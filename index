@@ -313,7 +313,7 @@ input[type=number]{-moz-appearance:textfield}
 <body>
 <div id="app" style="height:100%;max-width:480px;margin:0 auto;overflow:hidden;background:#F8F9FA"></div>
 <script>
-var API_URL="https://script.google.com/macros/s/AKfycbw7fYjeLmYICIfKHXWJlv0uN-6SS2nS_7ji9VdfDNkSR6lHAdhDkLPo_Ap2xnNo4Ndhyw/exec";
+var API_URL="https://script.google.com/macros/s/AKfycbwKQcb5yyvMeyjNFYwYB8W2u1Z0iHhqBN9MXMIvapmlxkFUmdDLyHYdnzrhrfkC13uHaA/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 var ITEMS=[
 // Etiquetas Adhesivas > 1Kg Funsmart
