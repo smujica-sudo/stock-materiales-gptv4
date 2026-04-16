@@ -761,7 +761,7 @@ function draw(){
         '</div>'+
         '<div class="pin-card" style="margin-top:18px">'+
           '<div style="padding:16px 16px 0;font-size:12px;font-weight:700;color:#6941C6;display:flex;align-items:center;gap:8px"><span class="material-symbols-rounded" style="font-size:16px">lock</span> Ingresa tu PIN</div>'+
-          '<input id="pin" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="····" '+((!authLoaded&&isOnline())?'disabled':'')+'>'+ 
+          '<input id="pin" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="····">'+ 
         '</div>'+
         '<div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
           '<div class="user-pills">'+loginPills+'</div>'+
@@ -772,21 +772,37 @@ function draw(){
     A.innerHTML=html;
     var pin=document.getElementById('pin');
     if(pin){
-      if(!pin.disabled)pin.focus();
+      pin.focus();
       pin.oninput=function(){
         if(pin.disabled)return;
         if(pin.value.length===4){
-          var u=AUTH_USERS.find(function(x){return String(x.p)===String(pin.value)});
-          if(u){
-            pin.disabled=true;
-            user=u;
-            load();
-            pg='home';
-            draw();
-            sync();
-            toast('Hola, '+u.n)
-          }
-          else{toast('PIN incorrecto','err');pin.value=''}
+          var pinAttempt=String(pin.value);
+          pin.disabled=true;
+          pin.style.opacity='.65';
+          var ready=authLoaded?Promise.resolve(AUTH_USERS):loadUsers();
+          ready.then(function(users){
+            var pool=(users&&users.length?users:AUTH_USERS)||[];
+            var u=pool.find(function(x){return String(x.p)===pinAttempt});
+            if(u){
+              user=u;
+              load();
+              pg='home';
+              draw();
+              sync();
+              toast('Hola, '+u.n);
+            }else{
+              pin.disabled=false;
+              pin.style.opacity='1';
+              pin.value='';
+              pin.focus();
+              toast('PIN incorrecto','err');
+            }
+          }).catch(function(){
+            pin.disabled=false;
+            pin.style.opacity='1';
+            pin.focus();
+            toast('No se pudo validar el PIN','err');
+          });
         }
       };
     }
