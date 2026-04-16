@@ -125,19 +125,24 @@
         --shadow-sm: theme(boxShadow.sm);
         --shadow-md: theme(boxShadow.md);
         --shadow-lg: theme(boxShadow.lg);
+        /* Anchura del menú lateral. Se usa para desplazar el contenido principal cuando la
+           navegación está en disposición vertical. */
+        --nav-width: 72px;
       }
       * {
         -webkit-tap-highlight-color: transparent;
       }
       body {
-        @apply bg-[--background] text-[--text] min-h-screen overflow-hidden font-sans;
+        /* Ajustamos el tamaño base de la fuente y mantenemos el fondo y el color de texto. */
+        @apply bg-[--background] text-[--text] min-h-screen overflow-hidden font-sans text-[15px];
       }
     }
 
     @layer components {
       /* Contenedor principal y scrolling */
       #app {
-        @apply relative h-full w-full max-w-[480px] mx-auto overflow-hidden bg-[--background];
+        /* El contenedor principal se expande a lo ancho disponible y se centra. */
+        @apply relative h-full w-full mx-auto overflow-hidden bg-[--background];
       }
       .app-shell {
         @apply flex flex-col h-full relative;
@@ -159,7 +164,7 @@
         @apply text-xs font-semibold uppercase tracking-wide text-[--primary];
       }
       .page-title {
-        @apply mt-1 text-2xl font-normal tracking-normal text-[--text];
+        @apply mt-1 text-3xl font-medium tracking-normal text-[--text];
       }
       .page-subtitle {
         @apply text-sm mt-1 text-[--text-muted] max-w-[72ch];
@@ -337,24 +342,29 @@
       }
       /* Barra de navegación inferior */
       .bottom-nav-wrap {
-        @apply absolute left-0 right-0 bottom-0 z-20;
+        @apply fixed top-0 left-0 bottom-0 z-30 w-[--nav-width] flex items-start justify-start;
       }
+      /* Navegación lateral: se reorienta la barra inferior para convertirla en un
+         menú vertical situado a la izquierda de la aplicación. */
       .bottom-nav {
-        @apply grid grid-cols-5 bg-[--surface] border-t border-[--stroke] shadow-sm;
+        @apply flex flex-col w-full h-full bg-[--surface] border-r border-[--stroke] shadow-none;
       }
       .nav-btn {
-        @apply relative flex flex-col items-center gap-1 py-3 px-1 cursor-pointer text-[--text-muted];
+        @apply relative flex flex-col items-center gap-1 py-4 px-0 w-full cursor-pointer text-[--text-muted] transition-colors duration-150;
       }
       .nav-btn.active {
         @apply bg-[--primary-soft] text-[--primary-strong];
       }
+      .nav-btn:hover {
+        @apply bg-[--surface-alt] text-[--text];
+      }
       .nav-btn .label {
-        @apply text-[11px] font-normal;
+        @apply text-[10px] font-normal;
       }
       .nav-dot {
         @apply absolute w-2 h-2 rounded-full border border-white;
-        top: 10px;
-        right: calc(50% - 16px);
+        top: 8px;
+        right: 12px;
         background-color: var(--danger);
       }
       /* Toast */
@@ -362,6 +372,22 @@
         @apply fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 rounded-md text-sm shadow-md;
         animation: toast-in 0.2s ease both;
       }
+    }
+  </style>
+  <!-- Ajustes adicionales para el menú lateral y el desplazamiento del contenido. Estas reglas
+       se aplican fuera de Tailwind para evitar conflictos con el compilador de utilidades. -->
+  <style>
+    /* Reserva espacio para el menú lateral mediante un padding a la izquierda. De este modo,
+       todo el contenido dinámico se desplaza de forma consistente y evita ser cubierto por
+       la navegación. */
+    #app {
+      padding-left: var(--nav-width);
+    }
+    /* El encabezado y el contenido scrollable heredan automáticamente el padding del
+       contenedor principal, por lo que no necesitan márgenes adicionales. */
+    .screen-header,
+    .app-scroll {
+      margin-left: 0;
     }
   </style>
 </head>
