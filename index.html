@@ -2,157 +2,202 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <!--
-    Esta versión de la aplicación ha sido adaptada a un estilo
-    totalmente inspirado en el kit **Snow UI Dashboard**. Se
-    abandona la paleta Google para adoptar colores más suaves,
-    superficies neutras y acentos pastel propios de Snow UI. A
-    pesar del cambio estético, se conservan todas las
-    funcionalidades de la PWA original. La estructura está
-    construida sobre Tailwind CSS, extendida aquí con una paleta
-    personalizada de tonos fríos, neutros y pasteles, radios
-    moderados y sombras sutiles para transmitir claridad y
-    modernidad. La intención es que la interfaz se sienta como un
-    panel limpio y minimalista, típico de las dashboard UI kits
-    contemporáneas, pero sin sacrificar la usabilidad ni el soporte
-    táctil.
+    Esta versión de la aplicación adopta una estética inspirada en
+    **Untitled UI**. La paleta se basa en grises neutros con
+    acentos azulados, verdes, naranjas y rojos según el sistema
+    de colores de Untitled UI【752745931322592†L52-L83】. Se utiliza Tailwind CSS
+    como motor de utilidades y se extiende su configuración
+    para reflejar la gama de colores y radios del kit. Toda la
+    lógica de la PWA se mantiene intacta al final del archivo.
   -->
-  <title>Kawas Stock (Snow UI)</title>
-  <!-- Iconos y logotipo embebidos se conservan para garantizar
-       compatibilidad con las apps existentes -->
-  <link
-    rel="icon"
-    type="image/png"
-    href="data:image/png;base64,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"
-  />
-  <link
-    rel="apple-touch-icon"
-    href="data:image/png;base64,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"
-  />
-  <!-- Importación de iconos Material Symbols Rounded -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@400;500&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- Tailwind CSS CDN con configuración extendida para la paleta Snow UI -->
+  <title>Kawas Stock – Untitled UI</title>
+  <!-- Favicon e iconos embebidos (sin cambios respecto al original) -->
+  <link rel="icon" type="image/png" href="data:image/png;base64,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" />
+  <link rel="apple-touch-icon" href="data:image/png;base64,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" />
+  <!-- Importación de Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Configuración extendida de Tailwind para adaptar la estética
-    // minimalista y fría de Snow UI. Se definen colores pastel y
-    // neutros, radios suavizados y sombras ligeras para tarjetas
-    // flotantes y componentes.
+    // Configuración extendida de Tailwind para aproximar la paleta y
+    // escalas de Untitled UI. Se definen escalas de colores para
+    // neutrales, primarios, éxito, advertencia, peligro e información
+    // basados en la paleta de colores Untitled UI【221690594390865†L52-L151】.
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: '#6C63FF',
-            primaryContainer: '#EAE6FE',
-            onPrimary: '#FFFFFF',
-            onPrimaryContainer: '#362E80',
-            secondary: '#A3A0FF',
-            onSecondary: '#FFFFFF',
-            surface: '#FFFFFF',
-            surfaceContainer: '#F7F9FC',
-            surfaceContainerHigh: '#EEF1F6',
-            background: '#F7F9FC',
-            outline: '#E2E6EE',
-            onSurface: '#1A2942',
-            onSurfaceVariant: '#5D697C',
-            success: '#2EAD68',
-            successContainer: '#E6F5EF',
-            warning: '#F5A623',
-            warningContainer: '#FFF7E8',
-            danger: '#DE3A47',
-            dangerContainer: '#FCEEEF',
-            info: '#6C63FF',
-            infoContainer: '#EAE6FE'
+            neutral: {
+              25:  '#FCFCFD',
+              50:  '#F9FAFB',
+              100: '#F2F4F7',
+              200: '#EAECF0',
+              300: '#D0D5DD',
+              400: '#98A2B3',
+              500: '#667085',
+              600: '#475467',
+              700: '#344054',
+              800: '#1D2939',
+              900: '#101828'
+            },
+            primary: {
+              25: '#FCFAFF',
+              50: '#F9F5FF',
+              100: '#F4EBFF',
+              200: '#E9D7FE',
+              300: '#D6BBFB',
+              400: '#B692F6',
+              500: '#9061F9',
+              600: '#7C3AED',
+              700: '#6927DA',
+              800: '#5521B5',
+              900: '#44179A'
+            },
+            success: {
+              25: '#F6FEF9',
+              50: '#ECFDF3',
+              100: '#D1FADF',
+              200: '#A6F4C5',
+              300: '#6CE9A6',
+              400: '#32D583',
+              500: '#12B76A',
+              600: '#039855',
+              700: '#027A48',
+              800: '#05603A',
+              900: '#054F31'
+            },
+            warning: {
+              25: '#FFFCF5',
+              50: '#FFFAEB',
+              100: '#FEF0C7',
+              200: '#FEDF89',
+              300: '#FEC84B',
+              400: '#FDB022',
+              500: '#F79009',
+              600: '#DC6803',
+              700: '#B54708',
+              800: '#93370D',
+              900: '#7A2E0E'
+            },
+            danger: {
+              25: '#FFFBFA',
+              50: '#FEF3F2',
+              100: '#FEE4E2',
+              200: '#FECDCA',
+              300: '#FDA29B',
+              400: '#F97066',
+              500: '#F04438',
+              600: '#D92D20',
+              700: '#B42318',
+              800: '#912018',
+              900: '#7A271A'
+            },
+            info: {
+              25: '#F5FBFF',
+              50: '#EFF8FF',
+              100: '#D1E9FF',
+              200: '#B2DDFF',
+              300: '#84CAFF',
+              400: '#53B1FD',
+              500: '#2E90FA',
+              600: '#1570EF',
+              700: '#175CD3',
+              800: '#1849A9',
+              900: '#194185'
+            }
           },
           borderRadius: {
-            xs: '4px',
-            sm: '6px',
-            md: '8px',
-            lg: '12px',
-            xl: '16px'
+            sm: '4px',
+            md: '6px',
+            lg: '8px',
+            xl: '12px'
           },
           boxShadow: {
-            sm: '0 1px 3px rgba(0,0,0,0.05)',
-            md: '0 2px 6px rgba(0,0,0,0.08)',
-            lg: '0 4px 12px rgba(0,0,0,0.12)'
+            sm: '0 1px 2px rgba(16, 24, 40, 0.05)',
+            md: '0 2px 4px rgba(16, 24, 40, 0.06)',
+            lg: '0 4px 8px rgba(16, 24, 40, 0.08)'
           }
         }
       }
     };
   </script>
-  <!-- Estilos personalizados que aplican utilidades Tailwind sobre
-       las clases usadas por la PWA. Las variables CSS se mapean a la
-       nueva paleta Snow UI para facilitar ajustes globales. -->
+  <!-- Estilos base y componentes. Se utiliza la sintaxis de Tailwind
+       @layer para aplicar utilidades a las clases existentes en la
+       aplicación. Estas clases ajustan el diseño a un estilo
+       dashboard con menú lateral, tarjetas limpias y colores
+       pastel neutros. -->
   <style type="text/tailwindcss">
     @layer base {
       :root {
-        /* Variables semánticas basadas en la paleta Snow UI */
-        --primary: theme(colors.primary);
-        --primary-soft: theme(colors.primaryContainer);
-        --primary-strong: theme(colors.onPrimaryContainer);
-        --surface: theme(colors.surface);
-        --surface-alt: theme(colors.surfaceContainer);
-        --surface-strong: theme(colors.surfaceContainerHigh);
-        --background: theme(colors.background);
-        --stroke: theme(colors.outline);
-        --text: theme(colors.onSurface);
-        --text-soft: theme(colors.onSurfaceVariant);
-        --text-muted: theme(colors.onSurfaceVariant);
-        --text-faint: theme(colors.outline);
-        --success: theme(colors.success);
-        --success-soft: theme(colors.successContainer);
-        --warning: theme(colors.warning);
-        --warning-soft: theme(colors.warningContainer);
-        --danger: theme(colors.danger);
-        --danger-soft: theme(colors.dangerContainer);
-        --info: theme(colors.info);
-        --info-soft: theme(colors.infoContainer);
-        --shell: theme(colors.primary);
-        --shell-text: theme(colors.onPrimary);
-        --radius-xs: theme(borderRadius.xs);
-        --radius-sm: theme(borderRadius.sm);
-        --radius-md: theme(borderRadius.md);
-        --radius-lg: theme(borderRadius.lg);
-        --radius-xl: theme(borderRadius.xl);
-        --shadow-sm: theme(boxShadow.sm);
-        --shadow-md: theme(boxShadow.md);
-        --shadow-lg: theme(boxShadow.lg);
-        /* Anchura del menú lateral. Se usa para desplazar el contenido principal cuando la
-           navegación está en disposición vertical. */
-        --nav-width: 72px;
+        /* Variables semánticas que vinculan las clases de la PWA con la paleta Untitled UI */
+        --bg: theme('colors.neutral.50');
+        --surface: #FFFFFF;
+        --surface-alt: theme('colors.neutral.100');
+        --surface-strong: theme('colors.neutral.200');
+        --stroke: theme('colors.neutral.200');
+        --stroke-strong: theme('colors.neutral.300');
+        --text: theme('colors.neutral.900');
+        --text-soft: theme('colors.neutral.700');
+        --text-muted: theme('colors.neutral.600');
+        --text-faint: theme('colors.neutral.500');
+        --primary: theme('colors.primary.600');
+        --primary-soft: theme('colors.primary.100');
+        --primary-strong: theme('colors.primary.700');
+        --success: theme('colors.success.600');
+        --success-soft: theme('colors.success.25');
+        --warning: theme('colors.warning.600');
+        --warning-soft: theme('colors.warning.25');
+        --danger: theme('colors.danger.600');
+        --danger-soft: theme('colors.danger.25');
+        --info: theme('colors.info.600');
+        --info-soft: theme('colors.info.25');
+        --radius-sm: theme('borderRadius.sm');
+        --radius-md: theme('borderRadius.md');
+        --radius-lg: theme('borderRadius.lg');
+        --shadow-sm: theme('boxShadow.sm');
+        --shadow-md: theme('boxShadow.md');
+        --shadow-lg: theme('boxShadow.lg');
+        --nav-width: 80px;
       }
-      * {
+      *, *::before, *::after {
         -webkit-tap-highlight-color: transparent;
       }
       body {
-        /* Ajustamos el tamaño base de la fuente y mantenemos el fondo y el color de texto. */
-        @apply bg-[--background] text-[--text] min-h-screen overflow-hidden font-sans text-[15px];
+        @apply bg-[--bg] text-[--text] min-h-screen overflow-hidden font-sans text-[15px];
       }
     }
-
     @layer components {
-      /* Contenedor principal y scrolling */
+      /* Layout principal: contenedor y menú lateral */
       #app {
-        /* El contenedor principal se expande a lo ancho disponible y se centra. */
-        @apply relative h-full w-full mx-auto overflow-hidden bg-[--background];
+        padding-left: var(--nav-width);
       }
-      .app-shell {
-        @apply flex flex-col h-full relative;
+      .bottom-nav-wrap {
+        @apply fixed top-0 left-0 bottom-0 z-30 w-[--nav-width] flex items-start justify-start;
       }
-      .app-scroll {
-        @apply flex-1 overflow-y-auto px-4 pb-28 relative;
+      .bottom-nav {
+        @apply flex flex-col w-full h-full bg-[--surface] border-r border-[--stroke] shadow-none;
       }
-      /* Encabezado de página */
+      .nav-btn {
+        @apply relative flex flex-col items-center gap-1 py-4 w-full cursor-pointer text-[--text-muted] transition-colors;
+      }
+      .nav-btn.active {
+        @apply bg-[--primary-soft] text-[--primary];
+      }
+      .nav-btn:hover {
+        @apply bg-[--surface-alt] text-[--text];
+      }
+      .nav-dot {
+        @apply absolute w-2 h-2 rounded-full border border-white;
+        top: 8px;
+        right: 12px;
+        background-color: var(--danger);
+      }
+      /* Encabezado de pantalla */
       .screen-header {
-        @apply sticky top-0 z-10 px-4 py-4 border-b border-[--stroke] bg-white/90 backdrop-blur;
+        @apply sticky top-0 z-20 px-4 py-3 border-b border-[--stroke] bg-[--surface]/90 backdrop-blur;
       }
       .header-row {
         @apply flex items-start gap-3;
@@ -161,10 +206,10 @@
         @apply flex-1 min-w-0;
       }
       .eyebrow {
-        @apply text-xs font-semibold uppercase tracking-wide text-[--primary];
+        @apply text-[10px] font-semibold uppercase tracking-wider text-[--primary];
       }
       .page-title {
-        @apply mt-1 text-3xl font-medium tracking-normal text-[--text];
+        @apply mt-1 text-2xl font-medium tracking-tight text-[--text];
       }
       .page-subtitle {
         @apply text-sm mt-1 text-[--text-muted] max-w-[72ch];
@@ -183,28 +228,22 @@
       }
       /* Tarjetas y paneles */
       .card,
-      .glass-banner,
-      .insight-card,
-      .category-card,
-      .hero-stock,
+      .login-panel,
       .kpi-card,
       .list-item,
       .history-row,
-      .login-panel,
       .pin-card,
       .input-wrap,
-      .login-info,
       .metric-pill,
       .mini-stat,
       .action-tile,
       .list-icon,
       .icon-btn,
-      .bottom-nav,
       .status-badge,
       .soft-badge,
       .btn,
       .alert-banner {
-        @apply border border-[--stroke] shadow-none;
+        @apply border border-[--stroke] shadow-sm;
       }
       .card {
         @apply bg-[--surface] rounded-md;
@@ -222,7 +261,7 @@
         @apply text-xs font-normal text-[--text-muted];
       }
       .kpi-value {
-        @apply text-3xl font-light mt-2 leading-none tracking-tight;
+        @apply text-3xl font-medium mt-2 leading-none tracking-tight;
       }
       .kpi-meta {
         @apply text-xs mt-1 text-[--text-faint];
@@ -231,7 +270,7 @@
         @apply text-[--primary];
       }
       .kpi-card.warn .kpi-value {
-        @apply text-[#C7791A];
+        @apply text-[--warning];
       }
       .kpi-card.danger .kpi-value {
         @apply text-[--danger];
@@ -239,11 +278,11 @@
       .kpi-card.success .kpi-value {
         @apply text-[--success];
       }
-      /* Badges */
+      /* Badges y chips */
       .status-badge,
       .soft-badge,
       .chip {
-        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-normal rounded-sm bg-white;
+        @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-normal rounded-sm bg-[--surface-alt];
       }
       .status-badge.ok {
         background-color: var(--success-soft);
@@ -261,48 +300,9 @@
         color: var(--danger);
         border-color: var(--danger);
       }
-      .soft-badge.primary {
-        background-color: var(--primary-soft);
-        color: var(--primary-strong);
-        border-color: theme(colors.primaryContainer);
-      }
-      .soft-badge.gray {
-        background-color: #F1F3F7;
-        color: var(--text-muted);
-        border-color: var(--stroke);
-      }
-      .soft-badge.kawas {
-        background-color: var(--primary-soft);
-        color: var(--primary-strong);
-        border-color: theme(colors.primaryContainer);
-      }
-      .soft-badge.info {
-        background-color: var(--info-soft);
-        color: var(--primary-strong);
-        border-color: theme(colors.infoContainer);
-      }
-      .soft-badge.success {
-        background-color: var(--success-soft);
-        color: var(--success);
-        border-color: var(--success);
-      }
-      .soft-badge.warning {
-        background-color: var(--warning-soft);
-        color: var(--warning);
-        border-color: var(--warning);
-      }
-      .soft-badge.danger {
-        background-color: var(--danger-soft);
-        color: var(--danger);
-        border-color: var(--danger);
-      }
       /* Botones */
-      .btn,
-      .icon-btn {
-        @apply cursor-pointer transition-colors duration-150 ease-in-out active:translate-y-px;
-      }
       .btn {
-        @apply inline-flex items-center justify-center gap-2 min-h-[48px] px-4 text-sm font-normal rounded-sm border bg-[--surface] text-[--text] border-[--stroke];
+        @apply inline-flex items-center justify-center gap-2 min-h-[40px] px-4 text-sm font-normal rounded-sm border bg-[--surface] text-[--text] border-[--stroke] hover:bg-[--surface-alt];
       }
       .btn-primary {
         @apply bg-[--primary] text-white border-transparent shadow-sm rounded-sm;
@@ -311,93 +311,54 @@
         @apply bg-[--primary-strong];
       }
       .btn-secondary {
-        @apply bg-white text-[--text-soft] border-[--stroke];
+        @apply bg-[--surface] text-[--text] border-[--stroke] hover:bg-[--surface-alt];
       }
       .btn-soft {
-        @apply bg-[--surface-strong] text-[--text-soft];
+        @apply bg-[--surface-alt] text-[--text-muted];
       }
       .btn-danger {
         @apply bg-[--danger] text-white border-[--danger];
       }
       .icon-btn {
-        @apply flex items-center justify-center w-10 h-10 rounded-full text-[--text-soft] bg-transparent;
+        @apply flex items-center justify-center w-10 h-10 rounded-full text-[--text-muted] bg-transparent hover:bg-[--surface-alt];
       }
       .icon-btn.primary {
-        @apply bg-[--surface];
+        @apply bg-[--surface] hover:bg-[--surface-alt];
       }
-      .icon-btn.warn {
-        background-color: var(--warning-soft);
-        color: var(--warning);
-        border-color: var(--warning);
-      }
-      /* Campos de entrada */
+      /* Entradas */
       .input-wrap {
-        @apply flex items-center gap-2 bg-[--surface] border border-[--stroke] border-b-2 border-[--stroke] px-4 min-h-[48px] rounded-sm;
+        @apply flex items-center gap-2 bg-[--surface] border border-[--stroke] px-3 min-h-[40px] rounded-sm;
       }
       .input-wrap input {
-        @apply w-full min-w-0 border-none bg-transparent outline-none text-sm text-[--text] py-3;
+        @apply w-full min-w-0 border-none bg-transparent outline-none text-sm text-[--text] py-2;
       }
       .input-wrap input::placeholder {
         color: var(--text-faint);
       }
-      /* Barra de navegación inferior */
-      .bottom-nav-wrap {
-        @apply fixed top-0 left-0 bottom-0 z-30 w-[--nav-width] flex items-start justify-start;
+      /* Otros elementos */
+      .progress-rail {
+        @apply relative h-2 w-full rounded-full bg-[--surface-alt];
       }
-      /* Navegación lateral: se reorienta la barra inferior para convertirla en un
-         menú vertical situado a la izquierda de la aplicación. */
-      .bottom-nav {
-        @apply flex flex-col w-full h-full bg-[--surface] border-r border-[--stroke] shadow-none;
+      .progress-fill {
+        @apply absolute left-0 top-0 h-full rounded-full;
       }
-      .nav-btn {
-        @apply relative flex flex-col items-center gap-1 py-4 px-0 w-full cursor-pointer text-[--text-muted] transition-colors duration-150;
+      .history-list {
+        @apply divide-y divide-[--stroke];
       }
-      .nav-btn.active {
-        @apply bg-[--primary-soft] text-[--primary-strong];
+      .history-row {
+        @apply flex items-start gap-3 p-3;
       }
-      .nav-btn:hover {
-        @apply bg-[--surface-alt] text-[--text];
-      }
-      .nav-btn .label {
-        @apply text-[10px] font-normal;
-      }
-      .nav-dot {
-        @apply absolute w-2 h-2 rounded-full border border-white;
-        top: 8px;
-        right: 12px;
-        background-color: var(--danger);
-      }
-      /* Toast */
-      .toast {
-        @apply fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 rounded-md text-sm shadow-md;
-        animation: toast-in 0.2s ease both;
-      }
-    }
-  </style>
-  <!-- Ajustes adicionales para el menú lateral y el desplazamiento del contenido. Estas reglas
-       se aplican fuera de Tailwind para evitar conflictos con el compilador de utilidades. -->
-  <style>
-    /* Reserva espacio para el menú lateral mediante un padding a la izquierda. De este modo,
-       todo el contenido dinámico se desplaza de forma consistente y evita ser cubierto por
-       la navegación. */
-    #app {
-      padding-left: var(--nav-width);
-    }
-    /* El encabezado y el contenido scrollable heredan automáticamente el padding del
-       contenedor principal, por lo que no necesitan márgenes adicionales. */
-    .screen-header,
-    .app-scroll {
-      margin-left: 0;
     }
   </style>
 </head>
 <body>
   <div id="app"></div>
-  <!-- Código JavaScript de la aplicación incrustado. Se mantiene
-       intacto para conservar el funcionamiento original; únicamente
-       se modifican los colores de alerta para ajustarlos a la
-       nueva paleta Snow UI. -->
+  <!-- Aquí se incluye el script original de la aplicación. Para mantener la
+       funcionalidad intacta se ha copiado íntegramente desde la versión
+       anterior. -->
   <script>
+  // == INICIO DEL SCRIPT ORIGINAL ==
+
 var API_URL="https://script.google.com/macros/s/AKfycbyEc51AIkfpgZzzfv_qHWfkQUObG824eNsg8sCZL0KU8r9k0lhVbx4EKYP1Ktq7Knk_gg/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 var ITEMS=[
@@ -1511,6 +1472,7 @@ window.addEventListener('unhandledrejection',function(e){ console.error('unhandl
 loadCachedUsers();
 draw();
 loadUsers(true);
-</script>
+
+  </script>
 </body>
 </html>
