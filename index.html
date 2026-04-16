@@ -454,8 +454,12 @@ var CC_KNOWN={"Etiquetas Adhesivas":{i:'<span class="material-symbols-rounded" s
 var CC_COLORS=["#1a73e8","#4A9BD9","#2EAD7A","#C5221F","#E89B3E","#D4618C","#8B5CF6","#6366F1","#7A8FA6","#14B8A6"];
 var CC_ICONS=['<span class="material-symbols-rounded" style="font-size:26px">inventory</span>','<span class="material-symbols-rounded" style="font-size:26px">label</span>','<span class="material-symbols-rounded" style="font-size:26px">shopping_bag</span>','<span class="material-symbols-rounded" style="font-size:26px">package_2</span>','<span class="material-symbols-rounded" style="font-size:26px">coffee</span>','<span class="material-symbols-rounded" style="font-size:26px">star</span>','<span class="material-symbols-rounded" style="font-size:26px">more_horiz</span>','<span class="material-symbols-rounded" style="font-size:26px">category</span>','<span class="material-symbols-rounded" style="font-size:26px">build</span>','<span class="material-symbols-rounded" style="font-size:26px">widgets</span>'];
 var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}];
-var AUTH_USERS=USERS.slice();
+var AUTH_CACHE_KEY='kw4_auth_users';
+var AUTH_USERS=[];
 var authLoaded=false,authLoading=false,authError=false;
+var authSource='none';
+var authMessage='Esperando conexión con Apps Script';
+var authPromise=null;
 
 var items=[],hist=[],user=null,pg="login",selCat=null,selSubcat=null,selItem=null;
 var adjMode=null,adjVal="",adjNote="",searchQ="",toastMsg=null,toastT="ok";
@@ -482,29 +486,103 @@ function subcatMap(catName){var m={};items.filter(function(x){return x.cat===cat
 function save(){try{localStorage.setItem("kw4",JSON.stringify({items:items,hist:hist}))}catch(e){}}
 function load(){try{var d=JSON.parse(localStorage.getItem("kw4"));if(d&&d.items&&d.items.length>0){items=d.items;hist=d.hist||[]}else{items=JSON.parse(JSON.stringify(ITEMS));hist=[]}}catch(e){items=JSON.parse(JSON.stringify(ITEMS));hist=[]}}
 function isOnline(){return API_URL!=="DEMO"&&API_URL!=="TU_URL_AQUI"&&API_URL!==""}
-function loadUsers(){
-  if(authLoaded||authLoading)return Promise.resolve(AUTH_USERS);
-  if(!isOnline()){authLoaded=true;authError=true;return Promise.resolve(AUTH_USERS)}
-  authLoading=true;
-  return fetch(API_URL+"?action=getUsers").then(function(r){return r.json()}).then(function(d){
-    if(d&&d.success&&d.users&&d.users.length){
-      AUTH_USERS=d.users.map(function(u){return{n:String(u.nombre||u.n||"Usuario"),p:String(u.pin||u.p||"")}}).filter(function(u){return u.p});
-      authError=false;
-    }else{
-      authError=true;
+function normalizeUsers(arr){
+  return (arr||[]).map(function(u){
+    return {n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()};
+  }).filter(function(u){return u.n&&u.p});
+}
+function loadCachedUsers(){
+  try{
+    var raw=localStorage.getItem(AUTH_CACHE_KEY);
+    if(!raw)return [];
+    var parsed=JSON.parse(raw);
+    var users=normalizeUsers(parsed);
+    if(users.length){
+      AUTH_USERS=users;
+      authSource='cache';
+      authMessage='Usuarios cargados desde caché local';
     }
+    return users;
+  }catch(e){
+    return [];
+  }
+}
+function saveCachedUsers(users){
+  try{localStorage.setItem(AUTH_CACHE_KEY,JSON.stringify(users||[]))}catch(e){}
+}
+function loadUsers(force){
+  if(authLoading && authPromise)return authPromise;
+  if(authLoaded && !force && AUTH_USERS.length)return Promise.resolve(AUTH_USERS);
+  if(!isOnline()){
     authLoaded=true;
-    authLoading=false;
-    draw();
-    return AUTH_USERS;
-  }).catch(function(e){
-    console.log("users sync error",e);
-    authLoaded=true;
-    authLoading=false;
     authError=true;
-    draw();
-    return AUTH_USERS;
-  });
+    if(!AUTH_USERS.length)AUTH_USERS=USERS.slice();
+    authSource=AUTH_USERS===USERS? 'demo':'cache';
+    authMessage='API_URL sin conexión; usando usuarios locales';
+    return Promise.resolve(AUTH_USERS);
+  }
+  authLoading=true;
+  authMessage='Consultando usuarios en Apps Script...';
+  authPromise=fetch(API_URL+'?action=getUsers&_ts='+Date.now(),{cache:'no-store'})
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.text();
+    })
+    .then(function(txt){
+      var d;
+      try{d=JSON.parse(txt)}catch(parseErr){
+        throw new Error('Respuesta no JSON desde Apps Script');
+      }
+      if(d&&d.success&&d.users&&d.users.length){
+        AUTH_USERS=normalizeUsers(d.users);
+        if(!AUTH_USERS.length) throw new Error('Usuarios vacíos o mal formateados');
+        saveCachedUsers(AUTH_USERS);
+        authError=false;
+        authSource='backend';
+        authMessage='Usuarios cargados desde Apps Script';
+      }else if(d&&d.error){
+        throw new Error(String(d.error));
+      }else{
+        throw new Error('getUsers no devolvió usuarios');
+      }
+      authLoaded=true;
+      authLoading=false;
+      draw();
+      return AUTH_USERS;
+    })
+    .catch(function(e){
+      console.log('users sync error',e);
+      authLoaded=true;
+      authLoading=false;
+      authError=true;
+      if(!AUTH_USERS.length){
+        AUTH_USERS=USERS.slice();
+        authSource='demo';
+        authMessage='No fue posible leer usuarios del backend; usando fallback local';
+      }else if(authSource!=='cache'){
+        authSource='cache';
+        authMessage='Backend sin respuesta; usando caché local';
+      }else{
+        authMessage='Backend sin respuesta; usando caché local';
+      }
+      draw();
+      return AUTH_USERS;
+    });
+  return authPromise;
+}
+function completeLogin(u){
+  user=u;
+  load();
+  pg='home';
+  draw();
+  sync();
+  toast('Hola, '+u.n);
+}
+function validatePinAttempt(pinAttempt){
+  var pool=(AUTH_USERS&&AUTH_USERS.length?AUTH_USERS:[]);
+  var u=pool.find(function(x){return String(x.p)===String(pinAttempt)});
+  if(u)return {ok:true,user:u};
+  return {ok:false};
 }
 function sync(){
   if(!isOnline()){save();return}
@@ -744,9 +822,10 @@ function draw(){
 
   if(!user){
     if(!authLoaded&&!authLoading&&isOnline())loadUsers();
-    var loginHint=!isOnline()?'Modo demo sin conexión':!authLoaded?'Cargando usuarios desde backend...':authError?'No se pudo leer usuarios. Se activó fallback local.':'Usuarios cargados desde Apps Script';
+    var loginHint=authMessage||(!isOnline()?'Modo demo sin conexión':!authLoaded?'Cargando usuarios desde backend...':authError?'No se pudo leer usuarios.':'Usuarios cargados desde Apps Script');
+    var authStateLabel=authLoading?'SYNC':authError?'WARN':authSource==='backend'?'OK':authSource==='cache'?'CACHE':'LOCAL';
     var loginPills=AUTH_USERS.map(function(u){return '<span class="soft-badge gray">'+esc(u.n)+'</span>'}).join('');
-    if(!loginPills)loginPills='<span class="soft-badge gray">Sin usuarios</span>';
+    if(!loginPills)loginPills='<span class="soft-badge gray">Sin usuarios cargados</span>';
     html += '<div class="login-shell"><div class="login-panel">'+
       '<div class="login-topline">'+
         '<div class="brand-mark"><img src="data:image/png;base64,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" alt="Kawas"></div>'+
@@ -775,31 +854,33 @@ function draw(){
       pin.focus();
       pin.oninput=function(){
         if(pin.disabled)return;
+        pin.value=String(pin.value||'').replace(/\D/g,'').slice(0,4);
         if(pin.value.length===4){
           var pinAttempt=String(pin.value);
           pin.disabled=true;
           pin.style.opacity='.65';
-          var ready=authLoaded?Promise.resolve(AUTH_USERS):loadUsers();
-          ready.then(function(users){
-            var pool=(users&&users.length?users:AUTH_USERS)||[];
-            var u=pool.find(function(x){return String(x.p)===pinAttempt});
-            if(u){
-              user=u;
-              load();
-              pg='home';
-              draw();
-              sync();
-              toast('Hola, '+u.n);
+
+          var firstTry=validatePinAttempt(pinAttempt);
+          if(firstTry.ok){
+            completeLogin(firstTry.user);
+            return;
+          }
+
+          loadUsers(true).then(function(){
+            var secondTry=validatePinAttempt(pinAttempt);
+            if(secondTry.ok){
+              completeLogin(secondTry.user);
             }else{
               pin.disabled=false;
               pin.style.opacity='1';
               pin.value='';
               pin.focus();
-              toast('PIN incorrecto','err');
+              toast(authError?'PIN no encontrado. Revise hoja usuarios o deployment.':'PIN incorrecto','err');
             }
           }).catch(function(){
             pin.disabled=false;
             pin.style.opacity='1';
+            pin.value='';
             pin.focus();
             toast('No se pudo validar el PIN','err');
           });
@@ -985,6 +1066,7 @@ function draw(){
   html += '<div class="app-shell">';
 
   if(pg==='home'){
+    var cm=catMap();
     var totalStock=0; items.forEach(function(x){totalStock+=x.stock});
     var lowCount=items.filter(function(x){return st(x)==='low'}).length;
     var criticalCount=items.filter(function(x){return st(x)==='crit'}).length;
@@ -1308,8 +1390,9 @@ document.addEventListener('touchend',function(e){
   }
 },{passive:true});
 
-loadUsers();
+loadCachedUsers();
 draw();
+loadUsers(true);
 </script>
 </body>
 </html>
