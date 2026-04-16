@@ -460,6 +460,8 @@ var authLoaded=false,authLoading=false,authError=false;
 var authSource='none';
 var authMessage='Esperando conexión con Apps Script';
 var authPromise=null;
+var syncLoading=false;
+var syncCounter=0;
 
 var items=[],hist=[],user=null,pg="login",selCat=null,selSubcat=null,selItem=null;
 var adjMode=null,adjVal="",adjNote="",searchQ="",toastMsg=null,toastT="ok";
@@ -510,29 +512,71 @@ function loadCachedUsers(){
 function saveCachedUsers(users){
   try{localStorage.setItem(AUTH_CACHE_KEY,JSON.stringify(users||[]))}catch(e){}
 }
+
+function buildApiUrl(params){
+  var q=Object.keys(params||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k])}).join('&');
+  return API_URL+(API_URL.indexOf('?')>-1?'&':'?')+q;
+}
+function fetchTextWithTimeout(url,opts,timeoutMs){
+  timeoutMs=timeoutMs||12000;
+  return new Promise(function(resolve,reject){
+    var done=false;
+    var t=setTimeout(function(){if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);
+    fetch(url,opts||{}).then(function(r){
+      if(done)return;
+      clearTimeout(t);
+      done=true;
+      resolve(r);
+    }).catch(function(err){
+      if(done)return;
+      clearTimeout(t);
+      done=true;
+      reject(err);
+    });
+  });
+}
+function fetchJsonWithTimeout(url,opts,timeoutMs){
+  return fetchTextWithTimeout(url,opts,timeoutMs).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(txt){
+    try{return JSON.parse(txt)}catch(parseErr){
+      throw new Error('Respuesta no JSON desde Apps Script');
+    }
+  });
+}
+function safeRedraw(){
+  try{return draw()}catch(e){
+    console.error('draw error',e);
+    var app=document.getElementById('app');
+    if(app){
+      app.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:24px"><div style="max-width:360px;background:#fff;border:1px solid #EAECF0;border-radius:20px;padding:24px;box-shadow:0 12px 24px rgba(16,24,40,.08)"><div style="font:700 18px Inter,system-ui,sans-serif;color:#101828">Se produjo un error en la interfaz</div><div style="font:400 14px Inter,system-ui,sans-serif;color:#475467;margin-top:8px">La aplicación encontró un problema al renderizar esta vista. Puedes recargar o volver a abrir la app.</div><div style="margin-top:16px;display:flex;gap:8px"><button id="retry-app" style="height:40px;padding:0 14px;border:none;border-radius:12px;background:#7A5AF8;color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Reintentar</button><button id="reset-app" style="height:40px;padding:0 14px;border:1px solid #EAECF0;border-radius:12px;background:#fff;color:#344054;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Ir al inicio</button></div><div style="margin-top:12px;font:12px Inter,system-ui,sans-serif;color:#98A2B3">'+esc(e&&e.message?e.message:String(e))+'</div></div></div>';
+      var retry=document.getElementById('retry-app'); if(retry) retry.onclick=function(){ safeRedraw(); };
+      var reset=document.getElementById('reset-app'); if(reset) reset.onclick=function(){ selItem=null; selSubcat=null; selCat=null; pg='home'; safeRedraw(); };
+    }
+    return null;
+  }
+}
 function loadUsers(force){
   if(authLoading && authPromise)return authPromise;
   if(authLoaded && !force && AUTH_USERS.length)return Promise.resolve(AUTH_USERS);
   if(!isOnline()){
     authLoaded=true;
     authError=true;
-    if(!AUTH_USERS.length)AUTH_USERS=USERS.slice();
-    authSource=AUTH_USERS===USERS? 'demo':'cache';
-    authMessage='API_URL sin conexión; usando usuarios locales';
+    if(!AUTH_USERS.length){
+      AUTH_USERS=USERS.slice();
+      authSource='demo';
+      authMessage='API_URL sin conexión; usando usuarios locales';
+    }else{
+      authSource='cache';
+      authMessage='Sin conexión; usando caché local de usuarios';
+    }
     return Promise.resolve(AUTH_USERS);
   }
   authLoading=true;
   authMessage='Consultando usuarios en Apps Script...';
-  authPromise=fetch(API_URL+'?action=getUsers&_ts='+Date.now(),{cache:'no-store'})
-    .then(function(r){
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.text();
-    })
-    .then(function(txt){
-      var d;
-      try{d=JSON.parse(txt)}catch(parseErr){
-        throw new Error('Respuesta no JSON desde Apps Script');
-      }
+  authPromise=fetchJsonWithTimeout(buildApiUrl({action:'getUsers',_ts:Date.now()}),{cache:'no-store'},12000)
+    .then(function(d){
       if(d&&d.success&&d.users&&d.users.length){
         AUTH_USERS=normalizeUsers(d.users);
         if(!AUTH_USERS.length) throw new Error('Usuarios vacíos o mal formateados');
@@ -547,7 +591,8 @@ function loadUsers(force){
       }
       authLoaded=true;
       authLoading=false;
-      draw();
+      authPromise=null;
+      safeRedraw();
       return AUTH_USERS;
     })
     .catch(function(e){
@@ -555,17 +600,16 @@ function loadUsers(force){
       authLoaded=true;
       authLoading=false;
       authError=true;
+      authPromise=null;
       if(!AUTH_USERS.length){
         AUTH_USERS=USERS.slice();
         authSource='demo';
         authMessage='No fue posible leer usuarios del backend; usando fallback local';
-      }else if(authSource!=='cache'){
+      }else{
         authSource='cache';
         authMessage='Backend sin respuesta; usando caché local';
-      }else{
-        authMessage='Backend sin respuesta; usando caché local';
       }
-      draw();
+      safeRedraw();
       return AUTH_USERS;
     });
   return authPromise;
@@ -585,27 +629,51 @@ function validatePinAttempt(pinAttempt){
   return {ok:false};
 }
 function sync(){
-  if(!isOnline()){save();return}
-  fetch(API_URL+"?action=getAll").then(function(r){return r.json()}).then(function(d){
-    if(d.success&&d.items){
-      items=d.items.map(function(x){return{id:String(x.id),cat:String(x.categoria),subcat:String(x.subcategoria||""),name:String(x.nombre),stock:Number(x.stock)||0,min:Number(x.minimo)||0,unit:String(x.unidad)||"uds",alert:String(x.alerta)||""}});
-      save();draw();
+  if(!isOnline()){
+    save();
+    return Promise.resolve(false);
+  }
+  syncLoading=true;
+  var syncId=++syncCounter;
+  var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
+    if(!(d&&d.success&&d.items)) throw new Error(d&&d.error?String(d.error):'getAll inválido');
+    return d.items.map(function(x){return{id:String(x.id),cat:String(x.categoria),subcat:String(x.subcategoria||''),name:String(x.nombre),stock:Number(x.stock)||0,min:Number(x.minimo)||0,unit:String(x.unidad)||'uds',alert:String(x.alerta)||''}});
+  });
+  var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
+    if(!(d&&d.success&&d.entries)) throw new Error(d&&d.error?String(d.error):'getHistory inválido');
+    return d.entries.map(function(x){return{id:String(x.itemId),nm:String(x.itemNombre),cat:String(x.categoria),tp:String(x.tipo),os:Number(x.stockAnterior)||0,ns:Number(x.stockNuevo)||0,nt:String(x.nota)||'',u:String(x.usuario)||'?',ts:x.timestamp?x.timestamp.substring(0,16).replace('T',' '):''} });
+  });
+  return Promise.allSettled([stockReq,histReq]).then(function(results){
+    if(syncId!==syncCounter) return false;
+    var stockOk=results[0].status==='fulfilled';
+    var histOk=results[1].status==='fulfilled';
+    if(stockOk) items=results[0].value;
+    if(histOk) hist=results[1].value;
+    if(stockOk||histOk){
+      save();
+      safeRedraw();
     }
-  }).catch(function(e){console.log("sync error",e)});
-  // Also load history
-  fetch(API_URL+"?action=getHistory&limit=100").then(function(r){return r.json()}).then(function(d){
-    if(d.success&&d.entries){
-      hist=d.entries.map(function(x){return{id:String(x.itemId),nm:String(x.itemNombre),cat:String(x.categoria),tp:String(x.tipo),os:Number(x.stockAnterior)||0,ns:Number(x.stockNuevo)||0,nt:String(x.nota)||"",u:String(x.usuario)||"?",ts:x.timestamp?x.timestamp.substring(0,16).replace("T"," "):""} });
-      save();draw();
-    }
-  }).catch(function(e){console.log("hist sync error",e)});
+    if(!stockOk) console.log('sync stock error', results[0].reason);
+    if(!histOk) console.log('sync history error', results[1].reason);
+    if(!stockOk && !histOk) toast('No se pudo sincronizar con Apps Script','warn');
+    else if(!stockOk || !histOk) toast('Sincronización parcial completada','warn');
+    syncLoading=false;
+    return stockOk||histOk;
+  }).catch(function(e){
+    syncLoading=false;
+    console.log('sync error',e);
+    toast('No se pudo sincronizar','warn');
+    return false;
+  });
 }
 function pushUpdate(item,oldStock,newStock,type,note){
-  if(!isOnline()){save();return}
-  var body=JSON.stringify({action:"updateStock",itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:"?",nota:note||""});
-  fetch(API_URL,{method:"POST",body:body,headers:{"Content-Type":"text/plain"}}).then(function(r){return r.json()}).then(function(d){
-    if(d.success){toast("✓ Guardado en Sheets")}else{toast("Error: "+(d.error||""),"err")}
-  }).catch(function(e){toast("Error de red - guardado local","warn");console.log("push error",e)});
+  if(!isOnline()){save();toast('Sin conexión: cambio guardado solo en este dispositivo','warn');return Promise.resolve(false)}
+  var body=JSON.stringify({action:'updateStock',itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:'?',nota:note||''});
+  return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(function(d){
+    if(d&&d.success){toast('✓ Guardado en Sheets'); return true;}
+    toast('Error: '+((d&&d.error)||'respuesta inválida'),'err');
+    return false;
+  }).catch(function(e){toast('Error de red - guardado local','warn');console.log('push error',e);return false;});
 }var toastTmr;
 function toast(m,t){toastMsg=m;toastT=t||"ok";clearTimeout(toastTmr);draw();toastTmr=setTimeout(function(){toastMsg=null;draw()},2400)}
 
@@ -1390,6 +1458,20 @@ document.addEventListener('touchend',function(e){
   }
 },{passive:true});
 
+window.addEventListener('online',function(){
+  authMessage='Conexión recuperada. Reintentando...';
+  authError=false;
+  loadUsers(true);
+  if(user) sync();
+});
+window.addEventListener('offline',function(){
+  authError=true;
+  authMessage='Sin conexión a internet';
+  safeRedraw();
+  toast('Sin conexión: usando datos locales','warn');
+});
+window.addEventListener('error',function(e){ console.error('window error', e&&e.error?e.error:e); });
+window.addEventListener('unhandledrejection',function(e){ console.error('unhandled rejection', e&&e.reason?e.reason:e); });
 loadCachedUsers();
 draw();
 loadUsers(true);
