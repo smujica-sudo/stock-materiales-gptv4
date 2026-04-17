@@ -145,10 +145,10 @@ var hft=document.getElementById('hist-filter-type');if(hft)hft.onchange=function
 document.querySelectorAll('[data-hsort]').forEach(function(btn){btn.onclick=function(){var k=btn.getAttribute('data-hsort');if(histSortKey===k){histSortDir=histSortDir==='asc'?'desc':'asc'}else{histSortKey=k;histSortDir=(k==='delta'?'desc':'asc')}renderHistoryTable()}});
 if(pg==='history')setTimeout(renderHistoryTable,0)}
 var touchStartX=0,touchStartY=0;document.addEventListener('touchstart',function(e){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY},{passive:true});document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-touchStartX,dy=Math.abs(e.changedTouches[0].clientY-touchStartY);if(dx>80&&dy<80){if(selItem){selItem=null;adjMode=null;adjVal='';adjNote='';draw()}else if(selSubcat){var sm2=subcatMap(selCat);if(Object.keys(sm2).length>1)selSubcat=null;else{selCat=null;selSubcat=null}draw()}else if(selCat){selCat=null;draw()}}},{passive:true});
+function backendOk(){
+  return !!(isOnline() && authLoaded && !authError && authSource==='backend');
+}
 window.addEventListener('online',function(){authMessage='Conexión recuperada. Reintentando...';authError=false;loadUsers(true);if(user)sync()});window.addEventListener('offline',function(){authError=true;authMessage='Sin conexión a internet';safeDraw();toast('Sin conexión: usando datos locales','warn')});window.addEventListener('error',function(e){console.error('window error',e&&e.error?e.error:e)});window.addEventListener('unhandledrejection',function(e){console.error('unhandled rejection',e&&e.reason?e.reason:e)});loadCachedUsers();safeDraw();setTimeout(function(){loadUsers(true).catch(function(){})},0);
   </script>
 </body>
 </html>
-function backendOk(){
-  return !!(isOnline() && authLoaded && !authError && authSource==='backend');
-}
