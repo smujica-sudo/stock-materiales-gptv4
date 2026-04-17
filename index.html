@@ -6,513 +6,1436 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>Kawas Stock - Untitled UI v8</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          },
-          colors: {
-            gray: {
-              25: '#FCFCFD',
-              50: '#F9FAFB',
-              100: '#F2F4F7',
-              200: '#EAECF0',
-              300: '#D0D5DD',
-              400: '#98A2B3',
-              500: '#667085',
-              600: '#475467',
-              700: '#344054',
-              800: '#1D2939',
-              900: '#101828'
-            },
-            primary: {
-              25: '#FCFAFF',
-              50: '#F9F5FF',
-              100: '#F4EBFF',
-              200: '#E9D7FE',
-              300: '#D6BBFB',
-              400: '#B692F6',
-              500: '#9E77ED',
-              600: '#7F56D9',
-              700: '#6941C6',
-              800: '#53389E',
-              900: '#42307D'
-            },
-            success: {
-              50: '#ECFDF3',
-              700: '#027A48'
-            },
-            warning: {
-              50: '#FFFAEB',
-              700: '#B54708'
-            },
-            error: {
-              50: '#FEF3F2',
-              700: '#B42318'
-            },
-            bluebrand: {
-              50: '#EFF8FF',
-              700: '#175CD3'
-            }
-          },
-          boxShadow: {
-            soft: '0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10)',
-            mdsoft: '0 4px 8px rgba(16,24,40,.08), 0 2px 4px rgba(16,24,40,.06)',
-            lgsoft: '0 12px 24px rgba(16,24,40,.10), 0 4px 8px rgba(16,24,40,.08)'
-          },
-          borderRadius: {
-            '4xl': '2rem'
-          }
-        }
-      }
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Rounded" rel="stylesheet" />
-
+  <!--
+    Versión completamente funcional de la PWA inspirada en el kit **Untitled UI**. 
+    Este archivo es autocontenido: incluye tanto los estilos (CSS) como el script
+    de la aplicación. La interfaz sigue una paleta neutra de Untitled UI con
+    acentos pastel y un layout de panel de inicio de sesión centrado, tarjetas limpias
+    y navegación inferior. La lógica de la PWA proviene del código original
+    (Kawas Stock) y se incluye íntegra al final del documento.
+  -->
+  <title>Kawas Stock – Untitled UI</title>
+  <!-- Iconos incrustados -->
+  <link rel="icon" type="image/png" href="data:image/png;base64,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" />
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAXIElEQVR4nO2dW4wcR9XHT1X1ZaZ77t5Zx04cx9k4Tmyvk5hgjD9lHQcFHAueQAhhRyLBwcpbXuAlIJAArTBCBAiEiyLBC5cXoqDAA5H58IYEEhMbJ17rE4md4L3O7Fx27tPT3VXfw05tJma9Xnf3Zj1d9ZMseXuma2p6/n361KlTpxBjjIFEEhLwWndAIgkSKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCloQKKWhJqJCCvg7g5djy+fzMkSNHXisWiwVKKZVl2q4dKejriMHBwcHnnnvunm9+85vnMcaYUkrXuk/9BpJW4PqAMcYQQuiBBx5445VXXtnx7rvv5tavX7+BMcYwxtLwrBB5oa4TuGHRNI1alkW+853vvI0QkgbnGpEX7DrAdV2XEELGxsZOf+xjH7sHAFxd1+m5c+emN2/evFla6ZUjL9Iaw10NAHC/8pWvmI7jIIwxbTQa2re//e0paaWvDXmx1hjHcRxFUZTf/e53L3/+85//H4SQ67ouwRhTVVXZ6dOn39q+ffsdlFIqrfTVkRdoDeGuRLvdbjz55JNb2AIIAABjTC3LIr/61a9yAAAy4rEypKDXkE6n08EY45/85CenLl68uJEQ4lJKF38TjDHbtGnTWnax71DWugMiQrvouq6XSqX86OjoboQQdV2X9LwHAwAaHh6OAwB0/WzJVZAW+gOEMcYcx3EwxlhRFOXEiROnHnzwwWqhUEh0X0cAAAghRinFmqY5Q0ND2e4xKegVIC30BwQPzSmKorzzzjsXv/71r+d/85vf7HUcZ1HA/L3dwAbauHFj/oYbbpCCvgakoFeZ7kCPEUJIu91uPPXUU6eOHz/+4XK5fCvGmGKMoVfMAAuCxhjTbdu25RRF2SgjHCtHCnoV4TFmhBB6/vnn//61r31tw7lz5+5njAEhxO31mXtRFMWxLEu/7bbb6gALPrcU9MqQgl4luGWu1WrzX/jCFy48//zzH6WUgqIojuu65GpiHhoamjl27FhWzhJeG/JCrRKu67oYY/zDH/7w7HPPPXevoigdjDF1HEfhg7/L6Ypduf/++8+9/PLLbMeOHXcAAEhBrxw5U7gK8GtaqVTK27Ztg2KxmGSMoct9ZQ7GmHYHguTo0aMv//jHP/6QoigRPpD8YHvf38g7fxVwXddFCKFnnnnmjXw+n7k8itGLoigOpRQjhMjx48f/+rOf/ex/FEWJUEqpFPO1Iy10wPDrWa1W57dt28by+Xy6e/x9bgYfFCKE4M4777z0ve99b+bgwYMf4a6KDNN5Q1rogOHW+ec///nZfD6fIYS4VxJzJBJxvvrVr5587bXXUlzMhBAixewdaaEDhIfpms1mdevWrc7MzMx/WWeMMQUA/OCDD5797ne/qw4PD28HeG/iZY26Hhpk2C5AuN/7gx/84PTMzMz9GOP3xZoJIS4AkJ/+9KdjR48eHQFYSB8lXdas4yFCCnoVOHPmjIEQogihxacfD8k98cQTY0ePHh1xXdftHpe/QYBIH3oVeOyxxwAAcG9us+M4yp133nlpdHT0Q47jOAghJK1y8EhBBwjGGDPG2AMPPHDX1q1bJ/nKEwAA0zStZ599tqzruokQQnKyZHWQFzVAEF8/RYj+8MMPvw0AoKqqTSnFe/fufWvv3r13ycHf6iIF7RHWQ+9xbqUffvjhWzVNW0zad13X7VkQu2x7MvLkHSEFzRPtr4bbA19lwttAPfS2zSse3XzzzTc//fTTf6OUKhhjatu2ttT7l2qPv4cxxiillPdhpX0V+YYQcoSNEEIBRBeo67qW4zigqqre6xOT7szJY489NjIxMXHyW9/61v5Wq6Xxz16qsfn5+TIhhOm6HlVVVUEIqcvdAJKlEXJiZXJy8j9jY2MT7XabWpbFms0mtFotsCwL2u02arfbuNVqQbvdVi3LQq1Wi9i2rbVaLeh0OpFOp4Mty8KdTseIx+ONkydPZuLxeKrXpeDWlRBCDh8+/Or58+fXnTlzZggA3idQ7lM//vjjf/v973+/KxaL1TVNcw3D6BiG0TYMw4nH45ZhGDSRSDimabqxWIwlEglkmibEYjFimqZimiYxTVM3DINs3bp1SyQSMdbk4q41l/tuIvDLX/5yDGPMEEKsGyv2/G/Tpk05x3HajC0IuPdzev8uFotzl7/OGGO2bduMMXb8+PH/vZbP5X3HGDOMMSOEMIwx0zSNvfjii6+t9jW8XhHS5eh0OpQQ4lw+k3c5bIm8ZdYTW6aU4g0bNpQJIYOM/feAr/fvTCYzsNRn8PfcfffdJiGEIYQWSxn0Tsz0/v9KfVIUxbVtW52dnW1f6b1hR0hB1+t1cBxHwRij5QS9HDwlNJPJtADeV9JrSa70Oj92++23Z1VVddvttuffhC+uzeVyrtc2+h0hoxyNRgOYz6EDt5jZbHZR0Fd5/xWjGwAAN91004Ybb7wxD7CYwOSZ2dlZIX9XAIEFHRSDg4M2wNUFfSUQQqg7eNTvuOOO2e4xT21x12NmZkbzcn4YEFXQgczUIYQgm836rjnH49u7du2qddv19fjI5/NRv33qV4QUdL1eDyy2m81mA7uGw8PDBCG05GB0JfDz5ubmYgAgZHFHIQXdaDQ0gKWjMGuFj/Gy2azqtz98UmbHjh2ZpQrPXCulUinWbDaD86v6CFEF7ft785shm80aAP5KdfFzt2zZsjGTyVS6N8s1ux28T5VKJVYulyte+9PPCCnoZrOp+22DMYYIISydTgciaMYYi8fjqaGhoZnuMc+CbjQaRqlUqnntTz8jqqB9xd95vFfXdSuVSsWC6BNfwbJ9+/YigPfQXTc+jnK5XD2IfvUbogo6CuDPhwYAiMfjzXg8HgMIrjro7t27HT9Nccsu6myhqIL2baEBANLpdN0wjEBDZKVSyWtIGwAWnx4wPT0t5GyhkIJutVqBZKKl0+k6AChXm/ZeCTzScerUqfcVP/cCYwympqaEXBUjpKAty/L1Y3P/dmBgYEXT3leDsYUKo47jtMfHxzd0j/mKRU9NTUX89KlfEVLQ7XbbBPDvQw8ODrYB/O9QxW+IS5cuTU9OTq5frhbeSpmdnQ1ksNpvCCloQogD4H+KWdO0QGbj+A0xPj6e627B4rldfpPmcrlkEH3rN4QUdDweDySkVSwWl11Wda28/vrrHUqp7xsNACCXyy2Zfx12hBR0KpXyJWhuBUulUgTAv6D5gPD06dOx3vb9ENRN228IKeh0Ot0E8J+mWSqVDAB/FfaDHBB2+0IBAA4cOPBvr230M0IKOplMtoJop1wum67rWgDeIx29A8Kpqan1AOArOYkxhjDGcPDgQdtrG/2MkIIeGBiwAPxb6FqtZjSbzaafvnBBj4+P523bJt0KpZ7g0RHDMNr33XefkHsqCynoTCYTiPWq1+tGrVZrAvi30GfOnGn7HRDyc3fu3Pnu5s2bN3ttp58RUtDpdNpv3BghhFin01Gr1aqvvGM+oHz99dd9Dwi5/zwyMpKDy+p/iIKQgl63bp3vSBvPuCuXy54tNGMLO8zatt0eHx/f2D3me9HB/v37hZwlBBBX0L6WOgG8lwRUKpXaAN4FTSmluVxubmJi4obuMU99Qggx13VJLBZr79mz5xYvbYQBIQWdSqXUoARdKBQ8++N8x6s//elPFx3HwUttMLRSuLtx9913XxgYGFjvN7+kXxFV0BGAYCYwCoWCp6iEbdu2qqrqCy+88OoTTzyxD7pbenvtBx8QHjhwoADw3oIB0RBS0MlkMuonPMbpuhzXfFM4juOoqqr++c9/fvUzn/nMve12W2GMIT83GN/f/sCBA4EuOOg3hBR0PB6PRiIRX7FoztzcnNJtZ0UCsm3bVhRFOXny5KlPf/rTuzudDuYDTK996ClLVtm9e/etAOLuDy7klzZN0zAMw9cSpZ4aGCtOUOKW+ZVXXjn7qU99amej0VCCSBXl/vOePXveSSQSaUoplRZaIAzDiHJBB5DPEe22s2yhRm6Z//nPf77xyU9+8rZarRYNQszdz+b+8zyA//zsfkbI6qOapkUSiUQg+Rzz8/MGAFCEEO5disVDcgALFf1VVVXPnj375qFDh24tl8smL8cbRB/4PkQjIyMZAHH9ZwBBLTQA4Hg8HoiFrlQqZqfTWVy54jiOwx/5fIfYer0+/8c//vEfDz300I1zc3MxQogblJh54fMNGzbM7dq1awhAXP8ZQFALDQCQSqUCWeZfq9XMSqVSW7duXaR3u7ZCoZAbGxu78Ic//AGdOHHitpmZmb2u6y5OgATx2QAAmqZ1LMvS9+zZ824kEvmw6NvGCSvoTCbTCaKdRqMRVVW1jTHGExMTl06cOPGfF154ITI2NnZ7sVjcx91ZQojbdUsCcQcQQowQ4lqWpd97771vjY6OCj0Y5Agr6EQi4WtdIRem67podHT0/Jtvvhl/6aWXtjcajZv5JB0hxCWEAKUUB2mVuf9NKVWOHTv28ve///27otFoLIhyCv2OsIJOpVKBzKQ5joOPHz8+wv/mEzZBi5jTk/NsP/30039/5JFHRrqfR0X2nTnCCtq27cAs2WqLmIMxpowxtGfPnn8/++yz7s6dO0d4PogU8wLCCrrdbgcmgNUU8VLE43Hrlltu2QRw9c2KREPYu9pxnLXuwjVDKcUIIXbixInhe+65p3n+/Pn/UxRFcfrxy6wSwgrasqy17oInKKWYEOK+/fbbG0dGRm568cUXX+WiFjVltBdhBW3btgoQTArpB43rugRjTIvFYuzQoUMf+cUvfnFSURSF76a61v1bS4QVdKfT6Tsh98LdD0opffzxx/c/+eSTJzHGmO8GsNb9WytEFnTf/+g8hxoh5IyOju4/fPjwq61WqshaypRZW0Nzl6HcYY8hxHEVRFPvXv/71Rz772c++LXIIT9gv3ul0QhWy7KZwuBcvXlwHAMKG8kQW9Jo8knkOhqIoThBVRnvbdV2XDAwMVAFAWD9aZEF/oJMhGGOqKIrDGEOu6xLXdZXViLAkEokOgLhJ/sIK2nGcwFZ+XwlujXn+s+M4imma1uHDh//xzDPPnFRVlfF85iA+CwAgmUx2APxvk9GvhMqPvBZs2161H5wL2XEchacnb9++feLIkSMXPve5z92yZcuWvQAAiqKMfelLXxpZqKbrBPJb8CxCURFW0KsxW8yTlFzXJY7jKJFIxHnooYf+9eijj9qf+MQn7lJVdVP3ddd1XfeLX/ziyBtvvPHSj370o/u6k32+f49kMilkPQ6OkIJmjFm2bQdS/+1ya4wxhqGhoekjR468dfjw4Ru3bt16L3+v091AhRBCMMbYdV33qaee+ui5c+fe/Mtf/jJMCHH9JDohhCCVSrHud5Quhyi4rusG9YjviQOzj3/84/969NFHm4cOHdoVjUb3AywMzniVfkVRFj8TvQf57W9/O7hv376pCxcubPRboyOVSgkZruOIKmhs27avKAAfhA0ODpYfeeSRN48cObJ+x44d9/DXuTVebpIDY4xt27az2ez6Y8eO/fXLX/7yjX5cD4QQJBIJ0v2/kMIWUtCO43T8zhRyN2P//v1vjY6OLmuNl4PnXmQyGexHg9yqJ5NJIX9Tjqhf3mWMEQDvYTtehmBqaipOKXUYY8jLamvud2SzWc1Pf/h5iURC5+16aaffETIOreu6YRhGCyCQ2nZxhBBQQoifgVgmk9H9lPjlC1fi8bjmtQ9hQEhBK4qi80IzXuHCK5fLiVqtVvXaDrek6XTaQAh53gGru/sVi8ViVy1NFmaEFDQAQCKRCKRyUrVajZXL5Wr3mGcLnUwmTV3XO176xN+vaVrHMAxht6MAEFjQ8Xjc9xoshBBzHIcUCoUagDdBc0saj8eNWCzmq95eNBq1uKClhRaMdDrte2u3blkByOfzvvYqBAAwTdOMx+MNAO9PDcMwWpFIRPfbl35GWEEnk0lflZP4uYwxmJ2d9bybLA/bEUK0dDrtaX9u/h2i0ail67p0OUQklUoFkl7JGIPp6Wm/+x4yAECZTMZT5IX7841GI9pqtQIpE9yviCzowHIdpqenfeVWc8ueyWR8DVSLxWKyVCpVetsUDWEFnUgkfM3MAbxnGWdnZ30NxLj4stmsp4qoPTvbavl8fr63TdEQVtDJZDKwFSuzs7MxAP+FxrPZrOfUTz5AnZmZqQNIQQtHMpnU/G6+yc8tFAoxSqnttyZGNpv1HG3jHz01NdWfJaECQlhBJxKJwARdKpWS9Xq95rdPAwMDis/pb5icnBTSMnOEFXQ8Hg9sTWG1Wo0Vi0XPgzFultetW6f77dPExEQo6o14RVhBx2KxKCGE8gGVn7Ycx8Htdtvzmq6efI6oVwvNz5mcnDQBxN04SMgvDQBgGIYejUYD2ThI0zQnFov5ntBIpVKmoiiul5usJ+KSAAAmBS0YhmEYpmkGIuhIJGKZpuk5y42fk0gkTK83Wc8ANdlsNj3NOIYBYQVNCMGKogSy9Ns0zVY0GvVtoWOxmJlIJOoA3idXSqVSslQqzfvtS78irKDr9XqjUqnE/LTBRWeaZisSifgWtKZpWiwW8xR2426K4zhkbm6u4rcv/Yqwgp6fn683Gg3DTxtc0IlEoo0Q8j1RY1mWVavVPN8YhBC3m1siXQ7RKBaLdUrp4s5Sftrqrn5BXjfw4aG+arVar1Qq8e4xz7Ho6enpQDYV7UeEFXShUGgBLEwZ+20rlUpZAP4LJFYqlUar1et302x8AGeUQjtnZWSdAQbej0ajvErblcrlh2zbxu8cKAICiKMIqWkhBT09PQ1B5HKZptnVd91wgkVvoYrHYZIwFkiwlsoUW0tnK5/Mq3+G11xpe6f/LkUgkWggh4jd1tFAoWF1B+35qiBzlEFLQ4+Pjme5+28v/8r3bFl/unnBLmkwmeS409eNy5PP5xeVgy7lCy73W3U/clYIWjIMHD+Y2bdpUrdfr2vz8fKTZbGqNRiPSbDYj7XZbtyxLtSxLgwWhIgAASun73BR+M+i6Hsi6xHw+D4wxYIyh5Z4Oy73W6XQ0hBC4rribyQop6G984xv7Lzvkdjodq9VqtZrN5nyr1bJqtVqrVqtZtVqtU61Wnfn5ebdSqbBKpYLK5bJSq9VIqVSK7Nu3z/P+Kr0Ui0USjUb5DdJQFAVUVQVCiK1pWktVVej+sxRF6ei6Drqug6IolqqqTvdvpqqqPTw8HEg8ux/xVYtNIrneEDLKIQkvUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUtCSUCEFLQkVUt/w+lpNUh0JDFfQAAAABJRU5ErkJggg==" />
+  <!-- Fuente de iconos Material Symbols para los íconos utilizados en la app -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+  <!-- Estilos Untitled UI -->
   <style>
-    :root{
-      --app-bg:#F9FAFB;
-      --app-surface:#FFFFFF;
-      --app-stroke:#EAECF0;
-      --app-stroke-strong:#D0D5DD;
-      --app-text:#101828;
-      --app-muted:#667085;
-      --app-primary:#7F56D9;
-      --app-primary-strong:#6941C6;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    :root {
+      /* Paleta inspirada en Untitled UI (grises neutros y acentos pastel) */
+      --bg: #F9FAFB;
+      --surface: #FFFFFF;
+      --surface-alt: #F2F4F7;
+      --surface-strong: #EAECF0;
+      --stroke: #EAECF0;
+      --stroke-strong: #D0D5DD;
+      --text: #101828;
+      --text-soft: #344054;
+      --text-muted: #475467;
+      --text-faint: #98A2B3;
+      --primary: #7C3AED;
+      --primary-soft: #F4EBFF;
+      --primary-strong: #5521B5;
+      --success: #039855;
+      --success-soft: #ECFDF3;
+      --warning: #DC6803;
+      --warning-soft: #FFFAEB;
+      --danger: #D92D20;
+      --danger-soft: #FEF3F2;
+      --info: #1570EF;
+      --info-soft: #EFF8FF;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;background:var(--app-bg);color:var(--app-text);font-family:Inter,system-ui,sans-serif;min-height:100%;overflow-x:hidden}
-    body{padding-bottom:calc(88px + var(--safe-bottom))}
-    #app{min-height:100vh}
-    .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24}
-    .mn{font-variant-numeric:tabular-nums}
-    .glass{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-    .hide-scrollbar::-webkit-scrollbar{display:none}
-    .hide-scrollbar{scrollbar-width:none}
-    .fade-up{animation:fadeUp .24s ease both}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-    @keyframes toastin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
-    .safe-top{padding-top:max(20px,calc(16px + var(--safe-top)))}
-    .safe-bottom{padding-bottom:max(16px,calc(12px + var(--safe-bottom)))}
-    .bottom-shadow{box-shadow:0 -8px 32px rgba(16,24,40,.08)}
-    .gradient-shell{background:radial-gradient(circle at top left, rgba(127,86,217,.18), transparent 34%),radial-gradient(circle at top right, rgba(23,92,211,.12), transparent 26%),#F9FAFB}
-    .hero-grad{background:linear-gradient(135deg,#101828 0%,#1D2939 38%,#53389E 100%)}
-    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    input,button,textarea,select{font:inherit}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    /* ===== Login ===== */
+    .login-shell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 48px 16px;
+      background: var(--bg);
+    }
+    .login-panel {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(16,24,40,0.08);
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .login-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .soft-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid var(--stroke);
+      background: var(--surface-alt);
+      color: var(--text);
+      line-height: 1;
+    }
+    .soft-badge.kawas {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .login-title {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0;
+      color: var(--text);
+    }
+    .login-subtitle {
+      font-size: 14px;
+      margin-top: 4px;
+      line-height: 1.3;
+      color: var(--text-muted);
+      max-width: 72ch;
+    }
+    .login-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .login-info { display: flex; flex-direction: column; gap: 4px; }
+    .login-info .num { font-size: 22px; font-weight: 500; color: var(--primary); }
+    .pin-card {
+      margin-top: 16px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 0 16px 16px;
+    }
+    .pin-input {
+      width: 100%;
+      border: 1px solid var(--stroke);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: 8px;
+      background: var(--surface-alt);
+      color: var(--text);
+      font-size: 16px;
+    }
+    .pin-input::placeholder { color: var(--text-faint); }
+    .user-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
+    .user-pills .soft-badge {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+    }
+    /* ===== Navegación inferior ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: var(--surface);
+      border-top: 1px solid var(--stroke);
+      box-shadow: 0 -1px 2px rgba(16,24,40,0.04);
+      z-index: 30;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .nav-btn.active { color: var(--primary); }
+    .nav-btn .material-symbols-rounded { font-size: 20px; }
+
+    /* Ajustes de tipografía y estructura para la pantalla principal */
+    .page-title {
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: var(--text);
+    }
+    .screen-section {
+      margin-top: 24px;
+    }
+    .screen-section h2 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--text-soft);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .stats-grid .kpi-card {
+      align-items: flex-start;
+    }
+    body { padding-bottom: 56px; }
+    /* ===== Tarjetas generales ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(16,24,40,0.04);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .kpi-card {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: 0 2px 4px rgba(16,24,40,0.04);
+    }
+    .kpi-card .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-size: 20px;
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+    .kpi-card.error .icon { color: var(--danger); background: var(--danger-soft); }
+    .kpi-card.warning .icon { color: var(--warning); background: var(--warning-soft); }
+    .kpi-card.ok .icon { color: var(--success); background: var(--success-soft); }
+    .kpi-card .content { flex: 1; display: flex; flex-direction: column; }
+    .kpi-card .title { font-size: 14px; font-weight: 500; color: var(--text-soft); }
+    .kpi-card .num { font-size: 24px; font-weight: 600; color: var(--text); }
+    /* ===== Progreso ===== */
+    .progress-rail {
+      position: relative;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--stroke);
+      overflow: hidden;
+    }
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 4px;
+    }
+    /* ===== Badges de estado ===== */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--surface-strong);
+    }
+    .status-badge.ok { color: var(--success); background: var(--success-soft); }
+    .status-badge.warning { color: var(--warning); background: var(--warning-soft); }
+    .status-badge.error { color: var(--danger); background: var(--danger-soft); }
+    /* ===== Botones ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-strong); }
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+    }
+    .btn-secondary:hover { background: var(--surface-strong); }
+    /* ===== Inputs ===== */
+    .input {
+      width: 100%;
+      border: 1px solid var(--stroke);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: var(--surface-alt);
+      color: var(--text);
+    }
+    .input::placeholder { color: var(--text-faint); }
   </style>
 </head>
-<body class="gradient-shell">
+<body>
   <div id="app"></div>
-
   <script>
     var API_URL="https://script.google.com/macros/s/AKfycbyEc51AIkfpgZzzfv_qHWfkQUObG824eNsg8sCZL0KU8r9k0lhVbx4EKYP1Ktq7Knk_gg/exec";
-    var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
-    var ITEMS=[
-    {id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},
-    {id:"e2",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Frutal",stock:142,min:150,unit:"uds",alert:"Pedir pronto"},
-    {id:"e3",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Bolivia Caranavi Regional",stock:230,min:200,unit:"uds",alert:"Pedir pronto"},
-    {id:"e4",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Regional",stock:297,min:200,unit:"uds",alert:"Pedir pronto"},
-    {id:"e5",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Brasil Regional",stock:464,min:100,unit:"uds",alert:""},
-    {id:"e6",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Decaf",stock:114,min:40,unit:"uds",alert:""},
-    {id:"e7",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Cusco",stock:65,min:50,unit:"uds",alert:""},
-    {id:"e8",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Crema",stock:410,min:100,unit:"uds",alert:""},
-    {id:"e9",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Pangoa",stock:457,min:150,unit:"uds",alert:""},
-    {id:"e10",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Col. Antioquia Gabriela",stock:85,min:50,unit:"uds",alert:""},
-    {id:"e11",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Washed Mosto",stock:41,min:30,unit:"uds",alert:""},
-    {id:"m1",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Original 12x5",stock:1091,min:200,unit:"uds",alert:""},
-    {id:"m2",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Colombia Regional 12x5",stock:690,min:200,unit:"uds",alert:""},
-    {id:"m3",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Colombia Decaf 12x5",stock:252,min:150,unit:"uds",alert:""},
-    {id:"m4",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Brasil Regional 12x5",stock:539,min:150,unit:"uds",alert:""},
-    {id:"m5",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Crema 12x5",stock:455,min:150,unit:"uds",alert:""},
-    {id:"m6",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Bolivia Caranavi 12x5",stock:354,min:200,unit:"uds",alert:""},
-    {id:"m7",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Blend Filtrado 12x5",stock:218,min:100,unit:"uds",alert:""},
-    {id:"m8",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Frutal 12x5",stock:360,min:150,unit:"uds",alert:""},
-    {id:"m9",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Costa Rica 120x50",stock:321,min:100,unit:"uds",alert:""},
-    {id:"m10",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Bolivia Typica 113x47",stock:675,min:200,unit:"uds",alert:""},
-    {id:"m11",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Peru Pangoa (Feyser)",stock:250,min:100,unit:"uds",alert:""},
-    {id:"t1",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Original",stock:452,min:150,unit:"uds",alert:""},
-    {id:"t2",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Colombia Regional",stock:400,min:150,unit:"uds",alert:""},
-    {id:"t3",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Colombia Decaf",stock:226,min:100,unit:"uds",alert:""},
-    {id:"t4",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Brasil Regional",stock:450,min:150,unit:"uds",alert:""},
-    {id:"t5",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Crema",stock:419,min:150,unit:"uds",alert:""},
-    {id:"t6",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Bolivia Caranavi",stock:131,min:100,unit:"uds",alert:""},
-    {id:"t7",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Costa Rica",stock:456,min:100,unit:"uds",alert:""},
-    {id:"t8",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Peru Pangoa",stock:429,min:150,unit:"uds",alert:""},
-    {id:"t9",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Frutal",stock:239,min:100,unit:"uds",alert:""},
-    {id:"t10",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Bolivia Typica",stock:88,min:50,unit:"uds",alert:""},
-    {id:"ml1",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Incahuasi 120g",stock:24,min:20,unit:"uds",alert:""},
-    {id:"ml2",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Java Anoxia",stock:46,min:20,unit:"uds",alert:""},
-    {id:"ml3",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Java Lavado",stock:68,min:30,unit:"uds",alert:""},
-    {id:"ml4",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Pacamara Lavado",stock:78,min:30,unit:"uds",alert:""},
-    {id:"ml5",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Catuai Natural",stock:40,min:30,unit:"uds",alert:""},
-    {id:"ml6",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Andino",stock:14,min:20,unit:"uds",alert:"Stock muy bajo"},
-    {id:"ml7",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Inca",stock:57,min:30,unit:"uds",alert:""},
-    {id:"b1",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g",stock:75,min:500,unit:"uds",alert:""},
-    {id:"b2",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g (lote ant.)",stock:125,min:50,unit:"uds",alert:""},
-    {id:"b3",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Espresso 250g",stock:225,min:200,unit:"uds",alert:""},
-    {id:"b4",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Espresso 250g (lote ant.)",stock:275,min:50,unit:"uds",alert:""},
-    {id:"b5",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK 1Kg c/ ziploc",stock:250,min:200,unit:"uds",alert:""},
-    {id:"b6",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 1Kg",stock:800,min:300,unit:"uds",alert:""},
-    {id:"b7",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 250g",stock:250,min:100,unit:"uds",alert:""},
-    {id:"b8",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Negras 1Kg",stock:100,min:200,unit:"uds",alert:""},
-    {id:"b9",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Negras 250g",stock:900,min:200,unit:"uds",alert:""},
-    {id:"c1",cat:"Cajas",subcat:"Kawas Grandes",name:"Caja Kawas SYT 12KG",stock:1850,min:500,unit:"uds",alert:""},
-    {id:"c2",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas formato nuevo 58x30x21",stock:41,min:50,unit:"uds",alert:"Crítico"},
-    {id:"c3",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas 30x20x20 Castaño",stock:150,min:100,unit:"uds",alert:""},
-    {id:"c4",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Cajas 40x30x20 Kawas 6kg",stock:0,min:50,unit:"uds",alert:""},
-    {id:"c5",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Caja 20x15x10 multibox",stock:63,min:30,unit:"uds",alert:""},
-    {id:"c6",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Caja 25x25x10 multibox 6u",stock:0,min:20,unit:"uds",alert:""},
-    {id:"p1",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Pequeña 20x30x10",stock:117,min:50,unit:"uds",alert:""},
-    {id:"p2",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Mediana 31x33x11",stock:300,min:100,unit:"uds",alert:""},
-    {id:"p3",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Grande 38x44x17",stock:200,min:50,unit:"uds",alert:""},
-    {id:"p4",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Kraft",stock:36,min:20,unit:"rollos",alert:"Pedir"},
-    {id:"p5",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Plástica",stock:24,min:30,unit:"rollos",alert:"Pedir"},
-    {id:"cb1",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Cold Brew Latte Vainilla",stock:139,min:50,unit:"uds",alert:""},
-    {id:"cb2",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas ámbar 200ml",stock:411,min:100,unit:"uds",alert:""},
-    {id:"cb3",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas transparentes 200ml",stock:12,min:50,unit:"uds",alert:"Pedir urgente"},
-    {id:"cb4",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Tapas Negras 200ml",stock:332,min:100,unit:"uds",alert:""},
-    {id:"cb5",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Tapas Blancas 200ml",stock:8,min:50,unit:"uds",alert:"Pedir urgente"},
-    {id:"cb6",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. Nitro Lata 310cc",stock:41,min:30,unit:"uds",alert:""},
-    {id:"cb7",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. CB Original Botella",stock:114,min:50,unit:"uds",alert:""},
-    {id:"cb8",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. CB Avena Botella",stock:70,min:30,unit:"uds",alert:""},
-    {id:"o1",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 40x40",stock:150,min:100,unit:"uds",alert:"Pedir"},
-    {id:"o2",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 50x50",stock:0,min:50,unit:"uds",alert:""},
-    {id:"o3",cat:"Otros",subcat:"Marsol",name:"Marsol Mokai",stock:219,min:50,unit:"uds",alert:""},
-    {id:"o4",cat:"Otros",subcat:"Marsol",name:"Marsol Lume",stock:230,min:50,unit:"uds",alert:""}
-    ];
+var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
+var ITEMS=[
+// Etiquetas Adhesivas > 1Kg Funsmart
+{id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},
+{id:"e2",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Frutal",stock:142,min:150,unit:"uds",alert:"Pedir pronto"},
+{id:"e3",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Bolivia Caranavi Regional",stock:230,min:200,unit:"uds",alert:"Pedir pronto"},
+{id:"e4",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Regional",stock:297,min:200,unit:"uds",alert:"Pedir pronto"},
+{id:"e5",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Brasil Regional",stock:464,min:100,unit:"uds",alert:""},
+{id:"e6",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Decaf",stock:114,min:40,unit:"uds",alert:""},
+{id:"e7",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Cusco",stock:65,min:50,unit:"uds",alert:""},
+{id:"e8",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Crema",stock:410,min:100,unit:"uds",alert:""},
+{id:"e9",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Pangoa",stock:457,min:150,unit:"uds",alert:""},
+{id:"e10",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Col. Antioquia Gabriela",stock:85,min:50,unit:"uds",alert:""},
+{id:"e11",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Washed Mosto",stock:41,min:30,unit:"uds",alert:""},
+// Etiquetas Adhesivas > 250g MTPACK
+{id:"m1",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Original 12x5",stock:1091,min:200,unit:"uds",alert:""},
+{id:"m2",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Colombia Regional 12x5",stock:690,min:200,unit:"uds",alert:""},
+{id:"m3",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Colombia Decaf 12x5",stock:252,min:150,unit:"uds",alert:""},
+{id:"m4",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Brasil Regional 12x5",stock:539,min:150,unit:"uds",alert:""},
+{id:"m5",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Crema 12x5",stock:455,min:150,unit:"uds",alert:""},
+{id:"m6",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Bolivia Caranavi 12x5",stock:354,min:200,unit:"uds",alert:""},
+{id:"m7",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Blend Filtrado 12x5",stock:218,min:100,unit:"uds",alert:""},
+{id:"m8",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Espresso Frutal 12x5",stock:360,min:150,unit:"uds",alert:""},
+{id:"m9",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Costa Rica 120x50",stock:321,min:100,unit:"uds",alert:""},
+{id:"m10",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Bolivia Typica 113x47",stock:675,min:200,unit:"uds",alert:""},
+{id:"m11",cat:"Etiquetas Adhesivas",subcat:"250g MTPACK 120×50",name:"Peru Pangoa (Feyser)",stock:250,min:100,unit:"uds",alert:""},
+// Etiquetas Adhesivas > 1Kg MTPACK
+{id:"t1",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Original",stock:452,min:150,unit:"uds",alert:""},
+{id:"t2",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Colombia Regional",stock:400,min:150,unit:"uds",alert:""},
+{id:"t3",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Colombia Decaf",stock:226,min:100,unit:"uds",alert:""},
+{id:"t4",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Brasil Regional",stock:450,min:150,unit:"uds",alert:""},
+{id:"t5",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Crema",stock:419,min:150,unit:"uds",alert:""},
+{id:"t6",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Bolivia Caranavi",stock:131,min:100,unit:"uds",alert:""},
+{id:"t7",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Costa Rica",stock:456,min:100,unit:"uds",alert:""},
+{id:"t8",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Peru Pangoa",stock:429,min:150,unit:"uds",alert:""},
+{id:"t9",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Espresso Frutal",stock:239,min:100,unit:"uds",alert:""},
+{id:"t10",cat:"Etiquetas Adhesivas",subcat:"1Kg MTPACK 60×80",name:"Bolivia Typica",stock:88,min:50,unit:"uds",alert:""},
+// Etiquetas Adhesivas > Microlotes
+{id:"ml1",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Incahuasi 120g",stock:24,min:20,unit:"uds",alert:""},
+{id:"ml2",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Java Anoxia",stock:46,min:20,unit:"uds",alert:""},
+{id:"ml3",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Java Lavado",stock:68,min:30,unit:"uds",alert:""},
+{id:"ml4",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Pacamara Lavado",stock:78,min:30,unit:"uds",alert:""},
+{id:"ml5",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Catuai Natural",stock:40,min:30,unit:"uds",alert:""},
+{id:"ml6",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Andino",stock:14,min:20,unit:"uds",alert:"Stock muy bajo"},
+{id:"ml7",cat:"Etiquetas Adhesivas",subcat:"Microlotes",name:"Geisha Inca",stock:57,min:30,unit:"uds",alert:""},
+// Bolsas > MTPACK
+{id:"b1",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g",stock:75,min:500,unit:"uds",alert:""},
+{id:"b2",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g (lote ant.)",stock:125,min:50,unit:"uds",alert:""},
+{id:"b3",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Espresso 250g",stock:225,min:200,unit:"uds",alert:""},
+{id:"b4",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Espresso 250g (lote ant.)",stock:275,min:50,unit:"uds",alert:""},
+{id:"b5",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK 1Kg c/ ziploc",stock:250,min:200,unit:"uds",alert:""},
+// Bolsas > Funsmart
+{id:"b6",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 1Kg",stock:800,min:300,unit:"uds",alert:""},
+{id:"b7",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 250g",stock:250,min:100,unit:"uds",alert:""},
+{id:"b8",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Negras 1Kg",stock:100,min:200,unit:"uds",alert:""},
+{id:"b9",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Negras 250g",stock:900,min:200,unit:"uds",alert:""},
+// Cajas > Kawas Grandes
+{id:"c1",cat:"Cajas",subcat:"Kawas Grandes",name:"Caja Kawas SYT 12KG",stock:1850,min:500,unit:"uds",alert:""},
+{id:"c2",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas formato nuevo 58x30x21",stock:41,min:50,unit:"uds",alert:"Crítico"},
+{id:"c3",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas 30x20x20 Castaño",stock:150,min:100,unit:"uds",alert:""},
+// Cajas > Multibox / Pequeñas
+{id:"c4",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Cajas 40x30x20 Kawas 6kg",stock:0,min:50,unit:"uds",alert:""},
+{id:"c5",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Caja 20x15x10 multibox",stock:63,min:30,unit:"uds",alert:""},
+{id:"c6",cat:"Cajas",subcat:"Multibox / Pequeñas",name:"Caja 25x25x10 multibox 6u",stock:0,min:20,unit:"uds",alert:""},
+// Empaque y Despacho
+{id:"p1",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Pequeña 20x30x10",stock:117,min:50,unit:"uds",alert:""},
+{id:"p2",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Mediana 31x33x11",stock:300,min:100,unit:"uds",alert:""},
+{id:"p3",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Grande 38x44x17",stock:200,min:50,unit:"uds",alert:""},
+{id:"p4",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Kraft",stock:36,min:20,unit:"rollos",alert:"Pedir"},
+{id:"p5",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Plástica",stock:24,min:30,unit:"rollos",alert:"Pedir"},
+// Cold Brew > Botellas y Tapas
+{id:"cb1",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Cold Brew Latte Vainilla",stock:139,min:50,unit:"uds",alert:""},
+{id:"cb2",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas ámbar 200ml",stock:411,min:100,unit:"uds",alert:""},
+{id:"cb3",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas transparentes 200ml",stock:12,min:50,unit:"uds",alert:"Pedir urgente"},
+{id:"cb4",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Tapas Negras 200ml",stock:332,min:100,unit:"uds",alert:""},
+{id:"cb5",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Tapas Blancas 200ml",stock:8,min:50,unit:"uds",alert:"Pedir urgente"},
+// Cold Brew > Etiquetas Cold Brew
+{id:"cb6",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. Nitro Lata 310cc",stock:41,min:30,unit:"uds",alert:""},
+{id:"cb7",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. CB Original Botella",stock:114,min:50,unit:"uds",alert:""},
+{id:"cb8",cat:"Cold Brew",subcat:"Etiquetas Cold Brew",name:"Etiq. CB Avena Botella",stock:70,min:30,unit:"uds",alert:""},
+// Otros > Sellos Kawas
+{id:"o1",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 40x40",stock:150,min:100,unit:"uds",alert:"Pedir"},
+{id:"o2",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 50x50",stock:0,min:50,unit:"uds",alert:""},
+// Otros > Marsol
+{id:"o3",cat:"Otros",subcat:"Marsol",name:"Marsol Mokai",stock:219,min:50,unit:"uds",alert:""},
+{id:"o4",cat:"Otros",subcat:"Marsol",name:"Marsol Lume",stock:230,min:50,unit:"uds",alert:""}
+];
+var CC_KNOWN={"Etiquetas Adhesivas":{i:'<span class="material-symbols-rounded" style="font-size:26px">label</span>',c:"#1a73e8"},"Etiquetas":{i:'<span class="material-symbols-rounded" style="font-size:26px">label</span>',c:"#1a73e8"},"Bolsas":{i:'<span class="material-symbols-rounded" style="font-size:26px">shopping_bag</span>',c:"#2EAD7A"},"Cajas":{i:'<span class="material-symbols-rounded" style="font-size:26px">inventory_2</span>',c:"#C5221F"},"Empaque":{i:'<span class="material-symbols-rounded" style="font-size:26px">package_2</span>',c:"#E89B3E"},"Empaque y Despacho":{i:'<span class="material-symbols-rounded" style="font-size:26px">package_2</span>',c:"#E89B3E"},"Cold Brew":{i:'<span class="material-symbols-rounded" style="font-size:26px">coffee</span>',c:"#4A8FD9"},"Otros":{i:'<span class="material-symbols-rounded" style="font-size:26px">more_horiz</span>',c:"#7A8FA6"},"Microlotes":{i:'<span class="material-symbols-rounded" style="font-size:26px">star</span>',c:"#D4618C"},"Insumos":{i:'<span class="material-symbols-rounded" style="font-size:26px">build</span>',c:"#8B5CF6"},"Materiales":{i:'<span class="material-symbols-rounded" style="font-size:26px">category</span>',c:"#6366F1"}};
+var CC_COLORS=["#1a73e8","#4A9BD9","#2EAD7A","#C5221F","#E89B3E","#D4618C","#8B5CF6","#6366F1","#7A8FA6","#14B8A6"];
+var CC_ICONS=['<span class="material-symbols-rounded" style="font-size:26px">inventory</span>','<span class="material-symbols-rounded" style="font-size:26px">label</span>','<span class="material-symbols-rounded" style="font-size:26px">shopping_bag</span>','<span class="material-symbols-rounded" style="font-size:26px">package_2</span>','<span class="material-symbols-rounded" style="font-size:26px">coffee</span>','<span class="material-symbols-rounded" style="font-size:26px">star</span>','<span class="material-symbols-rounded" style="font-size:26px">more_horiz</span>','<span class="material-symbols-rounded" style="font-size:26px">category</span>','<span class="material-symbols-rounded" style="font-size:26px">build</span>','<span class="material-symbols-rounded" style="font-size:26px">widgets</span>'];
+var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}];
+var AUTH_CACHE_KEY='kw4_auth_users';
+var AUTH_USERS=[];
+var authLoaded=false,authLoading=false,authError=false;
+var authSource='none';
+var authMessage='Esperando conexión con Apps Script';
+var authPromise=null;
+var syncLoading=false;
+var syncCounter=0;
 
-    var CC_KNOWN={
-      "Etiquetas Adhesivas":{i:'sell',c:'#175CD3'},
-      "Etiquetas":{i:'sell',c:'#175CD3'},
-      "Bolsas":{i:'shopping_bag',c:'#079455'},
-      "Cajas":{i:'inventory_2',c:'#B42318'},
-      "Empaque":{i:'deployed_code',c:'#B54708'},
-      "Empaque y Despacho":{i:'deployed_code',c:'#B54708'},
-      "Cold Brew":{i:'local_cafe',c:'#175CD3'},
-      "Otros":{i:'widgets',c:'#667085'},
-      "Microlotes":{i:'auto_awesome',c:'#C11574'},
-      "Insumos":{i:'construction',c:'#7F56D9'},
-      "Materiales":{i:'category',c:'#7F56D9'}
-    };
-    var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}];
-    var AUTH_CACHE_KEY='kw4_auth_users';
-    var AUTH_USERS=[];
-    var authLoaded=false,authLoading=false,authError=false;
-    var authSource='none';
-    var authMessage='Esperando conexión con Apps Script';
-    var authPromise=null;
-    var syncCounter=0;
+var items=[],hist=[],user=null,pg="login",selCat=null,selSubcat=null,selItem=null;
+var adjMode=null,adjVal="",adjNote="",searchQ="",toastMsg=null,toastT="ok";
 
-    var items=[],hist=[],user=null,pg='login',selCat=null,selSubcat=null,selItem=null;
-    var adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok';
-
-    function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-    function ts(){var d=new Date(),p=function(n){return ('0'+n).slice(-2)};return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
-    function st(x){if(x.stock===0)return 'zero';if(x.stock<x.min*.3)return 'crit';if(x.stock<x.min)return 'low';return 'ok'}
-    var STC={
-      zero:{l:'Agotado',tone:'error'},
-      crit:{l:'Crítico',tone:'error'},
-      low:{l:'Bajo',tone:'warning'},
-      ok:{l:'OK',tone:'success'}
-    };
-
-    function statusTheme(s){
-      if(s==='ok') return {dot:'bg-success-700', soft:'bg-success-50 text-success-700 border-green-200', bar:'#12B76A', text:'text-success-700'};
-      if(s==='low') return {dot:'bg-warning-700', soft:'bg-warning-50 text-warning-700 border-amber-200', bar:'#F79009', text:'text-warning-700'};
-      return {dot:'bg-error-700', soft:'bg-error-50 text-error-700 border-red-200', bar:'#F04438', text:'text-error-700'};
+function st(x){if(x.stock===0)return"zero";if(x.stock<x.min*.3)return"crit";if(x.stock<x.min)return"low";return"ok"}
+var STC={zero:{l:"Agotado",c:"#C5221F",b:"#FCE8E6"},crit:{l:"Crítico",c:"#C5221F",b:"#FCE8E6"},low:{l:"Bajo",c:"#E37400",b:"#FEF7E0"},ok:{l:"OK",c:"#137333",b:"#E6F4EA"}};
+function gc(c){
+  // Try exact match first
+  if(CC_KNOWN[c])return{i:CC_KNOWN[c].i,c:CC_KNOWN[c].c,s:c.length>14?c.substring(0,12)+"..":c};
+  // Try partial match (first word)
+  var fw=c.split(" ")[0];
+  if(CC_KNOWN[fw])return{i:CC_KNOWN[fw].i,c:CC_KNOWN[fw].c,s:c.length>14?c.substring(0,12)+"..":c};
+  // Auto-assign based on index
+  var catKeys=Object.keys(catMap());
+  var idx=catKeys.indexOf(c);
+  if(idx<0)idx=catKeys.length;
+  return{i:CC_ICONS[idx%CC_ICONS.length],c:CC_COLORS[idx%CC_COLORS.length],s:c.length>14?c.substring(0,12)+"..":c};
+}
+function ts(){var d=new Date(),p=function(n){return("0"+n).slice(-2)};return p(d.getDate())+"/"+p(d.getMonth()+1)+" "+p(d.getHours())+":"+p(d.getMinutes())}
+function esc(s){return s==null?"":String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function alerts(){return items.filter(function(x){return st(x)!=="ok"}).sort(function(a,b){var o={zero:0,crit:1,low:2};return(o[st(a)]||3)-(o[st(b)]||3)})}
+function catMap(){var m={};items.forEach(function(x){if(!m[x.cat])m[x.cat]=[];m[x.cat].push(x)});return m}
+function subcatMap(catName){var m={};items.filter(function(x){return x.cat===catName}).forEach(function(x){var sc=x.subcat||"General";if(!m[sc])m[sc]=[];m[sc].push(x)});return m}
+function save(){try{localStorage.setItem("kw4",JSON.stringify({items:items,hist:hist}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem("kw4"));if(d&&d.items&&d.items.length>0){items=d.items;hist=d.hist||[]}else{items=JSON.parse(JSON.stringify(ITEMS));hist=[]}}catch(e){items=JSON.parse(JSON.stringify(ITEMS));hist=[]}}
+function isOnline(){return API_URL!=="DEMO"&&API_URL!=="TU_URL_AQUI"&&API_URL!==""}
+function normalizeUsers(arr){
+  return (arr||[]).map(function(u){
+    return {n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()};
+  }).filter(function(u){return u.n&&u.p});
+}
+function loadCachedUsers(){
+  try{
+    var raw=localStorage.getItem(AUTH_CACHE_KEY);
+    if(!raw)return [];
+    var parsed=JSON.parse(raw);
+    var users=normalizeUsers(parsed);
+    if(users.length){
+      AUTH_USERS=users;
+      authSource='cache';
+      authMessage='Usuarios cargados desde caché local';
     }
+    return users;
+  }catch(e){
+    return [];
+  }
+}
+function saveCachedUsers(users){
+  try{localStorage.setItem(AUTH_CACHE_KEY,JSON.stringify(users||[]))}catch(e){}
+}
 
-    function alerts(){
-      return items.filter(function(x){return st(x)!=='ok'}).sort(function(a,b){
-        var o={zero:0,crit:1,low:2,ok:3};
-        return o[st(a)]-o[st(b)];
-      });
+function buildApiUrl(params){
+  var q=Object.keys(params||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k])}).join('&');
+  return API_URL+(API_URL.indexOf('?')>-1?'&':'?')+q;
+}
+function fetchTextWithTimeout(url,opts,timeoutMs){
+  timeoutMs=timeoutMs||12000;
+  return new Promise(function(resolve,reject){
+    var done=false;
+    var t=setTimeout(function(){if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);
+    fetch(url,opts||{}).then(function(r){
+      if(done)return;
+      clearTimeout(t);
+      done=true;
+      resolve(r);
+    }).catch(function(err){
+      if(done)return;
+      clearTimeout(t);
+      done=true;
+      reject(err);
+    });
+  });
+}
+function fetchJsonWithTimeout(url,opts,timeoutMs){
+  return fetchTextWithTimeout(url,opts,timeoutMs).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.text();
+  }).then(function(txt){
+    try{return JSON.parse(txt)}catch(parseErr){
+      throw new Error('Respuesta no JSON desde Apps Script');
     }
-    function catMap(){var m={};items.forEach(function(x){if(!m[x.cat])m[x.cat]=[];m[x.cat].push(x)});return m}
-    function subcatMap(catName){var m={};items.filter(function(x){return x.cat===catName}).forEach(function(x){var sc=x.subcat||'General';if(!m[sc])m[sc]=[];m[sc].push(x)});return m}
-    function gc(c){
-      if(CC_KNOWN[c])return CC_KNOWN[c];
-      var fw=c.split(' ')[0];
-      if(CC_KNOWN[fw])return CC_KNOWN[fw];
-      return {i:'category',c:'#7F56D9'};
+  });
+}
+function safeRedraw(){
+  try{return draw()}catch(e){
+    console.error('draw error',e);
+    var app=document.getElementById('app');
+    if(app){
+      app.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;padding:24px"><div style="max-width:360px;background:#fff;border:1px solid #EAECF0;border-radius:20px;padding:24px;box-shadow:0 12px 24px rgba(16,24,40,.08)"><div style="font:700 18px Inter,system-ui,sans-serif;color:#101828">Se produjo un error en la interfaz</div><div style="font:400 14px Inter,system-ui,sans-serif;color:#475467;margin-top:8px">La aplicación encontró un problema al renderizar esta vista. Puedes recargar o volver a abrir la app.</div><div style="margin-top:16px;display:flex;gap:8px"><button id="retry-app" style="height:40px;padding:0 14px;border:none;border-radius:12px;background:#7A5AF8;color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Reintentar</button><button id="reset-app" style="height:40px;padding:0 14px;border:1px solid #EAECF0;border-radius:12px;background:#fff;color:#344054;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Ir al inicio</button></div><div style="margin-top:12px;font:12px Inter,system-ui,sans-serif;color:#98A2B3">'+esc(e&&e.message?e.message:String(e))+'</div></div></div>';
+      var retry=document.getElementById('retry-app'); if(retry) retry.onclick=function(){ safeRedraw(); };
+      var reset=document.getElementById('reset-app'); if(reset) reset.onclick=function(){ selItem=null; selSubcat=null; selCat=null; pg='home'; safeRedraw(); };
     }
-
-    function save(){try{localStorage.setItem('kw4',JSON.stringify({items:items,hist:hist}))}catch(e){}}
-    function load(){
-      try{
-        var d=JSON.parse(localStorage.getItem('kw4'));
-        if(d&&d.items&&d.items.length>0){items=d.items;hist=d.hist||[]} else {items=JSON.parse(JSON.stringify(ITEMS));hist=[]}
-      }catch(e){items=JSON.parse(JSON.stringify(ITEMS));hist=[]}
+    return null;
+  }
+}
+function loadUsers(force){
+  if(authLoading && authPromise)return authPromise;
+  if(authLoaded && !force && AUTH_USERS.length)return Promise.resolve(AUTH_USERS);
+  if(!isOnline()){
+    authLoaded=true;
+    authError=true;
+    if(!AUTH_USERS.length){
+      AUTH_USERS=USERS.slice();
+      authSource='demo';
+      authMessage='API_URL sin conexión; usando usuarios locales';
+    }else{
+      authSource='cache';
+      authMessage='Sin conexión; usando caché local de usuarios';
     }
-
-    function isOnline(){return API_URL!==''&&API_URL!=='DEMO'&&API_URL!=='TU_URL_AQUI'}
-    function normalizeUsers(arr){
-      return (arr||[]).map(function(u){return {n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()}}).filter(function(u){return u.n&&u.p});
-    }
-    function loadCachedUsers(){
-      try{
-        var raw=localStorage.getItem(AUTH_CACHE_KEY);
-        if(!raw)return [];
-        var parsed=JSON.parse(raw), users=normalizeUsers(parsed);
-        if(users.length){AUTH_USERS=users;authSource='cache';authMessage='Usuarios cargados desde caché local'}
-        return users;
-      }catch(e){return []}
-    }
-    function saveCachedUsers(users){try{localStorage.setItem(AUTH_CACHE_KEY,JSON.stringify(users||[]))}catch(e){}}
-    function buildApiUrl(params){var q=Object.keys(params||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k])}).join('&');return API_URL+(API_URL.indexOf('?')>-1?'&':'?')+q}
-
-    function fetchTextWithTimeout(url,opts,timeoutMs){
-      timeoutMs=timeoutMs||12000;
-      return new Promise(function(resolve,reject){
-        var done=false;
-        var t=setTimeout(function(){if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);
-        fetch(url,opts||{}).then(function(r){if(done)return;clearTimeout(t);done=true;resolve(r)}).catch(function(err){if(done)return;clearTimeout(t);done=true;reject(err)})
-      });
-    }
-    function fetchJsonWithTimeout(url,opts,timeoutMs){
-      return fetchTextWithTimeout(url,opts,timeoutMs).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(txt){try{return JSON.parse(txt)}catch(e){throw new Error('Respuesta no JSON desde Apps Script')}})
-    }
-
-    function toast(m,t){toastMsg=m;toastT=t||'ok';draw();clearTimeout(window.__toastTm);window.__toastTm=setTimeout(function(){toastMsg=null;draw()},2200)}
-    function safeRedraw(){try{return draw()}catch(e){console.error(e);document.getElementById('app').innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="max-w-sm w-full rounded-3xl border border-gray-200 bg-white p-6 shadow-lgsoft"><div class="text-lg font-bold text-gray-900">Se produjo un error en la interfaz</div><div class="mt-2 text-sm text-gray-600">La app encontró un problema al renderizar esta vista.</div><div class="mt-5 flex gap-3"><button id="retry-app" class="flex-1 rounded-2xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white">Reintentar</button><button id="reset-app" class="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Ir al inicio</button></div><div class="mt-3 text-xs text-gray-400">'+esc(e&&e.message?e.message:String(e))+'</div></div></div>';var r=document.getElementById('retry-app');if(r)r.onclick=function(){safeRedraw()};var rs=document.getElementById('reset-app');if(rs)rs.onclick=function(){selItem=null;selSubcat=null;selCat=null;pg='home';safeRedraw()}}
-    }
-
-    function loadUsers(force){
-      if(authLoading && authPromise) return authPromise;
-      if(authLoaded && !force && AUTH_USERS.length) return Promise.resolve(AUTH_USERS);
-      if(!isOnline()){
-        authLoaded=true;authError=true;
-        if(!AUTH_USERS.length){AUTH_USERS=USERS.slice();authSource='demo';authMessage='API_URL sin conexión; usando usuarios locales'}
-        else{authSource='cache';authMessage='Sin conexión; usando caché local de usuarios'}
-        return Promise.resolve(AUTH_USERS);
+    return Promise.resolve(AUTH_USERS);
+  }
+  authLoading=true;
+  authMessage='Consultando usuarios en Apps Script...';
+  authPromise=fetchJsonWithTimeout(buildApiUrl({action:'getUsers',_ts:Date.now()}),{cache:'no-store'},12000)
+    .then(function(d){
+      if(d&&d.success&&d.users&&d.users.length){
+        AUTH_USERS=normalizeUsers(d.users);
+        if(!AUTH_USERS.length) throw new Error('Usuarios vacíos o mal formateados');
+        saveCachedUsers(AUTH_USERS);
+        authError=false;
+        authSource='backend';
+        authMessage='Usuarios cargados desde Apps Script';
+      }else if(d&&d.error){
+        throw new Error(String(d.error));
+      }else{
+        throw new Error('getUsers no devolvió usuarios');
       }
-      authLoading=true;authMessage='Consultando usuarios en Apps Script...';
-      authPromise=fetchJsonWithTimeout(buildApiUrl({action:'getUsers',_ts:Date.now()}),{cache:'no-store'},12000)
-        .then(function(d){
-          if(d&&d.success&&d.users&&d.users.length){
-            AUTH_USERS=normalizeUsers(d.users);
-            if(!AUTH_USERS.length) throw new Error('Usuarios vacíos o mal formateados');
-            saveCachedUsers(AUTH_USERS);authError=false;authSource='backend';authMessage='Usuarios cargados desde Apps Script';
-          }else if(d&&d.error){throw new Error(String(d.error))}
-          else{throw new Error('getUsers no devolvió usuarios')}
-          authLoaded=true;authLoading=false;authPromise=null;safeRedraw();return AUTH_USERS;
-        }).catch(function(){
-          authLoaded=true;authLoading=false;authError=true;authPromise=null;
-          if(!AUTH_USERS.length){AUTH_USERS=USERS.slice();authSource='demo';authMessage='No fue posible leer usuarios del backend; usando fallback local'}
-          else{authSource='cache';authMessage='Backend sin respuesta; usando caché local'}
-          safeRedraw();return AUTH_USERS;
-        });
-      return authPromise;
-    }
-
-    function validatePinAttempt(pinAttempt){
-      var pool=(AUTH_USERS&&AUTH_USERS.length?AUTH_USERS:[]);
-      var u=pool.find(function(x){return String(x.p)===String(pinAttempt)});
-      if(u)return {ok:true,user:u};
-      return {ok:false};
-    }
-    function completeLogin(u){user=u;load();pg='home';draw();sync();toast('Hola, '+u.n)}
-
-    function sync(){
-      if(!isOnline()){save();return Promise.resolve(false)}
-      var syncId=++syncCounter;
-      var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
-        if(!(d&&d.success&&d.items)) throw new Error(d&&d.error?String(d.error):'getAll inválido');
-        return d.items.map(function(x){return{id:String(x.id),cat:String(x.categoria),subcat:String(x.subcategoria||''),name:String(x.nombre),stock:Number(x.stock)||0,min:Number(x.minimo)||0,unit:String(x.unidad)||'uds',alert:String(x.alerta)||''}});
-      });
-      var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
-        if(!(d&&d.success&&d.entries)) throw new Error(d&&d.error?String(d.error):'getHistory inválido');
-        return d.entries.map(function(x){return{id:String(x.itemId),nm:String(x.itemNombre),cat:String(x.categoria),tp:String(x.tipo),os:Number(x.stockAnterior)||0,ns:Number(x.stockNuevo)||0,nt:String(x.nota)||'',u:String(x.usuario)||'?',ts:x.timestamp?x.timestamp.substring(0,16).replace('T',' '):''}});
-      });
-      return Promise.allSettled([stockReq,histReq]).then(function(results){
-        if(syncId!==syncCounter) return false;
-        var stockOk=results[0].status==='fulfilled';
-        var histOk=results[1].status==='fulfilled';
-        if(stockOk) items=results[0].value;
-        if(histOk) hist=results[1].value;
-        if(stockOk||histOk){save();safeRedraw()}
-        if(!stockOk && !histOk) toast('No se pudo sincronizar con Apps Script','warn');
-        else if(!stockOk || !histOk) toast('Sincronización parcial completada','warn');
-        return stockOk||histOk;
-      }).catch(function(){toast('No se pudo sincronizar','warn');return false});
-    }
-
-    function pushUpdate(item,oldStock,newStock,type,note){
-      if(!isOnline()){save();toast('Sin conexión: cambio guardado solo en este dispositivo','warn');return Promise.resolve(false)}
-      var body=JSON.stringify({action:'updateStock',itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:'?',nota:note||''});
-      return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(function(d){
-        if(d&&d.success){toast('Guardado en Sheets');return true}
-        toast('Error: '+((d&&d.error)||'respuesta inválida'),'err');return false;
-      }).catch(function(){toast('Error de red - guardado local','warn');return false});
-    }
-
-    function calcProjection(item){
-      var pad=function(n){return ('0'+n).slice(-2)};
-      if(item.stock<=0) return {title:'Sin stock',subtitle:'No hay unidades disponibles',days:'0',dailyUse:'-',dateOut:'-',color:'#B42318',daysNum:0};
-      var moves=hist.filter(function(h){return h.id===item.id});
-      var consumptions=[];
-      moves.forEach(function(h){if(h.ns<h.os) consumptions.push({amount:h.os-h.ns,ts:h.ts,tp:h.tp})});
-      function parseTS(t){
-        if(!t)return null;var d=new Date(t);if(!isNaN(d.getTime()))return d;
-        var parts=t.split(' ');
-        if(parts[0]&&parts[0].indexOf('/')>-1){var dp=parts[0].split('/');var day=parseInt(dp[0]),mon=parseInt(dp[1])-1;var yr=dp[2]?parseInt(dp[2]):new Date().getFullYear();if(yr<100)yr+=2000;var hr=0,mi=0;if(parts[1]&&parts[1].indexOf(':')>-1){var tp=parts[1].split(':');hr=parseInt(tp[0]);mi=parseInt(tp[1])}return new Date(yr,mon,day,hr,mi)}
-        return null;
+      authLoaded=true;
+      authLoading=false;
+      authPromise=null;
+      safeRedraw();
+      return AUTH_USERS;
+    })
+    .catch(function(e){
+      console.log('users sync error',e);
+      authLoaded=true;
+      authLoading=false;
+      authError=true;
+      authPromise=null;
+      if(!AUTH_USERS.length){
+        AUTH_USERS=USERS.slice();
+        authSource='demo';
+        authMessage='No fue posible leer usuarios del backend; usando fallback local';
+      }else{
+        authSource='cache';
+        authMessage='Backend sin respuesta; usando caché local';
       }
-      if(consumptions.length<1){
-        if(item.min>0){
-          var estDaily=Math.max(1,Math.round(item.min/14));
-          var estDays=Math.round(item.stock/estDaily);
-          var estDate=new Date();estDate.setDate(estDate.getDate()+estDays);
-          var dc=estDays<=7?'#B42318':estDays<=21?'#B54708':estDays<=45?'#175CD3':'#027A48';
-          return {title:estDays<=7?'Agotamiento inminente':estDays<=21?'Stock limitado':estDays<=45?'Stock moderado':'Stock holgado',subtitle:'Estimado (aún sin datos de consumo)',days:String(estDays),dailyUse:'~'+estDaily,dateOut:pad(estDate.getDate())+'/'+pad(estDate.getMonth()+1),color:dc,daysNum:estDays};
-        }
-        return null;
-      }
-      var totalConsumed=0;consumptions.forEach(function(c){totalConsumed+=c.amount});
-      var spanDays=0;var dates=consumptions.map(function(c){return parseTS(c.ts)}).filter(function(d){return d!==null});
-      if(dates.length>=2){dates.sort(function(a,b){return a-b});spanDays=Math.max(1,Math.round(Math.abs(dates[dates.length-1]-dates[0])/86400000));}
-      else if(dates.length===1){spanDays=Math.max(1,Math.round(Math.abs(new Date()-dates[0])/86400000));}
-      else{spanDays=Math.max(1,consumptions.length*3)}
-      var dailyUse=totalConsumed/spanDays;if(dailyUse<=0)dailyUse=0.1;
-      var daysLeft=Math.round(item.stock/dailyUse);var futureDate=new Date();futureDate.setDate(futureDate.getDate()+daysLeft);
-      var dateStr=pad(futureDate.getDate())+'/'+pad(futureDate.getMonth()+1);
-      var color=daysLeft<=7?'#B42318':daysLeft<=21?'#B54708':daysLeft<=45?'#175CD3':'#027A48';
-      var title=daysLeft<=0?'Sin stock':daysLeft<=7?'Agotamiento inminente':daysLeft<=14?'Pedir pronto':daysLeft<=30?'Stock limitado':daysLeft<=60?'Stock moderado':'Stock holgado';
-      var types={};consumptions.forEach(function(c){types[c.tp]=(types[c.tp]||0)+1});
-      var desc=[];if(types['salida'])desc.push(types['salida']+' salida'+(types['salida']>1?'s':''));if(types['ajuste'])desc.push(types['ajuste']+' ajuste'+(types['ajuste']>1?'s':''));
-      var sub='Basado en '+(desc.length?desc.join(' + '):consumptions.length+' mov.')+' en '+spanDays+' día'+(spanDays>1?'s':'');
-      return {title:title,subtitle:sub,days:String(daysLeft),dailyUse:dailyUse<1?dailyUse.toFixed(1):Math.round(dailyUse).toString(),dateOut:dateStr,color:color,daysNum:daysLeft};
+      safeRedraw();
+      return AUTH_USERS;
+    });
+  return authPromise;
+}
+function completeLogin(u){
+  user=u;
+  load();
+  pg='home';
+  draw();
+  sync();
+  toast('Hola, '+u.n);
+}
+function validatePinAttempt(pinAttempt){
+  var pool=(AUTH_USERS&&AUTH_USERS.length?AUTH_USERS:[]);
+  var u=pool.find(function(x){return String(x.p)===String(pinAttempt)});
+  if(u)return {ok:true,user:u};
+  return {ok:false};
+}
+function sync(){
+  if(!isOnline()){
+    save();
+    return Promise.resolve(false);
+  }
+  syncLoading=true;
+  var syncId=++syncCounter;
+  var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
+    if(!(d&&d.success&&d.items)) throw new Error(d&&d.error?String(d.error):'getAll inválido');
+    return d.items.map(function(x){return{id:String(x.id),cat:String(x.categoria),subcat:String(x.subcategoria||''),name:String(x.nombre),stock:Number(x.stock)||0,min:Number(x.minimo)||0,unit:String(x.unidad)||'uds',alert:String(x.alerta)||''}});
+  });
+  var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
+    if(!(d&&d.success&&d.entries)) throw new Error(d&&d.error?String(d.error):'getHistory inválido');
+    return d.entries.map(function(x){return{id:String(x.itemId),nm:String(x.itemNombre),cat:String(x.categoria),tp:String(x.tipo),os:Number(x.stockAnterior)||0,ns:Number(x.stockNuevo)||0,nt:String(x.nota)||'',u:String(x.usuario)||'?',ts:x.timestamp?x.timestamp.substring(0,16).replace('T',' '):''} });
+  });
+  return Promise.allSettled([stockReq,histReq]).then(function(results){
+    if(syncId!==syncCounter) return false;
+    var stockOk=results[0].status==='fulfilled';
+    var histOk=results[1].status==='fulfilled';
+    if(stockOk) items=results[0].value;
+    if(histOk) hist=results[1].value;
+    if(stockOk||histOk){
+      save();
+      safeRedraw();
     }
+    if(!stockOk) console.log('sync stock error', results[0].reason);
+    if(!histOk) console.log('sync history error', results[1].reason);
+    if(!stockOk && !histOk) toast('No se pudo sincronizar con Apps Script','warn');
+    else if(!stockOk || !histOk) toast('Sincronización parcial completada','warn');
+    syncLoading=false;
+    return stockOk||histOk;
+  }).catch(function(e){
+    syncLoading=false;
+    console.log('sync error',e);
+    toast('No se pudo sincronizar','warn');
+    return false;
+  });
+}
+function pushUpdate(item,oldStock,newStock,type,note){
+  if(!isOnline()){save();toast('Sin conexión: cambio guardado solo en este dispositivo','warn');return Promise.resolve(false)}
+  var body=JSON.stringify({action:'updateStock',itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:'?',nota:note||''});
+  return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(function(d){
+    if(d&&d.success){toast('✓ Guardado en Sheets'); return true;}
+    toast('Error: '+((d&&d.error)||'respuesta inválida'),'err');
+    return false;
+  }).catch(function(e){toast('Error de red - guardado local','warn');console.log('push error',e);return false;});
+}var toastTmr;
+function toast(m,t){toastMsg=m;toastT=t||"ok";clearTimeout(toastTmr);draw();toastTmr=setTimeout(function(){toastMsg=null;draw()},2400)}
 
-    function badge(label, cls, icon){
-      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold '+cls+'">'+(icon?'<span class="material-symbols-rounded text-[14px]">'+icon+'</span>':'')+esc(label)+'</span>';
-    }
-    function statusBadge(item){
-      var s=st(item), th=statusTheme(s);
-      return badge(STC[s].l, th.soft, s==='ok'?'check_circle':s==='low'?'warning':'error');
-    }
-    function progressBar(item){
-      var pct=item.min>0?Math.min(100,Math.round(item.stock/item.min*100)):100;
-      var th=statusTheme(st(item));
-      return '<div class="mt-3"><div class="h-2 rounded-full bg-gray-100 overflow-hidden"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+th.bar+'"></div></div><div class="mt-2 flex items-center justify-between text-[11px] text-gray-500"><span>Mínimo '+item.min+' '+esc(item.unit)+'</span><span>'+pct+'%</span></div></div>';
-    }
-    function iconChip(name,color){
-      return '<div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/70 shadow-soft" style="color:'+color+'"><span class="material-symbols-rounded text-[22px]">'+name+'</span></div>';
-    }
-    function sectionHeader(eyebrow,title,subtitle,actions){
-      return '<header class="safe-top px-4 pt-1"><div class="mx-auto w-full max-w-md"><div class="flex items-start gap-3">'+(actions&&actions.left?actions.left:'')+'<div class="min-w-0 flex-1"><div class="text-xs font-semibold uppercase tracking-[0.08em] text-primary-700">'+esc(eyebrow||'')+'</div><h1 class="mt-1 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-gray-900">'+esc(title||'')+'</h1>'+(subtitle?'<p class="mt-1 text-sm leading-6 text-gray-600">'+esc(subtitle)+'</p>':'')+'</div>'+(actions&&actions.right?actions.right:'')+'</div></div></header>';
-    }
-    function topIconButton(id,icon,primary){
-      return '<button id="'+id+'" class="'+(primary?'bg-primary-600 text-white border-primary-600':'bg-white text-gray-700 border-gray-200')+' inline-flex h-11 w-11 items-center justify-center rounded-2xl border shadow-soft"><span class="material-symbols-rounded text-[20px]">'+icon+'</span></button>';
-    }
-    function appShell(inner,bottom){
-      return '<div class="mx-auto min-h-screen w-full max-w-md">'+inner+(bottom||'')+'</div>';
-    }
-    function navHtml(current,critCount){
-      var tabs=[
-        {id:'home',ic:'home',l:'Inicio'},
-        {id:'search',ic:'search',l:'Buscar'},
-        {id:'alerts',ic:'warning',l:'Alertas'},
-        {id:'history',ic:'schedule',l:'Historial'},
-        {id:'report',ic:'description',l:'Reporte'}
-      ];
-      return '<div class="fixed inset-x-0 bottom-0 z-40"><div class="mx-auto max-w-md px-4 pb-safe-bottom"><div class="glass bottom-shadow mb-3 rounded-[28px] border border-white/70 bg-white/85 px-2 py-2">'+tabs.map(function(t){var active=current===t.id;return '<button data-tab="'+t.id+'" class="relative inline-flex w-[19.2%] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold '+(active?'bg-gray-900 text-white':'text-gray-500')+'"><span class="material-symbols-rounded text-[20px]">'+t.ic+'</span><span>'+t.l+'</span>'+(t.id==='alerts'&&critCount>0?'<span class="absolute right-3 top-2 h-2 w-2 rounded-full bg-error-700"></span>':'')+'</button>'}).join('')+'</div></div></div>';
-    }
+// ─── STOCK PROJECTION ───
+function calcProjection(item){
+  var pad=function(n){return("0"+n).slice(-2)};
+  
+  if(item.stock<=0) return {icon:"⊘",title:"Sin stock",subtitle:"No hay unidades disponibles",days:"0",dailyUse:"-",dateOut:"-",color:"#C5221F",daysNum:0};
 
-    function itemCard(item, idx){
-      var info=gc(item.cat), s=st(item), th=statusTheme(s);
-      return '<button data-item="'+item.id+'" class="fade-up w-full rounded-3xl border border-gray-200 bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx*.03)+'s">'+
-        '<div class="flex items-start gap-3">'+
-          '<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[22px]">'+info.i+'</span></div>'+
-          '<div class="min-w-0 flex-1">'+
-            '<div class="flex items-start justify-between gap-3">'+
-              '<div class="min-w-0"><div class="line-clamp-2 text-[15px] font-semibold text-gray-900">'+esc(item.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(item.cat)+(item.subcat?' · '+esc(item.subcat):'')+'</div></div>'+
-              '<div class="text-right"><div class="mn text-[22px] font-semibold tracking-[-0.03em] '+th.text+'">'+item.stock.toLocaleString()+'</div><div class="text-[11px] text-gray-500">'+esc(item.unit)+'</div></div>'+
-            '</div>'+
-            '<div class="mt-3 flex items-center gap-2 flex-wrap">'+statusBadge(item)+(item.alert?badge(item.alert,'bg-gray-50 text-gray-700 border-gray-200','notification_important'):'')+'</div>'+
-            progressBar(item)+
-          '</div>'+
+  // Get ALL movements for this item (any type)
+  var moves=hist.filter(function(h){return h.id===item.id});
+  
+  // Find every time stock went DOWN (consumption), regardless of movement type
+  var consumptions=[];
+  moves.forEach(function(h){
+    if(h.ns<h.os){
+      consumptions.push({amount:h.os-h.ns, ts:h.ts, tp:h.tp});
+    }
+  });
+
+  // Parse timestamps to real dates
+  function parseTS(t){
+    if(!t)return null;
+    // Try ISO format first (from Google Sheets)
+    var d=new Date(t);
+    if(!isNaN(d.getTime()))return d;
+    // Try DD/MM HH:MM format (local)
+    var parts=t.split(" ");
+    if(parts[0]&&parts[0].indexOf("/")>-1){
+      var dp=parts[0].split("/");
+      var day=parseInt(dp[0]),mon=parseInt(dp[1])-1;
+      var yr=dp[2]?parseInt(dp[2]):new Date().getFullYear();
+      if(yr<100)yr+=2000;
+      var hr=0,mi=0;
+      if(parts[1]&&parts[1].indexOf(":")>-1){var tp=parts[1].split(":");hr=parseInt(tp[0]);mi=parseInt(tp[1])}
+      return new Date(yr,mon,day,hr,mi);
+    }
+    return null;
+  }
+
+  if(consumptions.length<1){
+    // No consumption data - estimate from stock mínimo
+    if(item.min>0){
+      var estDaily=Math.max(1,Math.round(item.min/14));
+      var estDays=Math.round(item.stock/estDaily);
+      var estDate=new Date();estDate.setDate(estDate.getDate()+estDays);
+      var dc=estDays<=7?"#C5221F":estDays<=21?"#E37400":estDays<=45?"#4A9BD9":"#137333";
+      return {icon:estDays<=7?"🔴":estDays<=21?"🟡":estDays<=45?"🔵":"🟢",title:estDays<=7?"Agotamiento inminente":estDays<=21?"Stock limitado":estDays<=45?"Stock moderado":"Stock holgado",subtitle:"Estimado (aún sin datos de consumo)",days:String(estDays),dailyUse:"~"+estDaily,dateOut:pad(estDate.getDate())+"/"+pad(estDate.getMonth()+1),color:dc,daysNum:estDays};
+    }
+    return null;
+  }
+
+  // Total consumed
+  var totalConsumed=0;
+  consumptions.forEach(function(c){totalConsumed+=c.amount});
+
+  // Calculate time span using timestamps
+  var spanDays=0;
+  var dates=consumptions.map(function(c){return parseTS(c.ts)}).filter(function(d){return d!==null});
+  
+  if(dates.length>=2){
+    // Sort oldest first
+    dates.sort(function(a,b){return a-b});
+    var oldest=dates[0];
+    var newest=dates[dates.length-1];
+    spanDays=Math.max(1,Math.round(Math.abs(newest-oldest)/86400000));
+  } else if(dates.length===1){
+    // Single consumption: days since that date
+    var now=new Date();
+    spanDays=Math.max(1,Math.round(Math.abs(now-dates[0])/86400000));
+  } else {
+    // No parseable dates, rough estimate
+    spanDays=Math.max(1,consumptions.length*3);
+  }
+
+  var dailyUse=totalConsumed/spanDays;
+  if(dailyUse<=0)dailyUse=0.1;
+  var daysLeft=Math.round(item.stock/dailyUse);
+
+  var futureDate=new Date();
+  futureDate.setDate(futureDate.getDate()+daysLeft);
+  var dateStr=pad(futureDate.getDate())+"/"+pad(futureDate.getMonth()+1);
+
+  var color=daysLeft<=7?"#C5221F":daysLeft<=21?"#E37400":daysLeft<=45?"#4A9BD9":"#137333";
+  var icon=daysLeft<=7?"🔴":daysLeft<=21?"🟡":daysLeft<=45?"🔵":"🟢";
+  var title=daysLeft<=0?"Sin stock":daysLeft<=7?"Agotamiento inminente":daysLeft<=14?"Pedir pronto":daysLeft<=30?"Stock limitado":daysLeft<=60?"Stock moderado":"Stock holgado";
+
+  // Build descriptive subtitle
+  var types={};
+  consumptions.forEach(function(c){types[c.tp]=(types[c.tp]||0)+1});
+  var desc=[];
+  if(types["salida"])desc.push(types["salida"]+" salida"+(types["salida"]>1?"s":""));
+  if(types["ajuste"])desc.push(types["ajuste"]+" ajuste"+(types["ajuste"]>1?"s":""));
+  var sub="Basado en "+(desc.length?desc.join(" + "):consumptions.length+" mov.")+" en "+spanDays+" día"+(spanDays>1?"s":"");
+
+  return {icon:icon,title:title,subtitle:sub,days:String(daysLeft),dailyUse:dailyUse<1?dailyUse.toFixed(1):Math.round(dailyUse).toString(),dateOut:dateStr,color:color,daysNum:daysLeft};
+}
+
+// ─── ICONS ───
+var IB='<span class="material-symbols-rounded">arrow_back</span>';
+var IH='<span class="material-symbols-rounded">home</span>';
+var IS='<span class="material-symbols-rounded">search</span>';
+var IA='<span class="material-symbols-rounded">warning</span>';
+var IT='<span class="material-symbols-rounded">schedule</span>';
+var IP='<span class="material-symbols-rounded" style="font-size:20px">add</span>';
+var IM='<span class="material-symbols-rounded" style="font-size:20px">remove</span>';
+var IE='<span class="material-symbols-rounded" style="font-size:18px">edit</span>';
+var IK='<span class="material-symbols-rounded" style="font-size:18px">check</span>';
+var IR='<span class="material-symbols-rounded">description</span>';
+
+// ─── SINGLE RENDER FUNCTION ───
+
+function statusBadge(item){
+  var s=st(item);
+  return '<span class="status-badge '+s+'"><span class="material-symbols-rounded" style="font-size:14px">'+(s==='ok'?'check_circle':s==='low'?'warning':'error')+'</span>'+STC[s].l+'</span>';
+}
+function softBadge(label,tone,icon){
+  return '<span class="soft-badge '+(tone||'gray')+'">'+(icon?'<span class="material-symbols-rounded" style="font-size:14px">'+icon+'</span>':'')+esc(label)+'</span>';
+}
+function breadcrumbHtml(parts){
+  return '<div class="breadcrumbs">'+parts.map(function(p,idx){
+    return '<span class="crumb '+(idx===parts.length-1?'current':'')+'">'+esc(p)+'</span>'+(idx<parts.length-1?'<span class="crumb-sep">›</span>':'');
+  }).join('')+'</div>';
+}
+function stateToneColor(s){
+  if(s==='ok')return '#198038';
+  if(s==='low')return '#8E6A00';
+  return '#DA1E28';
+}
+function navHtml(current,critCount){
+  var tabs=[
+    {id:'home',ic:'home',l:'Inicio'},
+    {id:'search',ic:'search',l:'Buscar'},
+    {id:'alerts',ic:'warning',l:'Alertas'},
+    {id:'history',ic:'schedule',l:'Historial'},
+    {id:'report',ic:'description',l:'Reporte'}
+  ];
+  return '<div class="bottom-nav-wrap"><div class="bottom-nav">'+tabs.map(function(t){
+    return '<button class="nav-btn '+(current===t.id?'active':'')+'" data-tab="'+t.id+'">'+
+      '<span class="material-symbols-rounded" style="font-size:20px">'+t.ic+'</span>'+
+      '<span class="label">'+t.l+'</span>'+
+      (t.id==='alerts'&&critCount>0?'<span class="nav-dot"></span>':'')+
+    '</button>';
+  }).join('')+'</div></div>';
+}
+function shellHeader(opts){
+  return '<div class="screen-header">'+
+    '<div class="header-row">'+
+      (opts.back?'<button id="'+opts.back.id+'" class="icon-btn">'+opts.back.icon+'</button>':'')+
+      '<div class="header-copy">'+
+        (opts.eyebrow?'<div class="eyebrow">'+opts.eyebrow+'</div>':'')+
+        '<div class="page-title">'+opts.title+'</div>'+
+        (opts.subtitle?'<div class="page-subtitle">'+opts.subtitle+'</div>':'')+
+        (opts.breadcrumbs?breadcrumbHtml(opts.breadcrumbs):'')+
+      '</div>'+
+      (opts.actions||'')+
+    '</div>'+
+  '</div>';
+}
+function emptyState(icon,title,text){
+  return '<div class="center-empty"><span class="material-symbols-rounded">'+icon+'</span><div style="font-size:18px;font-weight:400;color:#161616">'+esc(title)+'</div><div style="font-size:14px;color:#525252;margin-top:6px">'+esc(text)+'</div></div>';
+}
+function productCard(item, idx){
+  var s=st(item), sc=STC[s], tone=stateToneColor(s);
+  var pct=item.min>0?Math.min(100,Math.round(item.stock/item.min*100)):100;
+  var fill=s==='ok'?'#12B76A':s==='low'?'#F79009':'#F04438';
+  return '<div class="list-item fi" data-item="'+item.id+'" style="animation-delay:'+(idx*.03)+'s">'+
+    '<div class="list-item-head">'+
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+        '<div class="list-item-title">'+esc(item.name)+'</div>'+
+        statusBadge(item)+
+      '</div>'+
+      '<div class="list-item-desc">'+esc(item.cat)+(item.subcat?' · '+esc(item.subcat):'')+(item.alert?' · '+esc(item.alert):'')+'</div>'+
+      '<div style="margin-top:12px" class="progress-rail"><div class="progress-fill" style="width:'+pct+'%;background:'+fill+'"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:11px;color:#667085"><span>Mínimo '+item.min+' '+esc(item.unit)+'</span><span>'+pct+'%</span></div>'+
+    '</div>'+
+    '<div class="list-trailing">'+
+      '<div class="list-item-value mn" style="color:'+tone+'">'+item.stock.toLocaleString()+'</div>'+
+      '<div style="font-size:11px;color:#667085">'+esc(item.unit)+'</div>'+
+      '<span class="material-symbols-rounded" style="font-size:18px;color:#98A2B3">chevron_right</span>'+
+    '</div>'+
+  '</div>';
+}
+function historyCard(entry){
+  var diff=entry.ns-entry.os;
+  var tone=diff>0?'#12B76A':diff<0?'#F04438':'#7A5AF8';
+  var bg=entry.tp==='ingreso'?'#ECFDF3':entry.tp==='salida'?'#FEF3F2':'#F4F3FF';
+  var bd=entry.tp==='ingreso'?'#ABEFC6':entry.tp==='salida'?'#FECDCA':'#D9D6FE';
+  var ic=entry.tp==='ingreso'?'add':entry.tp==='salida'?'remove':'tune';
+  return '<div class="history-row">'+
+    '<div class="list-icon" style="background:'+bg+';border-color:'+bd+';border-top:3px solid '+tone+'"><span class="material-symbols-rounded" style="font-size:18px;color:'+tone+'">'+ic+'</span></div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div class="list-item-title" style="font-size:13px">'+esc(entry.nm)+'</div>'+
+      '<div class="history-meta">'+esc(entry.cat)+' · '+esc(entry.ts)+' · '+esc(entry.u)+'</div>'+
+      (entry.nt?'<div class="note-line">'+esc(entry.nt)+'</div>':'')+
+    '</div>'+
+    '<div style="text-align:right;flex-shrink:0">'+
+      '<div style="font-size:11px;color:#667085">'+entry.os+' → '+entry.ns+'</div>'+
+      '<div class="mn" style="font-size:16px;font-weight:800;color:'+tone+'">'+(diff>0?'+':'')+diff+'</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function draw(){
+  var A=document.getElementById('app');
+  var alertItems=alerts();
+  var criticalAlerts=alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length;
+  var html='';
+
+  if(toastMsg){
+    var toastColor=toastT==='err'?'#D92D20':toastT==='warn'?'#B54708':'#027A48';
+    html+='<div style="position:fixed;top:22px;left:50%;transform:translateX(-50%);z-index:999;padding:12px 18px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:'+toastColor+';box-shadow:0 20px 34px rgba(16,24,40,.18);animation:toast-in .28s ease;max-width:88vw;text-align:center">'+esc(toastMsg)+'</div>';
+  }
+
+  if(!user){
+    if(!authLoaded&&!authLoading&&isOnline())loadUsers();
+    var loginHint=authMessage||(!isOnline()?'Modo demo sin conexión':!authLoaded?'Cargando usuarios desde backend...':authError?'No se pudieron cargar usuarios.':'Usuarios cargados desde Apps Script');
+    var authStateLabel=authLoading?'SYNC':authError?'WARN':authSource==='backend'?'OK':authSource==='cache'?'CACHE':'LOCAL';
+    var loginPills=AUTH_USERS.map(function(u){return '<span class="soft-badge gray">'+esc(u.n)+'</span>'}).join('');
+    if(!loginPills)loginPills='<span class="soft-badge gray">Sin usuarios cargados</span>';
+    html += '<div class="login-shell"><div class="login-panel">'+
+      '<div class="login-topline">'+
+        '<div class="brand-mark"><img src="data:image/png;base64,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" alt="Kawas"></div>'+
+        '<span class="soft-badge kawas surface-ring"><span class="material-symbols-rounded" style="font-size:14px">verified</span> PWA interna</span>'+
+      '</div>'+
+      '<div class="login-stack">'+
+        '<div class="login-title">Kawas Stock</div>'+
+        '<div class="login-subtitle">Inventario visual, rápido y claro para operación diaria.</div>'+
+        '<div class="login-grid">'+
+          '<div class="login-info"><div style="font-size:11px;color:#667085;font-weight:600">Vistas</div><div class="num mn">6</div><div style="font-size:12px;color:#98A2B3;margin-top:4px">Home, búsqueda, alertas, historial, reporte y detalle</div></div>'+
+          '<div class="login-info"><div style="font-size:11px;color:#667085;font-weight:600">Auth</div><div class="num mn">'+(authLoaded&&!authError?'OK':'...')+'</div><div style="font-size:12px;color:#98A2B3;margin-top:4px">'+esc(loginHint)+'</div></div>'+
         '</div>'+
-      '</button>';
-    }
+        '<div class="pin-card" style="margin-top:18px">'+
+          '<div style="padding:16px 16px 0;font-size:12px;font-weight:700;color:#6941C6;display:flex;align-items:center;gap:8px"><span class="material-symbols-rounded" style="font-size:16px">lock</span> Ingresa tu PIN</div>'+
+          '<input id="pin" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="····">'+ 
+        '</div>'+
+        '<div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+          '<div class="user-pills">'+loginPills+'</div>'+
+          '<span style="font-size:12px;color:#98A2B3">'+(!isOnline()||authError?'Fallback local activo':'PIN validado desde backend')+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div></div>';
+    A.innerHTML=html;
+    var pin=document.getElementById('pin');
+    if(pin){
+      pin.focus();
+      pin.oninput=function(){
+        if(pin.disabled)return;
+        pin.value=String(pin.value||'').replace(/\D/g,'').slice(0,4);
+        if(pin.value.length===4){
+          var pinAttempt=String(pin.value);
+          pin.disabled=true;
+          pin.style.opacity='.65';
 
-    function historyCard(entry){
-      var diff=entry.ns-entry.os;
-      var map={ingreso:{cls:'bg-success-50 text-success-700 border-green-200',ic:'south_west'},salida:{cls:'bg-error-50 text-error-700 border-red-200',ic:'north_east'},ajuste:{cls:'bg-primary-50 text-primary-700 border-primary-200',ic:'tune'}};
-      var m=map[entry.tp]||map.ajuste;
-      return '<div class="rounded-3xl border border-gray-200 bg-white p-4 shadow-soft">'+
-        '<div class="flex items-start gap-3">'+
-          '<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border '+m.cls+'"><span class="material-symbols-rounded text-[20px]">'+m.ic+'</span></div>'+
-          '<div class="min-w-0 flex-1">'+
-            '<div class="flex items-start justify-between gap-3">'+
-              '<div class="min-w-0"><div class="truncate text-sm font-semibold text-gray-900">'+esc(entry.nm)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(entry.cat)+' · '+esc(entry.ts)+' · '+esc(entry.u)+'</div></div>'+
-              '<div class="text-right"><div class="text-[11px] text-gray-500">'+entry.os+' → '+entry.ns+'</div><div class="mn mt-1 text-lg font-semibold '+(diff>0?'text-success-700':diff<0?'text-error-700':'text-primary-700')+'">'+(diff>0?'+':'')+diff+'</div></div>'+
-            '</div>'+
-            (entry.nt?'<div class="mt-3 rounded-2xl bg-gray-50 px-3 py-2 text-xs text-gray-600">'+esc(entry.nt)+'</div>':'')+
-          '</div>'+
+          var firstTry=validatePinAttempt(pinAttempt);
+          if(firstTry.ok){
+            completeLogin(firstTry.user);
+            return;
+          }
+
+          loadUsers(true).then(function(){
+            var secondTry=validatePinAttempt(pinAttempt);
+            if(secondTry.ok){
+              completeLogin(secondTry.user);
+            }else{
+              pin.disabled=false;
+              pin.style.opacity='1';
+              pin.value='';
+              pin.focus();
+              toast(authError?'PIN no encontrado. Revise hoja usuarios o deployment.':'PIN incorrecto','err');
+            }
+          }).catch(function(){
+            pin.disabled=false;
+            pin.style.opacity='1';
+            pin.value='';
+            pin.focus();
+            toast('No se pudo validar el PIN','err');
+          });
+        }
+      };
+    }
+    return;
+  }
+
+  if(selItem){
+    var si=selItem;
+    var status=st(si), statusColor=stateToneColor(status);
+    var pct=si.min>0?Math.min(100,Math.round(si.stock/si.min*100)):100;
+    var proj=calcProjection(si);
+    var itemHistory=hist.filter(function(h){return h.id===si.id}).slice(0,15);
+
+    html += '<div class="app-shell">';
+    html += shellHeader({
+      back:{id:'back-item',icon:'<span class="material-symbols-rounded">arrow_back</span>'},
+      eyebrow:'Detalle de producto',
+      title:esc(si.name),
+      subtitle:(si.subcat?esc(si.subcat)+' · ':'')+esc(si.cat),
+      breadcrumbs:['Inicio',si.cat,si.subcat||'General',si.name],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">';
+    html += '<div class="hero-stock">'+
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+        '<div>'+softBadge('Estado actual', 'kawas', 'stacked_line_chart')+'</div>'+
+        statusBadge(si)+
+      '</div>'+
+      '<div class="hero-number mn" style="color:'+statusColor+'">'+si.stock.toLocaleString()+'</div>'+
+      '<div class="hero-unit">'+esc(si.unit)+' disponibles</div>'+
+      '<div style="margin-top:18px" class="progress-rail"><div class="progress-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+statusColor+','+statusColor+'DD)"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:12px;color:#667085"><span>Stock mínimo: '+si.min+' '+esc(si.unit)+'</span><span>'+pct+'% del mínimo</span></div>'+
+      (si.alert?'<div style="margin-top:16px">'+softBadge(si.alert,'warning','notification_important')+'</div>':'')+
+      '<div class="detail-overview">'+softBadge(si.cat,'gray','category')+(si.subcat?softBadge(si.subcat,'primary','folder_open'):'')+softBadge('Min '+si.min+' '+esc(si.unit),'info','straighten')+'</div>'+
+    '</div>';
+
+    if(proj){
+      html += '<div class="card pad-lg" style="margin-top:14px">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+          '<div><div class="section-title">'+esc(proj.title)+'</div><div class="section-subtitle">'+esc(proj.subtitle)+'</div></div>'+
+          softBadge('Proyección','info','timeline')+
+        '</div>'+
+        '<div class="meta-grid" style="margin-top:16px">'+
+          '<div class="mini-stat"><div class="mini-stat-value mn" style="color:'+proj.color+'">'+esc(proj.days)+'</div><div class="mini-stat-label">Días restantes</div></div>'+
+          '<div class="mini-stat"><div class="mini-stat-value mn">'+esc(proj.dailyUse)+'</div><div class="mini-stat-label">Uso diario</div></div>'+
+          '<div class="mini-stat"><div class="mini-stat-value mn" style="font-size:18px">'+esc(proj.dateOut)+'</div><div class="mini-stat-label">Fecha estimada</div></div>'+
         '</div>'+
       '</div>';
     }
 
-    function metricCard(label,value,meta,cls){
-      return '<div class="rounded-3xl border border-gray-200 bg-white p-4 shadow-soft"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">'+esc(label)+'</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] '+(cls||'text-gray-900')+'">'+esc(String(value))+'</div><div class="mt-1 text-xs text-gray-500">'+esc(meta||'')+'</div></div>';
+    if(!adjMode){
+      html += '<div class="toolbar"><div><div class="section-title">Acciones rápidas</div><div class="section-subtitle">Mantén el flujo actual con componentes y jerarquía tipo Material 3.</div></div></div>';
+      html += '<div class="actions-grid">'+
+        '<button class="action-tile in" data-adj="in"><span class="list-icon" style="width:40px;height:40px;background:#ECFDF3;border-color:#ABEFC6"><span class="material-symbols-rounded" style="font-size:20px;color:#027A48">south_west</span></span><strong>Ingreso</strong><span>Suma unidades al stock actual</span></button>'+
+        '<button class="action-tile out" data-adj="out"><span class="list-icon" style="width:40px;height:40px;background:#FEF3F2;border-color:#FECDCA"><span class="material-symbols-rounded" style="font-size:20px;color:#B42318">north_east</span></span><strong>Salida</strong><span>Descuenta unidades del inventario</span></button>'+
+        '<button class="action-tile set" data-adj="set"><span class="list-icon" style="width:40px;height:40px;background:#F4F3FF;border-color:#D9D6FE"><span class="material-symbols-rounded" style="font-size:20px;color:#6941C6">edit</span></span><strong>Ajustar</strong><span>Define un stock manual</span></button>'+
+      '</div>';
+    }else{
+      var ac=adjMode==='in'?'#12B76A':adjMode==='out'?'#F04438':'#7A5AF8';
+      var title=adjMode==='in'?'Registrar ingreso':adjMode==='out'?'Registrar salida':'Ajustar stock';
+      var hint=adjMode==='set'?'Nuevo stock':'Cantidad';
+      html += '<div class="card pad-lg" style="margin-top:16px;border-color:'+ac+'33">'+
+        '<div class="section-title">'+title+'</div>'+
+        '<div class="section-subtitle">La lógica original se mantiene; cambia la capa visual y la claridad de interacción.</div>'+
+        '<div class="input-wrap" style="margin-top:16px"><span class="material-symbols-rounded" style="color:'+ac+'">'+(adjMode==='in'?'add':adjMode==='out'?'remove':'tune')+'</span><input id="adj-v" type="number" inputmode="numeric" placeholder="'+hint+'" value="'+esc(adjVal)+'"></div>'+
+        '<div class="input-wrap" style="margin-top:10px"><span class="material-symbols-rounded" style="color:#98A2B3">edit_note</span><input id="adj-n" placeholder="Nota opcional" value="'+esc(adjNote)+'"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">'+
+          '<button id="adj-cancel" class="btn btn-secondary">Cancelar</button>'+
+          '<button id="adj-ok" class="btn btn-primary" style="background:linear-gradient(180deg,'+ac+','+ac+'DD)">Confirmar</button>'+
+        '</div>'+
+      '</div>';
     }
 
-    function emptyState(icon,title,text){
-      return '<div class="rounded-[28px] border border-dashed border-gray-300 bg-white/70 px-6 py-10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-100 text-gray-500"><span class="material-symbols-rounded text-[28px]">'+icon+'</span></div><div class="mt-4 text-lg font-semibold text-gray-900">'+esc(title)+'</div><div class="mt-2 text-sm leading-6 text-gray-500">'+esc(text)+'</div></div>';
+    html += '<div class="toolbar" style="margin-top:20px"><div><div class="section-title">Historial reciente</div><div class="section-subtitle">'+itemHistory.length+' movimientos visibles</div></div></div>';
+    html += itemHistory.length?'<div class="history-list">'+itemHistory.map(historyCard).join('')+'</div>':emptyState('schedule','Sin movimientos','Aún no hay registros para este producto.');
+    html += '</div>';
+    html += navHtml(pg, criticalAlerts);
+    html += '</div>';
+
+    A.innerHTML=html;
+
+    document.getElementById('back-item').onclick=function(){selItem=null;adjMode=null;adjVal='';adjNote='';draw()};
+    document.querySelectorAll('[data-home]').forEach(function(el){el.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='home';draw()}});
+    document.querySelectorAll('[data-tab]').forEach(function(btn){
+      btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';draw()}
+    });
+    document.querySelectorAll('[data-adj]').forEach(function(btn){
+      btn.onclick=function(){adjMode=btn.getAttribute('data-adj');draw();setTimeout(function(){var v=document.getElementById('adj-v');if(v)v.focus()},60)}
+    });
+    var adjC=document.getElementById('adj-cancel'); if(adjC) adjC.onclick=function(){adjMode=null;adjVal='';adjNote='';draw()};
+    var adjV=document.getElementById('adj-v'); if(adjV){adjV.oninput=function(){adjVal=adjV.value}; adjV.focus();}
+    var adjN=document.getElementById('adj-n'); if(adjN) adjN.oninput=function(){adjNote=adjN.value};
+    var adjO=document.getElementById('adj-ok');
+    if(adjO) adjO.onclick=function(){
+      var v=parseInt(adjVal);
+      if(isNaN(v)||v<0){toast('Valor inválido','err');return}
+      var old=selItem.stock,ns;
+      if(adjMode==='in')ns=old+v; else if(adjMode==='out')ns=Math.max(0,old-v); else ns=v;
+      items=items.map(function(x){return x.id===selItem.id?Object.assign({},x,{stock:ns}):x});
+      hist.unshift({id:selItem.id,nm:selItem.name,cat:selItem.cat,tp:adjMode==='in'?'ingreso':adjMode==='out'?'salida':'ajuste',os:old,ns:ns,nt:adjNote,u:user.n,ts:ts()});
+      save();
+      pushUpdate(selItem,old,ns,adjMode==='in'?'ingreso':adjMode==='out'?'salida':'ajuste',adjNote);
+      selItem=Object.assign({},selItem,{stock:ns}); adjMode=null; adjVal=''; adjNote='';
+      toast(selItem.name+': '+old+' → '+ns);
+    };
+    return;
+  }
+
+  if(selCat && !selSubcat){
+    var cf=gc(selCat), sm=subcatMap(selCat), scKeys=Object.keys(sm), totalItems=(catMap()[selCat]||[]).length;
+    if(scKeys.length===1 || (scKeys.length===1 && scKeys[0]==='General')){ selSubcat=scKeys[0]; draw(); return; }
+
+    html += '<div class="app-shell">';
+    html += shellHeader({
+      back:{id:'back-cat',icon:'<span class="material-symbols-rounded">arrow_back</span>'},
+      eyebrow:'Categoría',
+      title:esc(selCat),
+      subtitle:totalItems+' ítems · '+scKeys.length+' subcategorías',
+      breadcrumbs:['Inicio',selCat],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">';
+    html += '<div class="card pad-lg"><div class="section-title">Subcategorías</div><div class="section-subtitle">La navegación y el drill-down se mantienen intactos.</div></div>';
+    html += '<div class="list-stack" id="subcat-scroll" style="margin-top:14px">';
+    scKeys.forEach(function(sc,idx){
+      var scItems=sm[sc];
+      var issueCount=scItems.filter(function(x){return st(x)!=='ok'}).length;
+      var totalStock=0; scItems.forEach(function(x){ totalStock += Number(x.stock) || 0; });
+      html += '<div class="list-item fi" data-subcat="'+esc(sc)+'" style="animation-delay:'+(idx*.03)+'s">'+
+        '<div class="list-icon" style="background:'+cf.c+'15;border-color:'+cf.c+'33;color:'+cf.c+'">'+cf.i+'</div>'+
+        '<div class="list-item-head">'+
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><div class="list-item-title">'+esc(sc)+'</div>'+(issueCount?'<span class="soft-badge danger">'+issueCount+' con alerta</span>':'<span class="soft-badge success">Todo OK</span>')+'</div>'+
+          '<div class="list-item-desc">'+scItems.length+' productos</div>'+
+        '</div>'+
+        '<div class="list-trailing"><div class="list-item-value mn">'+totalStock.toLocaleString()+'</div><div style="font-size:11px;color:#667085">stock total</div></div>'+
+      '</div>';
+    });
+    html += '</div></div>'+navHtml(pg, criticalAlerts)+'</div>';
+
+    A.innerHTML=html;
+    document.getElementById('back-cat').onclick=function(){selCat=null;draw()};
+    document.querySelectorAll('[data-home]').forEach(function(el){el.onclick=function(){selCat=null;selSubcat=null;selItem=null;pg='home';draw()}});
+    document.querySelectorAll('[data-tab]').forEach(function(btn){btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;pg=btn.getAttribute('data-tab');searchQ='';draw()}});
+    document.getElementById('subcat-scroll').onclick=function(e){
+      var t=e.target; while(t&&t.id!=='subcat-scroll'){ if(t.hasAttribute&&t.hasAttribute('data-subcat')){ selSubcat=t.getAttribute('data-subcat'); draw(); return;} t=t.parentElement; }
+    };
+    return;
+  }
+
+  if(selCat && selSubcat){
+    var cf2=gc(selCat);
+    var ci=items.filter(function(x){return x.cat===selCat && (x.subcat||'General')===selSubcat}).sort(function(a,b){var o={zero:0,crit:1,low:2,ok:3};return (o[st(a)]||4)-(o[st(b)]||4)});
+    var sm2=subcatMap(selCat);
+    var hasMultipleSubs=Object.keys(sm2).length>1;
+
+    html += '<div class="app-shell">';
+    html += shellHeader({
+      back:{id:'back-subcat',icon:'<span class="material-symbols-rounded">arrow_back</span>'},
+      eyebrow:'Subcategoría',
+      title:esc(selSubcat),
+      subtitle:esc(selCat)+' · '+ci.length+' ítems',
+      breadcrumbs:['Inicio',selCat,selSubcat],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">';
+    html += '<div class="card pad-lg"><div class="section-title">Productos</div><div class="section-subtitle">Todos los estados, alertas y navegación siguen disponibles.</div></div>';
+    html += '<div class="list-stack" id="prod-scroll" style="margin-top:14px">'+ci.map(productCard).join('')+'</div>';
+    html += '</div>'+navHtml(pg, criticalAlerts)+'</div>';
+
+    A.innerHTML=html;
+    document.querySelectorAll('[data-home]').forEach(function(el){el.onclick=function(){selCat=null;selSubcat=null;selItem=null;pg='home';draw()}});
+    document.querySelectorAll('[data-tab]').forEach(function(btn){btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;pg=btn.getAttribute('data-tab');searchQ='';draw()}});
+    document.getElementById('back-subcat').onclick=function(){ if(hasMultipleSubs){selSubcat=null}else{selCat=null;selSubcat=null} draw(); };
+    document.getElementById('prod-scroll').onclick=function(e){
+      var t=e.target; while(t&&t.id!=='prod-scroll'){ if(t.hasAttribute&&t.hasAttribute('data-item')){ selItem=items.find(function(x){return x.id===t.getAttribute('data-item')}); if(selItem)draw(); return;} t=t.parentElement; }
+    };
+    return;
+  }
+
+  html += '<div class="app-shell">';
+
+  if(pg==='home'){
+    var cm=catMap();
+    var totalStock=0; items.forEach(function(x){ totalStock += Number(x.stock) || 0; });
+    var lowCount=items.filter(function(x){return st(x)==='low'}).length;
+    var criticalCount=items.filter(function(x){return st(x)==='crit'}).length;
+    var zeroCount=items.filter(function(x){return st(x)==='zero'}).length;
+    var categoriesCount=Object.keys(catMap()).length;
+
+    html += shellHeader({
+      eyebrow:'Panel principal',
+      title:'Hola, '+esc(user.n),
+      subtitle:'Inventario visual, rápido y claro para operación diaria.',
+      breadcrumbs:['Inicio'],
+      actions:'<button id="top-sync" class="icon-btn primary"><span class="material-symbols-rounded">sync</span></button>'
+    });
+    html += '<div class="app-scroll">';
+
+    html += '<div class="dashboard-hero">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+        '<div>'+softBadge('Sistema activo','kawas','bolt')+'</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'+softBadge(categoriesCount+' categorías','gray','category')+softBadge(alertItems.length+' alertas','warning','notifications_active')+'</div>'+
+      '</div>'+
+      '<div class="hero-kpi-row">'+
+        '<div><div class="section-title" style="color:#fff;font-size:16px">Vista general del inventario</div><div class="hero-kpi-big mn">'+totalStock.toLocaleString()+'</div><div class="hero-kpi-caption">Unidades totales registradas en stock</div></div>'+
+        '<div class="glass-banner surface-ring" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);box-shadow:none">'+
+          '<div style="font-size:12px;color:rgba(255,255,255,.72);font-weight:600">Productos activos</div>'+
+          '<div style="font-size:38px;font-weight:800;letter-spacing:-.05em;margin-top:8px">'+items.length+'</div>'+
+          '<div style="font-size:12px;color:rgba(255,255,255,.72);margin-top:6px">Control centralizado y sincronizable</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="metric-strip">'+
+        '<div class="metric-pill"><div class="metric-pill-value mn">'+lowCount+'</div><div class="metric-pill-label">Bajo mínimo</div></div>'+
+        '<div class="metric-pill"><div class="metric-pill-value mn">'+criticalCount+'</div><div class="metric-pill-label">Críticos</div></div>'+
+        '<div class="metric-pill"><div class="metric-pill-value mn">'+zeroCount+'</div><div class="metric-pill-label">Agotados</div></div>'+
+      '</div>'+
+      '<div class="hero-actions">'+
+        '<button class="btn btn-light" data-tab="alerts"><span class="material-symbols-rounded" style="font-size:18px">priority_high</span> Ver alertas</button>'+
+        '<button class="btn btn-darkglass" id="do-sync"><span class="material-symbols-rounded" style="font-size:18px">sync</span> Sincronizar ahora</button>'+
+      '</div>'+
+    '</div>';
+
+    html += '<div class="insight-grid" style="margin-top:16px">'+
+      '<div class="insight-card"><div>'+softBadge('Salud del stock','success','monitoring')+'</div><div class="value mn" style="color:#12B76A">'+(items.length-alertItems.length)+'</div><div class="caption">Productos sin alertas activas</div></div>'+
+      '<div class="insight-card"><div>'+softBadge('Cobertura','info','grid_view')+'</div><div class="value mn" style="color:#175CD3">'+categoriesCount+'</div><div class="caption">Categorías operativas disponibles</div></div>'+
+    '</div>';
+
+    if(alertItems.length){
+      html += '<div class="glass-banner" style="margin-top:16px">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+          '<div><div class="section-title">Requieren atención</div><div class="section-subtitle">Prioriza reposición y ajustes críticos desde esta misma vista.</div></div>'+
+          +softBadge(alertItems.length+' activos','danger','error')+
+        '</div>'+
+        '<div class="list-stack" style="margin-top:14px">'+alertItems.slice(0,3).map(productCard).join('')+'</div>'+
+      '</div>';
     }
 
-    function renderLogin(){
-      if(!authLoaded&&!authLoading&&isOnline())loadUsers();
-      var loginHint=authMessage||(!isOnline()?'Modo demo sin conexión':!authLoaded?'Cargando usuarios desde backend...':authError?'No se pudieron cargar usuarios.':'Usuarios cargados desde Apps Script');
-      var loginPills=AUTH_USERS.map(function(u){return badge(u.n,'bg-white text-gray-700 border-gray-200')}).join('');
-      if(!loginPills)loginPills=badge('Sin usuarios cargados','bg-white text-gray-700 border-gray-200');
-      return '<div class="min-h-screen px-4 safe-top safe-bottom"><div class="mx-auto flex min-h-[calc(100vh-24px)] max-w-md items-center"><div class="w-full rounded-[32px] border border-gray-200 bg-white p-6 shadow-lgsoft">'+
-        '<div class="flex items-center justify-between gap-3">'+
-          '<div class="flex items-center gap-3">'+iconChip('inventory_2','#7F56D9')+'<div><div class="text-sm font-semibold text-gray-900">Kawas Stock</div><div class="text-xs text-gray-500">Untitled UI v8 style</div></div></div>'+
-          badge('PWA interna','bg-primary-50 text-primary-700 border-primary-200','verified')+
+    html += '<div class="section-header-row"><div><div class="section-title">Categorías</div><div class="section-subtitle">Navega el inventario con tiles y jerarquía de categorías.</div></div>'+softBadge(categoriesCount+' secciones','primary','dashboard')+'</div>';
+    html += '<div class="category-grid">';
+    Object.keys(cm).forEach(function(cat,idx){
+      var info=gc(cat), itemsCat=cm[cat], catAlerts=itemsCat.filter(function(x){return st(x)!=='ok'}).length;
+      var subCount=Object.keys(subcatMap(cat)).length;
+      var totalCat=0; itemsCat.forEach(function(it){totalCat+=it.stock});
+      html += '<div class="category-card fi" data-cat="'+esc(cat)+'" style="animation-delay:'+(idx*.03)+'s">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
+          '<div class="list-icon" style="background:'+info.c+'14;border-color:'+info.c+'33;color:'+info.c+'">'+info.i+'</div>'+
+          (catAlerts?'<span class="soft-badge danger">'+catAlerts+' alertas</span>':'<span class="soft-badge success">OK</span>')+
         '</div>'+
-        '<div class="mt-6"><div class="text-[30px] font-semibold tracking-[-0.04em] text-gray-900">Acceso seguro</div><p class="mt-2 text-sm leading-6 text-gray-600">Rediseño completo de interfaz manteniendo autenticación, sync, historial, búsqueda, PDF y backend.</p></div>'+
-        '<div class="mt-6 grid grid-cols-2 gap-3">'+
-          metricCard('Vistas','6','Home, alertas, historial y más','text-primary-700')+
-          metricCard('Auth',authLoaded&&!authError?'OK':'...',(loginHint||'').slice(0,42),'text-gray-900')+
-        '</div>'+
-        '<div class="mt-5 rounded-[28px] border border-gray-200 bg-gray-50 p-4">'+
-          '<label class="text-xs font-semibold uppercase tracking-[0.06em] text-primary-700">Ingresa tu PIN</label>'+
-          '<div class="mt-3 flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-soft"><span class="material-symbols-rounded text-gray-400">lock</span><input id="pin" class="w-full border-none bg-transparent text-base outline-none placeholder:text-gray-400" type="password" inputmode="numeric" maxlength="4" placeholder="····"></div>'+
-        '</div>'+
-        '<div class="mt-5 flex flex-wrap gap-2">'+loginPills+'</div>'+
-        '<div class="mt-4 text-xs text-gray-400">'+esc(!isOnline()||authError?'Fallback local activo':'PIN validado desde backend')+'</div>'+
-      '</div></div></div>';
-    }
+        '<div style="margin-top:14px" class="list-item-title">'+esc(cat)+'</div>'+
+        '<div class="meta">'+itemsCat.length+' ítems · '+subCount+' subcategorías</div>'+
+        '<div class="total mn">'+totalCat.toLocaleString()+' uds</div>'+
+      '</div>';
+    });
+    html += '</div>';
 
-    function renderHome(){
-      var cm=catMap();
-      var totalStock=0;items.forEach(function(x){totalStock+=Number(x.stock)||0});
-      var lowCount=items.filter(function(x){return st(x)==='low'}).length;
-      var criticalCount=items.filter(function(x){return st(x)==='crit'}).length;
-      var zeroCount=items.filter(function(x){return st(x)==='zero'}).length;
-      var alertItems=alerts();
-      var categoriesCount=Object.keys(cm).length;
-      var inner='';
-      inner+=sectionHeader('Panel principal','Hola, '+user.n,'Inventario visual, rápido y claro para operación diaria.',{right:topIconButton('top-sync','sync',true)});
-      inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md">';
-      inner+='<section class="hero-grad mt-4 overflow-hidden rounded-[32px] p-5 text-white shadow-lgsoft">'+
-        '<div class="flex items-center justify-between gap-3 flex-wrap">'+badge('Sistema activo','border-white/10 bg-white/10 text-white','bolt')+'<div class="flex gap-2 flex-wrap">'+badge(categoriesCount+' categorías','border-white/10 bg-white/10 text-white','category')+badge(alertItems.length+' alertas','border-white/10 bg-white/10 text-white','notifications_active')+'</div></div>'+
-        '<div class="mt-6 grid grid-cols-[1fr_auto] items-end gap-3">'+
-          '<div><div class="text-sm font-medium text-white/80">Vista general del inventario</div><div class="mn mt-2 text-[40px] font-semibold tracking-[-0.05em]">'+totalStock.toLocaleString()+'</div><div class="mt-2 text-sm text-white/70">Unidades totales registradas</div></div>'+
-          '<div class="rounded-[28px] border border-white/10 bg-white/10 px-4 py-4 text-right"><div class="text-xs font-semibold uppercase tracking-[0.06em] text-white/70">Productos</div><div class="mn mt-2 text-[32px] font-semibold">'+items.length+'</div><div class="mt-1 text-xs text-white/70">Control centralizado</div></div>'+
+    html += '<div class="card pad-lg" style="margin-top:18px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'+
+        '<div><div class="section-title">Sesión actual</div><div class="section-subtitle">Sesión activa, sincronización disponible y salida segura.</div></div>'+
+        '<span class="soft-badge gray"><span class="material-symbols-rounded" style="font-size:14px">person</span> '+esc(user.n)+'</span>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">'+
+        '<button class="btn btn-primary" data-tab="search"><span class="material-symbols-rounded" style="font-size:18px">search</span> Buscar</button>'+
+        '<button id="logout" class="btn btn-secondary">Salir</button>'+
+      '</div>'+
+    '</div>';
+
+    html += '</div>';
+  }
+
+  if(pg==='search'){
+    html += shellHeader({
+      eyebrow:'Búsqueda',
+      title:'Buscar productos',
+      subtitle:'Filtro en tiempo real preservado',
+      breadcrumbs:['Inicio','Buscar'],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">'+
+      '<div class="input-wrap" style="margin-top:6px"><span class="material-symbols-rounded" style="color:#98A2B3">search</span><input id="search-in" placeholder="Buscar por nombre de producto" value="'+esc(searchQ)+'"></div>'+
+      '<div id="search-res" style="margin-top:14px"></div>'+
+    '</div>';
+  }
+
+  if(pg==='alerts'){
+    html += shellHeader({
+      eyebrow:'Alertas',
+      title:'Estado del inventario',
+      subtitle:alertItems.length+' alertas activas',
+      breadcrumbs:['Inicio','Alertas'],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">';
+    if(!alertItems.length){
+      html += emptyState('check_circle','Todo en orden','No hay productos bajo mínimo ni agotados.');
+    }else{
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">'+
+        softBadge(criticalAlerts+' críticas','danger','error')+
+        softBadge(alertItems.filter(function(a){return st(a)==='low'}).length+' bajas','warning','report')+
+      '</div>';
+      html += '<div class="list-stack" style="margin-top:14px">'+alertItems.map(productCard).join('')+'</div>';
+    }
+    html += '</div>';
+  }
+
+  if(pg==='history'){
+    html += shellHeader({
+      eyebrow:'Historial',
+      title:'Movimientos',
+      subtitle:'Cambios recientes en stock',
+      breadcrumbs:['Inicio','Historial'],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">';
+    html += hist.length?'<div class="history-list" style="margin-top:6px">'+hist.slice(0,50).map(historyCard).join('')+'</div>':emptyState('history','Sin movimientos','Cuando registres ingresos, salidas o ajustes aparecerán aquí.');
+    html += '</div>';
+  }
+
+  if(pg==='report'){
+    var totalS=0;items.forEach(function(x){totalS+=x.stock});
+    var critReport=items.filter(function(x){return st(x)==='zero'||st(x)==='crit'}).length;
+    var lowReport=items.filter(function(x){return st(x)==='low'}).length;
+    var okReport=items.filter(function(x){return st(x)==='ok'}).length;
+    html += shellHeader({
+      eyebrow:'Reporte',
+      title:'Exportación PDF',
+      subtitle:'Exportación con estructura y componentes de estilo enterprise',
+      breadcrumbs:['Inicio','Reporte'],
+      actions:'<button data-home="1" class="icon-btn primary"><span class="material-symbols-rounded">home</span></button>'
+    });
+    html += '<div class="app-scroll">'+
+      '<div class="card pad-lg" style="margin-top:6px"><div class="section-title">Resumen para exportar</div><div class="section-subtitle">Descarga un reporte con stock actual, alertas críticas y proyecciones.</div></div>'+
+      '<div class="stats-grid" style="margin-top:14px">'+
+        '<div class="kpi-card primary"><div class="kpi-label">Productos</div><div class="kpi-value mn">'+items.length+'</div><div class="kpi-meta">Inventario total</div></div>'+
+        '<div class="kpi-card"><div class="kpi-label">Stock total</div><div class="kpi-value mn">'+totalS.toLocaleString()+'</div><div class="kpi-meta">Unidades registradas</div></div>'+
+        '<div class="kpi-card danger"><div class="kpi-label">Críticos</div><div class="kpi-value mn">'+critReport+'</div><div class="kpi-meta">Reposición inmediata</div></div>'+
+        '<div class="kpi-card success"><div class="kpi-label">OK</div><div class="kpi-value mn">'+okReport+'</div><div class="kpi-meta">Sin alertas</div></div>'+
+      '</div>'+
+      '<div class="card pad-lg" style="margin-top:16px">'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+          softBadge(lowReport+' bajo mínimo','warning','inventory_2')+
+          softBadge(critReport+' críticos','danger','warning')+
+          softBadge('PDF imprimible','info','picture_as_pdf')+
         '</div>'+
-        '<div class="mt-5 grid grid-cols-3 gap-2">'+
-          '<div class="rounded-2xl bg-white/10 px-3 py-3 text-center"><div class="mn text-lg font-semibold">'+lowCount+'</div><div class="text-[11px] text-white/70">Bajo mínimo</div></div>'+
-          '<div class="rounded-2xl bg-white/10 px-3 py-3 text-center"><div class="mn text-lg font-semibold">'+criticalCount+'</div><div class="text-[11px] text-white/70">Críticos</div></div>'+
-          '<div class="rounded-2xl bg-white/10 px-3 py-3 text-center"><div class="mn text-lg font-semibold">'+zeroCount+'</div><div class="text-[11px] text-white/70">Agotados</div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px">'+
+          '<button id="gen-pdf" class="btn btn-primary" style="width:100%"><span class="material-symbols-rounded" style="font-size:18px">picture_as_pdf</span> Descargar reporte PDF</button>'+
+          '<button id="open-db" class="btn btn-secondary" style="width:100%"><span class="material-symbols-rounded" style="font-size:18px">database</span> Abrir base de datos</button>'+
         '</div>'+
-        '<div class="mt-5 grid grid-cols-2 gap-3"><button data-tab="alerts" class="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-
+      '</div>'+
+    '</div>';
+  }
+
+  html += navHtml(pg, criticalAlerts);
+  html += '</div>';
+
+  A.innerHTML=html;
+
+  document.querySelectorAll('[data-tab]').forEach(function(btn){
+    btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';draw();if(pg==='search')setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},60)}
+  });
+  document.querySelectorAll('[data-home]').forEach(function(el){el.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='home';draw()}});
+  var ms=document.querySelector('.app-scroll');
+  if(ms) ms.onclick=function(e){
+    var t=e.target;
+    while(t&&t!==ms){
+      if(t.hasAttribute&&t.hasAttribute('data-item')){selItem=items.find(function(x){return x.id===t.getAttribute('data-item')});if(selItem)draw();return}
+      if(t.hasAttribute&&t.hasAttribute('data-cat')){selCat=t.getAttribute('data-cat');draw();return}
+      t=t.parentElement;
+    }
+  };
+
+  var lo=document.getElementById('logout'); if(lo) lo.onclick=function(){user=null;pg='login';draw()};
+  var sy=document.getElementById('do-sync'); if(sy) sy.onclick=function(){toast('Sincronizando...');sync()};
+  var ts2=document.getElementById('top-sync'); if(ts2) ts2.onclick=function(){toast('Sincronizando...');sync()};
+  var gp=document.getElementById('gen-pdf'); if(gp) gp.onclick=function(){generatePDF()};
+  var db=document.getElementById('open-db'); if(db) db.onclick=function(){window.open(SHEET_URL,'_blank')};
+  var si=document.getElementById('search-in');
+  if(si){si.oninput=function(){searchQ=si.value;renderSearch()}; setTimeout(renderSearch,0);}
+}
+
+function renderSearch(){
+  var box=document.getElementById('search-res'); if(!box) return;
+  if(!searchQ.trim()){ box.innerHTML=emptyState('search','Escribe para buscar','Busca por nombre dentro del catálogo actual.'); return; }
+  var q=searchQ.toLowerCase();
+  var res=items.filter(function(i){return i.name.toLowerCase().indexOf(q)!==-1});
+  if(!res.length){ box.innerHTML=emptyState('inventory_2','Sin resultados','No encontramos productos que coincidan con tu búsqueda.'); return; }
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px"><div class="section-title">'+res.length+' resultado'+(res.length>1?'s':'')+'</div>'+softBadge('Filtro activo','primary','filter_alt')+'</div><div class="list-stack">'+res.map(productCard).join('')+'</div>';
+  box.onclick=function(e){
+    var t=e.target; while(t&&t!==box){ if(t.hasAttribute&&t.hasAttribute('data-item')){ selItem=items.find(function(x){return x.id===t.getAttribute('data-item')}); if(selItem)draw(); return;} t=t.parentElement; }
+  };
+}
+
+function generatePDF(){
+  toast('Generando reporte...');
+  setTimeout(function(){
+    try{
+      var p2=function(n){return('0'+n).slice(-2)};
+      var now2=new Date();
+      var ds=p2(now2.getDate())+'/'+p2(now2.getMonth()+1)+'/'+now2.getFullYear();
+
+      var totalS=0; items.forEach(function(x){totalS+=x.stock});
+      var critC=items.filter(function(x){return st(x)==='zero'||st(x)==='crit'}).length;
+      var lowC=items.filter(function(x){return st(x)==='low'}).length;
+      var okC=items.filter(function(x){return st(x)==='ok'}).length;
+
+      var h='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte Stock Kawas</title><style>';
+      h+='@import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap);';
+      h+='*{margin:0;padding:0;box-sizing:border-box}';
+      h+='body{font-family:Inter,Arial,sans-serif;background:#F9FAFB;color:#101828;padding:14mm;font-size:10px}';
+      h+='@page{size:letter;margin:12mm}';
+      h+='@media print{.no-print{display:none!important}}';
+      h+='h1{font-size:24px;font-weight:800;letter-spacing:-.04em;margin-bottom:4px}';
+      h+='.sub{font-size:12px;color:#667085;margin-bottom:18px}';
+      h+='.print-btn{display:block;margin:0 auto 18px;padding:12px 24px;border:none;border-radius:12px;background:#7A5AF8;color:#fff;font-weight:700;cursor:pointer}';
+      h+='.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}';
+      h+='.kpi{background:#fff;border:1px solid #EAECF0;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(16,24,40,.05)}';
+      h+='.kpi .v{font-size:26px;font-weight:800;letter-spacing:-.04em;margin-top:8px}.kpi .l{font-size:11px;color:#667085;font-weight:600}.danger{color:#F04438}.warn{color:#F79009}.success{color:#12B76A}.primary{color:#7A5AF8}';
+      h+='h2{font-size:15px;font-weight:800;margin:20px 0 10px}';
+      h+='h3{font-size:12px;font-weight:700;margin:14px 0 8px;color:#344054}';
+      h+='table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:10px;background:#fff;border:1px solid #EAECF0;border-radius:14px;overflow:hidden}';
+      h+='th,td{padding:9px 10px;border-bottom:1px solid #EAECF0;text-align:left}th{font-size:10px;color:#475467;background:#F9FAFB;font-weight:700}td{font-size:10px}tr:last-child td{border-bottom:none}';
+      h+='.center{text-align:center}.section{margin-bottom:18px}.chip{display:inline-block;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:700}.chip-ok{background:#ECFDF3;color:#027A48}.chip-low{background:#FFFAEB;color:#B54708}.chip-crit{background:#FEF3F2;color:#B42318}';
+      h+='.footer{margin-top:18px;padding-top:10px;border-top:1px solid #EAECF0;font-size:9px;color:#98A2B3;text-align:center}';
+      h+='</style></head><body>';
+      h+='<button class="no-print print-btn" onclick="window.print()">Guardar como PDF</button>';
+      h+='<h1>Kawas Stock Report</h1><div class="sub">'+ds+' · '+items.length+' productos · UI export rediseñada</div>';
+      h+='<div class="kpis">'+
+        '<div class="kpi"><div class="l">Productos</div><div class="v primary">'+items.length+'</div></div>'+
+        '<div class="kpi"><div class="l">Stock total</div><div class="v">'+totalS.toLocaleString()+'</div></div>'+
+        '<div class="kpi"><div class="l">Críticos</div><div class="v danger">'+critC+'</div></div>'+
+        '<div class="kpi"><div class="l">Bajo mínimo</div><div class="v warn">'+lowC+'</div></div>'+
+      '</div>';
+
+      var critItems=items.filter(function(x){return st(x)!=='ok'}).sort(function(a,b){return a.stock-b.stock});
+      if(critItems.length){
+        h+='<div class="section"><h2>Productos con alerta</h2>';
+        h+='<table><tr><th>Producto</th><th>Categoría</th><th class="center">Stock</th><th class="center">Mínimo</th><th class="center">Estado</th><th class="center">Proyección</th></tr>';
+        critItems.forEach(function(it){
+          var proj=calcProjection(it);
+          var badge=st(it)==='low'?'chip-low':'chip-crit';
+          h+='<tr><td>'+esc(it.name)+'</td><td>'+esc(it.cat)+(it.subcat?' · '+esc(it.subcat):'')+'</td><td class="center">'+it.stock+'</td><td class="center">'+it.min+'</td><td class="center"><span class="chip '+badge+'">'+STC[st(it)].l+'</span></td><td class="center">'+(proj?esc(proj.days)+' días':'-')+'</td></tr>';
+        });
+        h+='</table></div>';
+      }
+
+      var groups={};
+      items.forEach(function(it){
+        if(!groups[it.cat])groups[it.cat]={};
+        var sk=it.subcat||'General';
+        if(!groups[it.cat][sk])groups[it.cat][sk]=[];
+        groups[it.cat][sk].push(it);
+      });
+
+      Object.keys(groups).forEach(function(cat){
+        h+='<div class="section"><h2>'+esc(cat)+'</h2>';
+        Object.keys(groups[cat]).forEach(function(sc){
+          if(sc!=='General')h+='<h3>'+esc(sc)+'</h3>';
+          h+='<table><tr><th>Producto</th><th class="center">Stock</th><th class="center">Mínimo</th><th class="center">Estado</th><th class="center">Uso diario</th><th class="center">Días restantes</th><th class="center">Fecha estimada</th></tr>';
+          groups[cat][sc].sort(function(a,b){return a.name>b.name?1:-1}).forEach(function(it){
+            var proj=calcProjection(it);
+            var s=st(it);
+            var chip=s==='ok'?'chip-ok':s==='low'?'chip-low':'chip-crit';
+            h+='<tr><td>'+esc(it.name)+'</td><td class="center">'+it.stock+'</td><td class="center">'+it.min+'</td><td class="center"><span class="chip '+chip+'">'+STC[s].l+'</span></td><td class="center">'+(proj?esc(proj.dailyUse):'-')+'</td><td class="center">'+(proj?esc(proj.days):'-')+'</td><td class="center">'+(proj?esc(proj.dateOut):'-')+'</td></tr>';
+          });
+          h+='</table>';
+        });
+        h+='</div>';
+      });
+
+      h+='<div class="footer">Kawas Coffee · Reporte generado desde la versión rediseñada del front end</div></body></html>';
+
+      var w=window.open('','_blank');
+      if(w){
+        w.document.write(h);
+        w.document.close();
+        toast('Reporte abierto - usa Guardar como PDF');
+      }else{
+        var blob=new Blob([h],{type:'text/html'});
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
+        a.href=url; a.download='reporte_stock_kawas_'+ds.replace(/\//g,'')+'.html';
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('Reporte descargado como HTML');
+      }
+    }catch(e){
+      console.error('Report error:',e);
+      toast('Error: '+e.message,'err');
+    }
+  },100);
+}
+
+
+// ─── SWIPE BACK GESTURE (iOS) ───
+var touchStartX=0,touchStartY=0;
+document.addEventListener('touchstart',function(e){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-touchStartX;
+  var dy=Math.abs(e.changedTouches[0].clientY-touchStartY);
+  if(dx>80&&dy<80){
+    // Swipe right detected - go back
+    if(selItem){selItem=null;adjMode=null;adjVal="";adjNote="";draw()}
+    else if(selSubcat){var sm2=subcatMap(selCat);if(Object.keys(sm2).length>1){selSubcat=null}else{selCat=null;selSubcat=null}draw()}
+    else if(selCat){selCat=null;draw()}
+  }
+},{passive:true});
+
+window.addEventListener('online',function(){
+  authMessage='Conexión recuperada. Reintentando...';
+  authError=false;
+  loadUsers(true);
+  if(user) sync();
+});
+window.addEventListener('offline',function(){
+  authError=true;
+  authMessage='Sin conexión a internet';
+  safeRedraw();
+  toast('Sin conexión: usando datos locales','warn');
+});
+window.addEventListener('error',function(e){ console.error('window error', e&&e.error?e.error:e); });
+window.addEventListener('unhandledrejection',function(e){ console.error('unhandled rejection', e&&e.reason?e.reason:e); });
+loadCachedUsers();
+draw();
+loadUsers(true);
+
+
+  </script>
+</body>
+</html>
