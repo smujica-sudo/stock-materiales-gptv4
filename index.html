@@ -149,3 +149,6 @@ window.addEventListener('online',function(){authMessage='Conexión recuperada. R
   </script>
 </body>
 </html>
+function backendOk(){
+  return !!(isOnline() && authLoaded && !authError && authSource==='backend');
+}
