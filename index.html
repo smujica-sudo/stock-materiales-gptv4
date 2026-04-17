@@ -148,6 +148,8 @@ var touchStartX=0,touchStartY=0;document.addEventListener('touchstart',function(
 function backendOk(){
   return !!(isOnline() && authLoaded && !authError && authSource==='backend');
 }
+function glowDot(ok){return '<span class="inline-flex h-2.5 w-2.5 rounded-full '+(ok?'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.16),0_0_14px_rgba(16,185,129,0.65)]':'bg-orange-500 shadow-[0_0_0_4px_rgba(249,115,22,0.14),0_0_14px_rgba(249,115,22,0.55)]')+'"></span>'}
+
 window.addEventListener('online',function(){authMessage='Conexión recuperada. Reintentando...';authError=false;loadUsers(true);if(user)sync()});window.addEventListener('offline',function(){authError=true;authMessage='Sin conexión a internet';safeDraw();toast('Sin conexión: usando datos locales','warn')});window.addEventListener('error',function(e){console.error('window error',e&&e.error?e.error:e)});window.addEventListener('unhandledrejection',function(e){console.error('unhandled rejection',e&&e.reason?e.reason:e)});loadCachedUsers();safeDraw();setTimeout(function(){loadUsers(true).catch(function(){})},0);
   </script>
 </body>
