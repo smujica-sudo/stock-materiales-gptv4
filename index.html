@@ -79,7 +79,7 @@ var ITEMS=[
 var CC_KNOWN={"Etiquetas Adhesivas":{i:'sell',c:'#175CD3'},"Etiquetas":{i:'sell',c:'#175CD3'},"Bolsas":{i:'shopping_bag',c:'#079455'},"Cajas":{i:'inventory_2',c:'#B42318'},"Empaque":{i:'deployed_code',c:'#B54708'},"Empaque y Despacho":{i:'deployed_code',c:'#B54708'},"Cold Brew":{i:'local_cafe',c:'#175CD3'},"Otros":{i:'widgets',c:'#667085'},"Microlotes":{i:'auto_awesome',c:'#C11574'},"Insumos":{i:'construction',c:'#7F56D9'},"Materiales":{i:'category',c:'#7F56D9'}};
 var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}],AUTH_CACHE_KEY='kw4_auth_users',AUTH_USERS=[];
 var authLoaded=false,authLoading=false,authError=false,authSource='none',authMessage='Esperando conexión con Apps Script',authPromise=null,syncCounter=0;
-var items=[],hist=[],user=null,pg='login',selCat=null,selSubcat=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok';
+var items=[],hist=[],user=null,pg='login',selCat=null,selSubcat=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false;
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function ts(){var d=new Date(),p=n=>("0"+n).slice(-2);return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
 function st(x){if(x.stock===0)return'zero';if(x.stock<x.min*.3)return'crit';if(x.stock<x.min)return'low';return'ok'}
