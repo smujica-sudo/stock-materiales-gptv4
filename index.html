@@ -162,11 +162,11 @@ function renderHome(){
         '</div>'+
       '</div>'+
 
-      '<div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">'+
-        '<div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4">'+
-          '<div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Categorías</div>'+
-          '<div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+categoriesCount+'</div>'+
-        '</div>'+
+      '<div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4">
+  <div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div>
+  <div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length===0?'Óptima':criticalCount>0||zeroCount>0?'Crítica':lowCount>0?'Atención':'Estable')+'</div>
+  <div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length===0?'Sin alertas activas':(items.length-alertItems.length)+' de '+items.length+' ítems estables')+'</div>
+</div>'+
         '<div class="rounded-[24px] border border-red-200 bg-error-50 p-4">'+
           '<div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div>'+
           '<div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div>'+
