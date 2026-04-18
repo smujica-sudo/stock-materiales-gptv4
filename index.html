@@ -364,6 +364,7 @@ function renderSearchResults(){
     return {score:score, matchedTerms:matchedTerms};
   }
 
+  var severityOrder={zero:0,crit:1,low:2,ok:3};
   var res=items
     .map(function(i){
       var meta=scoreItem(i);
@@ -373,7 +374,10 @@ function renderSearchResults(){
       return x.score>0 && x.matchedTerms===terms.length;
     })
     .sort(function(a,b){
+      var sa=severityOrder[st(a.item)],sb=severityOrder[st(b.item)];
+      if(sa!==sb)return sa-sb;
       if(b.score!==a.score)return b.score-a.score;
+      if(a.item.stock!==b.item.stock)return a.item.stock-b.item.stock;
       return a.item.name>b.item.name?1:-1;
     })
     .map(function(x){ return x.item; });
