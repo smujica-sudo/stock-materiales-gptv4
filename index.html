@@ -63,7 +63,7 @@
   <div id="app"></div>
   <script>
 var BUILD_CERTIFIED="2026-04-17 QA static+runtime sandbox";
-var API_URL="https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
+var API_URL="https://script.google.com/macros/s/AKfycbyEc51AIkfpgZzzfv_qHWfkQUObG824eNsg8sCZL0KU8r9k0lhVbx4EKYP1Ktq7Knk_gg/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 var ITEMS=[
 {id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},{id:"e2",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Frutal",stock:142,min:150,unit:"uds",alert:"Pedir pronto"},{id:"e3",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Bolivia Caranavi Regional",stock:230,min:200,unit:"uds",alert:"Pedir pronto"},{id:"e4",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Regional",stock:297,min:200,unit:"uds",alert:"Pedir pronto"},{id:"e5",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Brasil Regional",stock:464,min:100,unit:"uds",alert:""},{id:"e6",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Colombia Decaf",stock:114,min:40,unit:"uds",alert:""},{id:"e7",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Cusco",stock:65,min:50,unit:"uds",alert:""},{id:"e8",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Crema",stock:410,min:100,unit:"uds",alert:""},{id:"e9",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Peru Pangoa",stock:457,min:150,unit:"uds",alert:""},{id:"e10",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Col. Antioquia Gabriela",stock:85,min:50,unit:"uds",alert:""},{id:"e11",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Washed Mosto",stock:41,min:30,unit:"uds",alert:""},
@@ -79,7 +79,7 @@ var ITEMS=[
 var CC_KNOWN={"Etiquetas Adhesivas":{i:'sell',c:'#175CD3'},"Etiquetas":{i:'sell',c:'#175CD3'},"Bolsas":{i:'shopping_bag',c:'#079455'},"Cajas":{i:'inventory_2',c:'#B42318'},"Empaque":{i:'deployed_code',c:'#B54708'},"Empaque y Despacho":{i:'deployed_code',c:'#B54708'},"Cold Brew":{i:'local_cafe',c:'#175CD3'},"Otros":{i:'widgets',c:'#667085'},"Microlotes":{i:'auto_awesome',c:'#C11574'},"Insumos":{i:'construction',c:'#7F56D9'},"Materiales":{i:'category',c:'#7F56D9'}};
 var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}],AUTH_CACHE_KEY='kw4_auth_users',AUTH_USERS=[];
 var authLoaded=false,authLoading=false,authError=false,authSource='none',authMessage='Esperando conexión con Apps Script',authPromise=null,syncCounter=0;
-var items=[],hist=[],user=null,pg='login',selFamily=null,selList=null,selCat=null,selSubcat=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false,histFilterQuery='',histFilterType='all',histSortKey='ts',histSortDir='desc';
+var items=[],hist=[],user=null,pg='login',selCat=null,selSubcat=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false,histFilterQuery='',histFilterType='all',histSortKey='ts',histSortDir='desc';
 
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function ts(){var d=new Date(),p=n=>("0"+n).slice(-2);return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
@@ -97,32 +97,8 @@ function catMap(){var m={};items.forEach(x=>{if(!m[x.cat])m[x.cat]=[];m[x.cat].p
 function subcatMap(catName){var m={};items.filter(x=>x.cat===catName).forEach(x=>{var sc=x.subcat||'General';if(!m[sc])m[sc]=[];m[sc].push(x)});return m}
 function gc(c){if(CC_KNOWN[c])return CC_KNOWN[c];var fw=c.split(' ')[0];if(CC_KNOWN[fw])return CC_KNOWN[fw];return{i:'category',c:'#7F56D9'}}
 
-var FAMILY_META={
-  'Kawas General':{icon:'inventory_2',color:'#7F56D9',desc:'Materiales y stock operativo general'},
-  'Clientes Especiales':{icon:'apartment',color:'#B42318',desc:'Inventarios dedicados por cliente'},
-  'Mercadería':{icon:'storefront',color:'#175CD3',desc:'Equipamiento y productos para venta'},
-  'Bebidas Frías':{icon:'local_drink',color:'#06AED4',desc:'Sala y producción de bebidas frías'},
-  'Café Verde':{icon:'eco',color:'#027A48',desc:'Lotes, muestras y café en tránsito'}
-};
-var STOCK_LIST_REGISTRY=[
-  {family:'Kawas General',name:'Stock General Kawas'},{family:'Kawas General',name:'Packaging Kawas'},{family:'Kawas General',name:'Etiquetas Kawas'},{family:'Kawas General',name:'Cajas Kawas'},{family:'Kawas General',name:'Bolsas Kawas'},
-  {family:'Clientes Especiales',name:'Stock Castaño'},
-  {family:'Mercadería',name:'Equipamiento'},{family:'Mercadería',name:'Brewing'},{family:'Mercadería',name:'Limpieza'},{family:'Mercadería',name:'Accesorios'},{family:'Mercadería',name:'Repuestos'},
-  {family:'Bebidas Frías',name:'Sala Bebidas Frías'},{family:'Bebidas Frías',name:'Botellas y tapas'},{family:'Bebidas Frías',name:'Etiquetas Cold Brew'},{family:'Bebidas Frías',name:'Insumos de preparación'},
-  {family:'Café Verde',name:'Stock Café Verde'},{family:'Café Verde',name:'Lotes reservados'},{family:'Café Verde',name:'Muestras'},{family:'Café Verde',name:'Café en tránsito'}
-];
-function inferFamily(item){if(item.family)return item.family;if((item.name||'').toLowerCase().indexOf('castaño')>-1)return 'Clientes Especiales';if(item.cat==='Cold Brew')return 'Bebidas Frías';return 'Kawas General'}
-function inferStockList(item){if(item.stockList)return item.stockList;if((item.name||'').toLowerCase().indexOf('castaño')>-1)return 'Stock Castaño';if(item.cat==='Cold Brew')return 'Sala Bebidas Frías';return 'Stock General Kawas'}
-function normalizeHierarchyData(arr){return(arr||[]).map(function(x){var y=Object.assign({},x);y.family=inferFamily(y);y.stockList=inferStockList(y);return y})}
-function familyMap(){var m={};items.forEach(function(x){var k=x.family||'Sin familia';if(!m[k])m[k]=[];m[k].push(x)});return m}
-function stockListMap(familyName){var m={};STOCK_LIST_REGISTRY.filter(function(r){return r.family===familyName}).forEach(function(r){m[r.name]=[]});items.filter(function(x){return x.family===familyName}).forEach(function(x){var k=x.stockList||'General';if(!m[k])m[k]=[];m[k].push(x)});return m}
-function catMapScoped(familyName,listName){var m={};items.filter(function(x){return (!familyName||x.family===familyName)&&(!listName||x.stockList===listName)}).forEach(function(x){if(!m[x.cat])m[x.cat]=[];m[x.cat].push(x)});return m}
-function subcatMapScoped(familyName,listName,catName){var m={};items.filter(function(x){return (!familyName||x.family===familyName)&&(!listName||x.stockList===listName)&&x.cat===catName}).forEach(function(x){var sc=x.subcat||'General';if(!m[sc])m[sc]=[];m[sc].push(x)});return m}
-function scopeItems(){return items.filter(function(x){return (!selFamily||x.family===selFamily)&&(!selList||x.stockList===selList)&&(!selCat||x.cat===selCat)&&(!selSubcat||(x.subcat||'General')===selSubcat)})}
-function familyBadge(name){var meta=FAMILY_META[name]||{icon:'category',color:'#7F56D9'};return '<span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-[12px] font-semibold text-gray-700"><span class="material-symbols-rounded text-[16px]" style="color:'+meta.color+'">'+meta.icon+'</span>'+esc(name)+'</span>'}
-
 function save(){try{localStorage.setItem('kw4',JSON.stringify({items:items,hist:hist}))}catch(e){}}
-function load(){try{var d=JSON.parse(localStorage.getItem('kw4'));if(d&&d.items&&d.items.length>0){items=normalizeHierarchyData(d.items);hist=d.hist||[]}else{items=normalizeHierarchyData(JSON.parse(JSON.stringify(ITEMS)));hist=[]}}catch(e){items=normalizeHierarchyData(JSON.parse(JSON.stringify(ITEMS)));hist=[]}}
+function load(){try{var d=JSON.parse(localStorage.getItem('kw4'));if(d&&d.items&&d.items.length>0){items=d.items;hist=d.hist||[]}else{items=JSON.parse(JSON.stringify(ITEMS));hist=[]}}catch(e){items=JSON.parse(JSON.stringify(ITEMS));hist=[]}items=(items||[]).map(function(x){if(!x)return x;var name=String(x.name||'').toLowerCase();var family=x.family||((name.indexOf('castaño')>-1||name.indexOf('castano')>-1)?'Clientes Especiales':(x.cat==='Cold Brew'?'Bebidas Frías':'Kawas General'));var stockList=x.stockList||((name.indexOf('castaño')>-1||name.indexOf('castano')>-1)?'Stock Castaño':(x.cat==='Cold Brew'?'Sala Bebidas Frías':'Stock General Kawas'));return Object.assign({},x,{family:family,stockList:stockList})})}
 function isOnline(){return API_URL!==''&&API_URL!=='DEMO'&&API_URL!=='TU_URL_AQUI'}
 function normalizeUsers(arr){return(arr||[]).map(u=>({n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()})).filter(u=>u.n&&u.p)}
 function loadCachedUsers(){try{var raw=localStorage.getItem(AUTH_CACHE_KEY);if(!raw)return[];var parsed=JSON.parse(raw),users=normalizeUsers(parsed);if(users.length){AUTH_USERS=users;authSource='cache';authMessage='Usuarios cargados desde caché local'}return users}catch(e){return[]}}
@@ -189,16 +165,37 @@ function sync(){
   var syncId=++syncCounter;
   var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(d=>{
     if(!(d&&d.success&&d.items))throw new Error('getAll inválido');
-    return d.items.map(x=>({id:String(x.id),cat:String(x.categoria),subcat:String(x.subcategoria||''),name:String(x.nombre),stock:Number(x.stock)||0,min:Number(x.minimo)||0,unit:String(x.unidad)||'uds',alert:String(x.alerta)||''}))
+    return d.items.map(x=>({
+      id:String(x.id||''),
+      family:String(x.familia||x.family||''),
+      stockList:String(x.lista_stock||x.stockList||''),
+      cat:String(x.categoria||x.cat||''),
+      subcat:String(x.subcategoria||x.subcat||''),
+      name:String(x.nombre||x.name||''),
+      stock:Number(x.stock)||0,
+      min:Number(x.minimo)||0,
+      unit:String(x.unidad||'uds'),
+      alert:String(x.alerta||'')
+    }))
   });
   var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(d=>{
     if(!(d&&d.success&&d.entries))throw new Error('getHistory inválido');
-    return d.entries.map(x=>({id:String(x.itemId),nm:String(x.itemNombre),cat:String(x.categoria),tp:String(x.tipo),os:Number(x.stockAnterior)||0,ns:Number(x.stockNuevo)||0,nt:String(x.nota)||'',u:String(x.usuario)||'?',ts:x.timestamp?x.timestamp.substring(0,16).replace('T',' '):''}))
+    return d.entries.map(x=>({
+      id:String(x.itemId||x.item_id||x.id||''),
+      nm:String(x.itemNombre||x.item_nombre||x.nm||''),
+      cat:String(x.categoria||x.cat||''),
+      tp:String(x.tipo||x.tp||''),
+      os:Number(x.stockAnterior!=null?x.stockAnterior:(x.stock_anterior!=null?x.stock_anterior:x.os))||0,
+      ns:Number(x.stockNuevo!=null?x.stockNuevo:(x.stock_nuevo!=null?x.stock_nuevo:x.ns))||0,
+      nt:String(x.nota||x.nt||''),
+      u:String(x.usuario||x.u||'?'),
+      ts:x.timestamp?String(x.timestamp).substring(0,16).replace('T',' '):(x.ts||'')
+    }))
   });
   return Promise.allSettled([stockReq,histReq]).then(results=>{
     if(syncId!==syncCounter)return false;
     var stockOk=results[0].status==='fulfilled',histOk=results[1].status==='fulfilled';
-    if(stockOk)items=normalizeHierarchyData(results[0].value);
+    if(stockOk)items=results[0].value;
     if(histOk)hist=results[1].value;
     if(stockOk||histOk){save();safeDraw()}
     if(!stockOk&&!histOk)toast('No se pudo sincronizar con Apps Script','warn');
@@ -299,43 +296,182 @@ function renderLogin(){
 }
 
 function renderHome(){
-  var fm=familyMap(),familyNames=Object.keys(FAMILY_META),allAlerts=alerts(),criticalAlerts=allAlerts.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length;
+  var cm=catMap(),lowCount=items.filter(x=>st(x)==='low').length,criticalCount=items.filter(x=>st(x)==='crit').length,zeroCount=items.filter(x=>st(x)==='zero').length,alertItems=alerts(),categoriesCount=Object.keys(cm).length;
   var inner='';
-  inner+=sectionHeader('Panel principal','Hola, '+user.n,'Nueva navegación por familias y listas de stock.',{right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('top-sync','sync',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span></div></section><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Control de stock</div></div><div class="flex gap-2 flex-wrap">'+badge(allAlerts.length+' alertas','bg-warning-50 text-warning-700 border-amber-200','notifications_active')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">'+metricCard('Familias',familyNames.length,'Capas operativas','text-primary-700')+metricCard('Listas',STOCK_LIST_REGISTRY.length,'Inventarios configurados','text-gray-900')+metricCard('Críticos',items.filter(function(x){return st(x)==='crit'||st(x)==='zero'}).length,'Reposición inmediata','text-error-700')+metricCard('Productos',items.length,'Registros activos','text-success-700')+'</div></section><section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Familias</div>'+badge(familyNames.length+' familias','bg-primary-50 text-primary-700 border-primary-200','layers')+'</div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">'+familyNames.map(function(name,idx){var meta=FAMILY_META[name]||{icon:'category',color:'#7F56D9',desc:''},arr=fm[name]||[],totalStock=0,issueCount=0;arr.forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')issueCount++});return '<button data-family="'+esc(name)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[22px]">'+meta.icon+'</span></div>'+(issueCount?badge(issueCount+' alertas','bg-error-50 text-error-700 border-red-200'):badge('Sin alertas','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[17px] font-semibold text-gray-900">'+esc(name)+'</div><div class="mt-1 text-sm text-gray-500">'+esc(meta.desc||'')+'</div><div class="mt-4 flex items-center justify-between text-xs text-gray-500"><span>'+Object.keys(stockListMap(name)).length+' listas</span><span class="mn font-semibold text-gray-700">'+totalStock.toLocaleString()+' uds</span></div></button>'}).join('')+'</div></section></div></main>';
-  return appShell(inner,navHtml('home',criticalAlerts))
+  inner+=sectionHeader('Panel principal','Hola, '+user.n,'',{right:topIconButton('top-sync','sync',true)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span></div></section><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Inventario</div></div><div class="flex gap-2 flex-wrap">'+badge(alertItems.length+' alertas','bg-warning-50 text-warning-700 border-amber-200','notifications_active')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div><div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length===0?'Óptima':criticalCount>0||zeroCount>0?'Crítica':lowCount>0?'Atención':'Estable')+'</div><div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length===0?'Sin alertas activas':(items.length-alertItems.length)+' de '+items.length+' ítems estables')+'</div></div><div class="rounded-[24px] border border-red-200 bg-error-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Agotados</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+zeroCount+'</div></div></div></section>'+(alertItems.length?'<section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Atención</div>'+badge(alertItems.length+' activos','bg-error-50 text-error-700 border-red-200','error')+'</div><div class="grid gap-3 xl:grid-cols-2">'+alertItems.slice(0,4).map(itemCard).join('')+'</div></section>':'')+'<section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Categorías</div>'+badge(categoriesCount+' secciones','bg-primary-50 text-primary-700 border-primary-200','dashboard')+'</div><div class="grid grid-cols-2 gap-3 xl:grid-cols-3">'+Object.keys(cm).map((cat,idx)=>{var info=gc(cat),itemsCat=cm[cat],catAlerts=itemsCat.filter(x=>st(x)!=='ok').length;return '<button data-cat="'+esc(cat)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[22px]">'+info.i+'</span></div>'+(catAlerts?badge(catAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(cat)+'</div><div class="mt-1 text-xs text-gray-500">'+itemsCat.length+' ítems</div></button>'}).join('')+'</div></section></div></main>';
+  return appShell(inner,navHtml('home',alertItems.filter(a=>st(a)==='zero'||st(a)==='crit').length))
 }
-
 
 function renderSearch(){
-  var fm=familyMap(),familyOptions=['Todas'].concat(Object.keys(FAMILY_META)),listOptions=['Todas'];
-  if(selFamily&&stockListMap(selFamily))listOptions=listOptions.concat(Object.keys(stockListMap(selFamily)));
+  var cm=catMap();
+  var quickMatches=(function(){
+    function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
+    var q=norm(searchQ||'');
+    if(!q)return[];
+    return items.filter(function(i){return norm([i.name,i.cat,i.subcat,i.alert,i.id].join(' ')).indexOf(q)!==-1}).sort(function(a,b){return a.name>b.name?1:-1}).slice(0,6)
+  })();
   var inner='';
-  inner+=sectionHeader('Buscador maestro','Buscar en todo el stock','Busca por familia, lista, categoría, subcategoría o producto.',{right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('go-home-search','home',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px_240px]"><div class="rounded-[24px] border border-gray-200 bg-gray-50 px-4 py-3"><div class="flex items-center gap-3"><span class="material-symbols-rounded text-gray-400">search</span><input id="search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar en todo el stock" value="'+esc(searchQ)+'"></div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 px-4 py-3"><select id="search-family-filter" class="w-full border-none bg-transparent text-sm outline-none text-gray-700">'+familyOptions.map(function(v){return '<option value="'+esc(v)+'"'+((selFamily||'Todas')===v?' selected':'')+'>'+esc(v)+'</option>'}).join('')+'</select></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 px-4 py-3"><select id="search-list-filter" class="w-full border-none bg-transparent text-sm outline-none text-gray-700">'+listOptions.map(function(v){return '<option value="'+esc(v)+'"'+((selList||'Todas')===v?' selected':'')+'>'+esc(v)+'</option>'}).join('')+'</select></div></div><div id="search-predictive" class="mt-3"></div></section><section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div><div class="text-lg font-semibold text-gray-900">Accesos rápidos</div><div class="text-sm text-gray-500">Entra directo por familia o categoría.</div></div>'+badge(Object.keys(FAMILY_META).length+' familias','bg-primary-50 text-primary-700 border-primary-200','dashboard')+'</div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">'+Object.keys(FAMILY_META).map(function(name){var meta=FAMILY_META[name]||{icon:'category',color:'#7F56D9'},arr=fm[name]||[];return '<button data-family="'+esc(name)+'" class="rounded-[24px] border border-gray-200 bg-white p-4 text-left shadow-soft"><div class="flex h-11 w-11 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[20px]">'+meta.icon+'</span></div><div class="mt-4 text-sm font-semibold text-gray-900">'+esc(name)+'</div><div class="mt-1 text-xs text-gray-500">'+(arr.length?arr.length+' productos':'Listas preparadas')+'</div></button>'}).join('')+'</div></section><section class="mt-4"><div id="search-res"></div></section></div></main>';
-  return appShell(inner,navHtml('search',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
+  inner+=sectionHeader('Buscador maestro','Buscar en todo el stock','Barra predictiva, accesos rápidos y tabla dinámica.',{right:topIconButton('go-home-search','home',true)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><div class="rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Busca cualquier ítem</div><div class="mt-1 text-sm text-gray-500">La barra predictiva revisa productos, categorías, subcategorías y alertas.</div><div class="mt-4 rounded-[28px] border border-gray-200 bg-gray-50 p-3"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border border-gray-200"><span class="material-symbols-rounded text-gray-400">search</span><input id="search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(searchQ)+'"></div>'+(searchQ&&quickMatches.length?'<div class="mt-3 flex flex-wrap gap-2">'+quickMatches.map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft hover:bg-gray-50">'+esc(i.name)+'</button>'}).join('')+'</div>':'')+'</div><div id="search-res" class="mt-4"></div></div><aside class="space-y-4"><div class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="text-sm font-medium text-gray-500">Accesos rápidos</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Categorías</div><div class="mt-4 grid grid-cols-1 gap-3">'+Object.keys(cm).map(function(cat,idx){var info=gc(cat),itemsCat=cm[cat],catAlerts=itemsCat.filter(function(x){return st(x)!=='ok'}).length;return '<button data-cat="'+esc(cat)+'" class="fade-up rounded-[24px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[20px]">'+info.i+'</span></div>'+(catAlerts?badge(catAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-3 text-[15px] font-semibold text-gray-900">'+esc(cat)+'</div><div class="mt-1 text-xs text-gray-500">'+itemsCat.length+' ítems</div></button>'}).join('')+'</div></div></aside></section></div></main>';
+  return appShell(inner,navHtml('search',alerts().filter(a=>st(a)==='zero'||st(a)==='crit').length))
 }
-
 
 function renderSearchResults(){
-  var box=document.getElementById('search-res'),pred=document.getElementById('search-predictive');
+  var box=document.getElementById('search-res');
   if(!box)return;
-  function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim()}
-  var raw=(searchQ||'').trim(),q=norm(raw),familyFilter=selFamily&&selFamily!=='Todas'?selFamily:null,listFilter=selList&&selList!=='Todas'?selList:null;
-  var pool=items.filter(function(i){return (!familyFilter||i.family===familyFilter)&&(!listFilter||i.stockList===listFilter)});
-  if(pred){
-    var predictive=pool.slice().sort(function(a,b){var sa={zero:0,crit:1,low:2,ok:3}[st(a)],sb={zero:0,crit:1,low:2,ok:3}[st(b)];if(sa!==sb)return sa-sb;return a.stock-b.stock});
-    if(raw)predictive=predictive.filter(function(i){return norm([i.name,i.family,i.stockList,i.cat,i.subcat,i.alert].join(' ')).indexOf(q)!==-1});
-    pred.innerHTML='<div class="flex flex-wrap gap-2">'+predictive.slice(0,8).map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border '+(raw?'border-primary-200 bg-primary-50 text-primary-700':'border-gray-200 bg-white text-gray-700')+' px-3 py-2 text-xs font-semibold shadow-soft">'+esc(i.name)+'</button>'}).join('')+'</div>';
-    pred.onclick=function(e){var t=e.target;while(t&&t!==pred){if(t.hasAttribute&&t.hasAttribute('data-item')){selItem=items.find(function(x){return x.id===t.getAttribute('data-item')});if(selItem)draw();return}t=t.parentElement}};
-  }
-  function scoreItem(i){var text=norm([i.name,i.family,i.stockList,i.cat,i.subcat,i.unit,i.alert,i.id].join(' '));var name=norm(i.name),score=0,matchedTerms=0,terms=q.split(/\s+/).filter(Boolean);if(!q)return {score:1,matchedTerms:0,termsCount:0};if(name===q)score+=120;if(text.indexOf(q)!==-1)score+=40;if(name.indexOf(q)===0)score+=80;terms.forEach(function(t){if(text.indexOf(t)!==-1){matchedTerms++;score+=10}if(name.indexOf(t)!==-1)score+=6});return {score:score,matchedTerms:matchedTerms,termsCount:terms.length}}
-  var res=pool.map(function(i){var meta=scoreItem(i);return {item:i,score:meta.score,matchedTerms:meta.matchedTerms,termsCount:meta.termsCount};}).filter(function(x){return !q || x.score>0}).filter(function(x){return !q || x.matchedTerms===x.termsCount || norm([x.item.name,x.item.family,x.item.stockList,x.item.cat,x.item.subcat].join(' ')).indexOf(q)!==-1;}).sort(function(a,b){var sa={zero:0,crit:1,low:2,ok:3}[st(a.item)],sb={zero:0,crit:1,low:2,ok:3}[st(b.item)];if(sa!==sb)return sa-sb;if(b.score!==a.score)return b.score-a.score;if(a.item.stock!==b.item.stock)return a.item.stock-b.item.stock;return a.item.name>b.item.name?1:-1;}).map(function(x){return x.item;});
-  if(!res.length){box.innerHTML=emptyState('inventory_2','Sin resultados','No encontramos coincidencias en esta combinación de familia y lista.');return}
-  box.innerHTML='<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">'+res.length+' resultado'+(res.length>1?'s':'')+'</div><div class="flex gap-2 flex-wrap">'+(familyFilter?familyBadge(familyFilter):badge('Todas las familias','bg-gray-50 text-gray-700 border-gray-200','layers'))+(listFilter?badge(listFilter,'bg-primary-50 text-primary-700 border-primary-200','inventory'):badge('Todas las listas','bg-gray-50 text-gray-700 border-gray-200','list_alt'))+'</div></div><div class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+res.map(function(i){var info=gc(i.cat),tone=statusTheme(st(i));return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[18px]">'+info.i+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert?'<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>':'')+'</div></div></td><td class="px-4 py-3 text-sm text-gray-700">'+esc(i.family||'—')+'</td><td class="px-4 py-3 text-sm text-gray-700">'+esc(i.stockList||'—')+'</td><td class="px-4 py-3 text-sm text-gray-700">'+esc(i.cat)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.subcat||'—')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div><div class="text-[11px] text-gray-500">'+esc(i.unit)+'</div></td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>'}).join('')+'</tbody></table></div></div>';
-  box.onclick=function(e){var t=e.target;while(t&&t!==box){if(t.hasAttribute&&t.hasAttribute('data-item')){selItem=items.find(function(x){return x.id===t.getAttribute('data-item')});if(selItem)draw();return}t=t.parentElement}}
-}
 
+  var raw=(searchQ||'').trim();
+  if(!raw){
+    box.innerHTML='<div class="rounded-[28px] border border-dashed border-gray-300 bg-white/80 px-6 py-8 text-center"><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-gray-100 text-gray-500"><span class="material-symbols-rounded text-[26px]">travel_explore</span></div><div class="mt-4 text-lg font-semibold text-gray-900">Empieza a escribir</div><div class="mt-2 text-sm leading-6 text-gray-500">Verás coincidencias predictivas y una tabla dinámica con resultados en tiempo real.</div></div>';
+    return;
+  }
+
+  function norm(v){
+    return String(v||'')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .trim();
+  }
+
+  var q=norm(raw);
+  var terms=q.split(/\s+/).filter(Boolean);
+
+  function searchableText(i){
+    return norm([
+      i.name,
+      i.cat,
+      i.subcat,
+      i.unit,
+      i.alert,
+      i.id
+    ].join(' '));
+  }
+
+  function scoreItem(i){
+    var name=norm(i.name);
+    var cat=norm(i.cat);
+    var subcat=norm(i.subcat);
+    var alert=norm(i.alert);
+    var all=searchableText(i);
+    var score=0;
+
+    if(name===q)score+=120;
+    if(cat===q)score+=110;
+    if(subcat===q)score+=110;
+
+    if(name.indexOf(q)===0)score+=80;
+    if(cat.indexOf(q)===0)score+=70;
+    if(subcat.indexOf(q)===0)score+=70;
+
+    if(name.indexOf(q)!==-1)score+=50;
+    if(cat.indexOf(q)!==-1)score+=40;
+    if(subcat.indexOf(q)!==-1)score+=40;
+    if(alert.indexOf(q)!==-1)score+=20;
+    if(all.indexOf(q)!==-1)score+=10;
+
+    var matchedTerms=0;
+    terms.forEach(function(t){
+      if(all.indexOf(t)!==-1){
+        matchedTerms++;
+        score+=8;
+      }
+      if(name.indexOf(t)!==-1)score+=4;
+      if(cat.indexOf(t)!==-1)score+=3;
+      if(subcat.indexOf(t)!==-1)score+=3;
+    });
+
+    return {score:score, matchedTerms:matchedTerms};
+  }
+
+  var res=items
+    .map(function(i){
+      var meta=scoreItem(i);
+      return {item:i, score:meta.score, matchedTerms:meta.matchedTerms};
+    })
+    .filter(function(x){
+      return x.score>0 && x.matchedTerms===terms.length;
+    })
+    .sort(function(a,b){
+      if(b.score!==a.score)return b.score-a.score;
+      return a.item.name>b.item.name?1:-1;
+    })
+    .map(function(x){ return x.item; });
+
+  if(!res.length){
+    box.innerHTML=emptyState(
+      'inventory_2',
+      'Sin resultados',
+      'No encontramos productos, categorías o subcategorías que coincidan con tu búsqueda.'
+    );
+    return;
+  }
+
+  box.innerHTML =
+    '<div class="mb-3 flex items-center justify-between gap-3">'+
+      '<div class="text-lg font-semibold text-gray-900">'+res.length+' resultado'+(res.length>1?'s':'')+'</div>'+
+      badge('Vista tabla','bg-primary-50 text-primary-700 border-primary-200','table_rows')+
+    '</div>'+
+
+    '<div class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-soft">'+
+      '<div class="overflow-x-auto">'+
+        '<table class="min-w-full text-left">'+
+          '<thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500">'+
+            '<tr>'+
+              '<th class="px-4 py-3 font-semibold">Producto</th>'+
+              '<th class="px-4 py-3 font-semibold">Categoría</th>'+
+              '<th class="px-4 py-3 font-semibold">Subcategoría</th>'+
+              '<th class="px-4 py-3 font-semibold text-right">Stock</th>'+
+              '<th class="px-4 py-3 font-semibold">Unidad</th>'+
+              '<th class="px-4 py-3 font-semibold">Estado</th>'+
+            '</tr>'+
+          '</thead>'+
+          '<tbody>'+
+            res.map(function(i){
+              var info=gc(i.cat);
+              var tone=statusTheme(st(i));
+              return ''+
+              '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50">'+
+                '<td class="px-4 py-3">'+
+                  '<div class="flex items-start gap-3">'+
+                    '<div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'">'+
+                      '<span class="material-symbols-rounded text-[18px]">'+info.i+'</span>'+
+                    '</div>'+
+                    '<div class="min-w-0">'+
+                      '<div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+
+                      (i.alert?'<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>':'')+
+                    '</div>'+
+                  '</div>'+
+                '</td>'+
+                '<td class="px-4 py-3 text-sm text-gray-700">'+esc(i.cat)+'</td>'+
+                '<td class="px-4 py-3 text-sm text-gray-500">'+esc(i.subcat||'—')+'</td>'+
+                '<td class="px-4 py-3 text-right">'+
+                  '<div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div>'+
+                '</td>'+
+                '<td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td>'+
+                '<td class="px-4 py-3">'+statusBadge(i)+'</td>'+
+              '</tr>';
+            }).join('')+
+          '</tbody>'+
+        '</table>'+
+      '</div>'+
+    '</div>';
+
+  box.onclick=function(e){
+    var t=e.target;
+    while(t&&t!==box){
+      if(t.hasAttribute&&t.hasAttribute('data-item')){
+        selItem=items.find(function(x){
+          return x.id===t.getAttribute('data-item');
+        });
+        if(selItem)draw();
+        return;
+      }
+      t=t.parentElement;
+    }
+  };
+}
 
 function renderAlerts(){
   var alertItems=alerts(),critItems=alertItems.filter(a=>st(a)==='zero'||st(a)==='crit'),lowItems=alertItems.filter(a=>st(a)==='low'),inner='';
@@ -372,45 +508,26 @@ function renderReport(){
   return appShell(inner,navHtml('report',alerts().filter(a=>st(a)==='zero'||st(a)==='crit').length))
 }
 
-function renderFamily(){
-  var lm=stockListMap(selFamily),listNames=Object.keys(lm),meta=FAMILY_META[selFamily]||{icon:'category',color:'#7F56D9',desc:''};
-  var totalStock=0,totalAlerts=0;(familyMap()[selFamily]||[]).forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
-  var inner='';
-  inner+=sectionHeader('Familia',selFamily,meta.desc||'',{left:topIconButton('back-family','arrow_back',false),right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('go-home-family','home',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[22px]">'+meta.icon+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selFamily)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3">'+metricCard('Listas',listNames.length,'Configuradas','text-primary-700')+metricCard('Productos',(familyMap()[selFamily]||[]).length,'Registros','text-gray-900')+metricCard('Alertas',totalAlerts,'Activas','text-warning-700')+metricCard('Stock',totalStock.toLocaleString(),'Unidades','text-success-700')+'</div></section></aside><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">'+listNames.map(function(name,idx){var arr=lm[name]||[],issueCount=arr.filter(function(x){return st(x)!=='ok'}).length,total=0;arr.forEach(function(x){total+=Number(x.stock)||0});return '<button data-list="'+esc(name)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div>'+(issueCount?badge(issueCount+' alertas','bg-error-50 text-error-700 border-red-200'):badge(arr.length?'Sin alertas':'Vacía','bg-gray-50 text-gray-700 border-gray-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(name)+'</div><div class="mt-1 text-xs text-gray-500">'+(arr.length?arr.length+' productos':'Lista preparada para crecer')+'</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+total.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>'}).join('')+'</div></section></div></div></main>';
-  return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
-}
-
-function renderStockList(){
-  var cm=catMapScoped(selFamily,selList),cats=Object.keys(cm),totalItems=scopeItems().length,totalStock=0,totalAlerts=0;scopeItems().forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
-  var inner='';
-  inner+=sectionHeader('Lista de stock',selList,selFamily+' · '+totalItems+' ítems',{left:topIconButton('back-list','arrow_back',false),right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('go-home-list','home',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 mb-3 flex flex-wrap gap-2">'+familyBadge(selFamily)+'</div><div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft">'+metricCard('Categorías',cats.length,'Dentro de la lista','text-primary-700')+metricCard('Productos',totalItems,'Registros activos','text-gray-900')+metricCard('Alertas',totalAlerts,'Activas','text-warning-700')+metricCard('Stock',totalStock.toLocaleString(),'Unidades','text-success-700')+'</section></aside><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">'+(cats.length?cats.map(function(cat,idx){var info=gc(cat),arr=cm[cat]||[],issues=arr.filter(function(x){return st(x)!=='ok'}).length;return '<button data-cat="'+esc(cat)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[22px]">'+info.i+'</span></div>'+(issues?badge(issues+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(cat)+'</div><div class="mt-1 text-xs text-gray-500">'+arr.length+' ítems</div></button>'}).join(''):emptyState('inventory_2','Lista vacía','Esta lista ya quedó preparada para recibir nuevos materiales.'))+'</div></section></div></div></main>';
-  return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
-}
-
 function renderCategory(){
-  var sm=subcatMapScoped(selFamily,selList,selCat),scKeys=Object.keys(sm),totalItems=(catMapScoped(selFamily,selList)[selCat]||[]).length,catInfo=gc(selCat);
+  var sm=subcatMap(selCat),scKeys=Object.keys(sm),totalItems=(catMap()[selCat]||[]).length,catInfo=gc(selCat);
   if(scKeys.length===1 || (scKeys.length===1 && scKeys[0]==='General')){selSubcat=scKeys[0];return draw()}
-  var totalStock=0,totalAlerts=0;(catMapScoped(selFamily,selList)[selCat]||[]).forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
+  var totalStock=0,totalAlerts=0;(catMap()[selCat]||[]).forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
   var inner='';
-  inner+=sectionHeader('Categoría',selCat,totalItems+' ítems · '+scKeys.length+' subcategorías',{left:topIconButton('back-cat','arrow_back',false),right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('go-home-cat','home',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 mb-3 flex flex-wrap gap-2">'+familyBadge(selFamily)+badge(selList,'bg-primary-50 text-primary-700 border-primary-200','inventory_2')+'</div><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" id="subcat-scroll">'+scKeys.map(function(sc,idx){var scItems=sm[sc],issueCount=scItems.filter(function(x){return st(x)!=='ok'}).length,totalSc=0;scItems.forEach(function(x){totalSc += Number(x.stock)||0;});return '<button data-subcat="'+esc(sc)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div>'+(issueCount?badge(issueCount+' con alerta','bg-error-50 text-error-700 border-red-200'):badge('Todo OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(sc)+'</div><div class="mt-1 text-xs text-gray-500">'+scItems.length+' productos</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>'}).join('')+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selCat)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Subcategorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+scKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Productos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section></aside></div></div></main>';
+  inner+=sectionHeader('Categoría',selCat||'Sin categoría',totalItems+' ítems · '+scKeys.length+' subcategorías',{left:topIconButton('back-cat','arrow_back',false),right:topIconButton('go-home-cat','home',true)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" id="subcat-scroll">'+scKeys.map(function(sc,idx){var scItems=sm[sc],issueCount=scItems.filter(function(x){return st(x)!=="ok"}).length,totalSc=0;scItems.forEach(function(x){ totalSc += Number(x.stock)||0; });return '<button data-subcat="'+esc(sc)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div>'+(issueCount?badge(issueCount+' con alerta','bg-error-50 text-error-700 border-red-200'):badge('Todo OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(sc)+'</div><div class="mt-1 text-xs text-gray-500">'+scItems.length+' productos</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>'}).join('')+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selCat)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Subcategorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+scKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Productos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section><section class="rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Navegación</div><div class="mt-1 text-sm text-gray-500">Selecciona una subcategoría para ver sus productos.</div></section></aside></div></div></main>';
   return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
 }
-
 
 function renderSubcategory(){
-  var ci=scopeItems().sort(function(a,b){var o={zero:0,crit:1,low:2,ok:3};return o[st(a)]-o[st(b)]});
-  window.__hasMultipleSubs=Object.keys(subcatMapScoped(selFamily,selList,selCat)).length>1;
+  var ci=items.filter(function(x){ return x.cat===selCat && (x.subcat||'General')===selSubcat; }).sort(function(a,b){var o={zero:0,crit:1,low:2,ok:3};return o[st(a)]-o[st(b)]});
+  window.__hasMultipleSubs=Object.keys(subcatMap(selCat)).length>1;
   var catInfo=gc(selCat);var totalStock=0,totalAlerts=0,criticalCount=0,lowCount=0,zeroCount=0;
   ci.forEach(function(x){totalStock+=Number(x.stock)||0;var s=st(x);if(s!=='ok')totalAlerts++;if(s==='crit')criticalCount++;if(s==='low')lowCount++;if(s==='zero')zeroCount++});
   var inner='';
-  inner+=sectionHeader('Subcategoría',selSubcat,selCat+' · '+ci.length+' ítems',{left:topIconButton('back-subcat','arrow_back',false),right:'<div class="flex items-center gap-2">'+topIconButton('header-search','search',false)+topIconButton('go-home-subcat','home',true)+'</div>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 mb-3 flex flex-wrap gap-2">'+familyBadge(selFamily)+badge(selList,'bg-primary-50 text-primary-700 border-primary-200','inventory_2')+badge(selCat,'bg-gray-50 text-gray-700 border-gray-200','category')+'</div><div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selSubcat)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Productos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+ci.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div><div class="rounded-[24px] border border-red-200 bg-error-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+(criticalCount+zeroCount)+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></div></div><div class="mt-4">'+badge(totalAlerts+' con alerta','bg-gray-50 text-gray-700 border-gray-200','notification_important')+'</div></section></aside><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3" id="prod-scroll">'+ci.map(itemCard).join('')+'</div></section></div></div></main>';
+  inner+=sectionHeader('Subcategoría',selSubcat||'General',selCat+' · '+ci.length+' ítems',{left:topIconButton('back-subcat','arrow_back',false),right:topIconButton('go-home-subcat','home',true)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selSubcat)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Productos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+ci.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div><div class="rounded-[24px] border border-red-200 bg-error-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+(criticalCount+zeroCount)+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></div></div><div class="mt-4">'+badge(totalAlerts+' con alerta','bg-gray-50 text-gray-700 border-gray-200','notification_important')+'</div></section></aside><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3" id="prod-scroll">'+ci.map(itemCard).join('')+'</div></section></div></div></main>';
   return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
 }
-
 
 function renderDetail(){
   var si=selItem,pct=si.min>0?Math.min(100,Math.round(si.stock/si.min*100)):100,proj=calcProjection(si),itemHistory=hist.filter(h=>h.id===si.id).slice(0,15),catInfo=gc(si.cat),subInfo=gc(si.cat),status=st(si),tone=statusTheme(status);
@@ -426,13 +543,11 @@ function generatePDF(){
 }
 
 function bindCommon(){
-  document.querySelectorAll('[data-tab], .rail-tab').forEach(btn=>btn.onclick=function(){selFamily=null;selList=null;selCat=null;selSubcat=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';draw();if(pg==='search')setTimeout(()=>{var x=document.getElementById('search-in');if(x)x.focus()},40)});
-  document.querySelectorAll('[data-family]').forEach(btn=>btn.onclick=function(){selFamily=btn.getAttribute('data-family');selList=null;selCat=null;selSubcat=null;draw()});
-  document.querySelectorAll('[data-list]').forEach(btn=>btn.onclick=function(){selList=btn.getAttribute('data-list');selCat=null;selSubcat=null;draw()});
+  document.querySelectorAll('[data-tab], .rail-tab').forEach(btn=>btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';draw();if(pg==='search')setTimeout(()=>{var x=document.getElementById('search-in');if(x)x.focus()},40)});
   document.querySelectorAll('[data-cat]').forEach(btn=>btn.onclick=function(){selCat=btn.getAttribute('data-cat');draw()});
   document.querySelectorAll('[data-item]').forEach(btn=>btn.onclick=function(){selItem=items.find(x=>x.id===btn.getAttribute('data-item'));if(selItem)draw()});
-  document.querySelectorAll('[data-home], #go-home-search, #go-home-alerts, #go-home-history, #go-home-report, #go-home-cat, #go-home-subcat, #go-home-item, #go-home-family, #go-home-list').forEach(btn=>btn.onclick=function(){selFamily=null;selList=null;selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='home';draw()});
-  document.querySelectorAll('#header-search').forEach(function(hs){hs.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='search';draw();setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)}});
+  document.querySelectorAll('[data-home], #go-home-search, #go-home-alerts, #go-home-history, #go-home-report, #go-home-cat, #go-home-subcat, #go-home-item').forEach(btn=>btn.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='home';draw()});
+  var hs=document.getElementById('header-search');if(hs)hs.onclick=function(){selCat=null;selSubcat=null;selItem=null;adjMode=null;pg='search';draw();setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)};
   var rl=document.getElementById('rail-logout');if(rl)rl.onclick=function(){user=null;pg='login';draw()}
 }
 
@@ -475,20 +590,6 @@ function draw(){
     return
   }
 
-  if(selFamily&&!selList){
-    A.innerHTML=html+renderFamily();
-    bindCommon();
-    document.getElementById('back-family').onclick=function(){selFamily=null;draw()};
-    return
-  }
-
-  if(selFamily&&selList&&!selCat){
-    A.innerHTML=html+renderStockList();
-    bindCommon();
-    document.getElementById('back-list').onclick=function(){selList=null;draw()};
-    return
-  }
-
   if(selCat&&!selSubcat){
     A.innerHTML=html+renderCategory();
     bindCommon();
@@ -516,8 +617,6 @@ function draw(){
   var gp=document.getElementById('gen-pdf');if(gp)gp.onclick=function(){generatePDF()};
   var db=document.getElementById('open-db');if(db)db.onclick=function(){window.open(SHEET_URL,'_blank')};
   var si=document.getElementById('search-in');if(si){si.oninput=function(){searchQ=si.value;renderSearchResults()};setTimeout(renderSearchResults,0)}
-  var sf=document.getElementById('search-family-filter');if(sf)sf.onchange=function(){selFamily=sf.value==='Todas'?null:sf.value;if(!selFamily)selList=null;else if(selList&&Object.keys(stockListMap(selFamily)).indexOf(selList)===-1)selList=null;draw()};
-  var slf=document.getElementById('search-list-filter');if(slf)slf.onchange=function(){selList=slf.value==='Todas'?null:slf.value;renderSearchResults()}
   var hfq=document.getElementById('hist-filter-q');if(hfq)hfq.oninput=function(){histFilterQuery=hfq.value;renderHistoryTable()};
   var hft=document.getElementById('hist-filter-type');if(hft)hft.onchange=function(){histFilterType=hft.value;renderHistoryTable()};
   document.querySelectorAll('[data-hsort]').forEach(function(btn){btn.onclick=function(){var k=btn.getAttribute('data-hsort');if(histSortKey===k){histSortDir=histSortDir==='asc'?'desc':'asc'}else{histSortKey=k;histSortDir=(k==='delta'?'desc':'asc')}renderHistoryTable()}});
@@ -529,13 +628,11 @@ var wheelSwipeAccum=0;
 var wheelSwipeLock=false;
 var wheelSwipeTimer=null;
 
-function canGoBackInApp(){return !!(selItem||selSubcat||selCat||selList||selFamily)}
+function canGoBackInApp(){return !!(selItem||selSubcat||selCat)}
 function runAppBack(){
   if(selItem){selItem=null;adjMode=null;adjVal='';adjNote='';draw();return true}
-  if(selSubcat){var sm2=subcatMapScoped(selFamily,selList,selCat);if(Object.keys(sm2).length>1){selSubcat=null}else{selCat=null;selSubcat=null}draw();return true}
+  if(selSubcat){var sm2=subcatMap(selCat);if(Object.keys(sm2).length>1){selSubcat=null}else{selCat=null;selSubcat=null}draw();return true}
   if(selCat){selCat=null;draw();return true}
-  if(selList){selList=null;draw();return true}
-  if(selFamily){selFamily=null;draw();return true}
   return false
 }
 
