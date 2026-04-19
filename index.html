@@ -64,7 +64,7 @@
 <body class="gradient-shell">
   <div id="app"></div>
   <script>
-var BUILD_CERTIFIED="2026-04-18 search-pills-above-bar-no-empty-block";
+var BUILD_CERTIFIED="2026-04-18 search-family-block-icons-fixed";
 var API_URL="https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 
@@ -92,12 +92,12 @@ var CATEGORY_META={
   "Bolsas":{icon:"shopping_bag",color:"#079455"},
   "Cajas":{icon:"inventory_2",color:"#B42318"},
   "Empaque y Despacho":{icon:"local_shipping",color:"#B54708"},
-  "Cold Brew":{icon:"local_cafe",color:"#175CD3"},
+  "Cold Brew":{icon:"local_bar",color:"#0E9384"},
   "Otros":{icon:"more_horiz",color:"#667085"},
-  "Molinos profesionales":{icon:"tune",color:"#175CD3"},
+  "Molinos profesionales":{icon:"settings",color:"#175CD3"},
   "Cafeteras":{icon:"coffee_maker",color:"#7F56D9"},
   "Botellas y Tapas":{icon:"liquor",color:"#175CD3"},
-  "Lotes":{icon:"grain",color:"#079455"}
+  "Lotes":{icon:"eco",color:"#079455"}
 };
 
 var FAMILY_THEMES={
@@ -105,7 +105,7 @@ var FAMILY_THEMES={
   "Clientes Especiales":{accent:"#B42318",soft:"#FEF3F2",softBorder:"#FECDCA",text:"#B42318",icon:"storefront"},
   "Mercadería":{accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
   "Bebidas Frías":{accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
-  "Café Verde":{accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"grain"},
+  "Café Verde":{accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
   "Sin familia":{accent:"#667085",soft:"#F2F4F7",softBorder:"#D0D5DD",text:"#475467",icon:"inventory_2"}
 };
 
@@ -451,7 +451,7 @@ function renderSearch(){
   }).join('');
   var inner='';
   inner+=sectionHeader('Buscador maestro','Buscar en todo el stock','Consulta global con predicción y tabla dinámica.');
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold text-gray-900">Busca cualquier ítem</div><div class="mt-1 text-sm text-gray-500">La barra predictiva revisa productos, familias, listas y categorías.</div></div>'+badge(items.length+' ítems','bg-primary-50 text-primary-700 border-primary-200','inventory_2')+'</div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold text-gray-900">Familias</div><div class="text-xs text-gray-500">Accesos rápidos</div></div><div class="pill-scroll">'+familyPills+'</div></div><div class="mt-4 rounded-[28px] border border-gray-200 bg-gray-50 p-3"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border border-gray-200"><span class="material-symbols-rounded text-gray-400">search</span><input id="search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, familia, lista o categoría" value="'+esc(searchQ)+'"></div></div>'+(quickMatches.length?'<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700">'+esc(i.name)+'</button>'}).join('')+'</div>':'')+'<div id="search-res" class="mt-4"></div></section></div></main>';
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold text-gray-900">Busca cualquier ítem</div><div class="mt-1 text-sm text-gray-500">La barra predictiva revisa productos, familias, listas y categorías.</div></div>'+badge(items.length+' ítems','bg-primary-50 text-primary-700 border-primary-200','inventory_2')+'</div><div class="mt-4 rounded-[24px] border border-gray-200 bg-gray-50/80 p-3"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold text-gray-900">Familias</div><div class="text-xs text-gray-500">Accesos rápidos</div></div><div class="pill-scroll">'+familyPills+'</div></div><div class="mt-4 rounded-[28px] border border-gray-200 bg-gray-50 p-3"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border border-gray-200"><span class="material-symbols-rounded text-gray-400">search</span><input id="search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, familia, lista o categoría" value="'+esc(searchQ)+'"></div></div>'+(quickMatches.length?'<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700">'+esc(i.name)+'</button>'}).join('')+'</div>':'')+'<div id="search-res" class="mt-4"></div></section></div></main>';
   return appShell(inner,navHtml('search',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
 }
 
