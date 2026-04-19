@@ -42,7 +42,6 @@
     .fade-up{animation:fadeUp .24s ease both}
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     @keyframes toastin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
-    @keyframes pulseSoft{0%,100%{opacity:1}50%{opacity:.55}}
     .safe-top{padding-top:max(20px,calc(16px + var(--safe-top)))}
     .safe-bottom{padding-bottom:max(16px,calc(12px + var(--safe-bottom)))}
     .bottom-shadow{box-shadow:0 -8px 32px rgba(16,24,40,.08)}
@@ -63,17 +62,27 @@
 <body class="gradient-shell">
   <div id="app"></div>
   <script>
-var BUILD_CERTIFIED="2026-04-18 home families";
+var BUILD_CERTIFIED="2026-04-18 all-stocklists-master-search";
 var API_URL="https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 
 var ITEMS=[
 {id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},
 {id:"e2",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Frutal",stock:142,min:150,unit:"uds",alert:"Pedir pronto"},
+{id:"e3",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Bolivia Caranavi Regional",stock:230,min:200,unit:"uds",alert:"Pedir pronto"},
 {id:"b1",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g",stock:75,min:500,unit:"uds",alert:""},
+{id:"b2",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 1Kg",stock:800,min:300,unit:"uds",alert:""},
+{id:"c1",cat:"Cajas",subcat:"Kawas Grandes",name:"Caja Kawas SYT 12KG",stock:1850,min:500,unit:"uds",alert:""},
+{id:"c2",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas formato nuevo 58x30x21",stock:41,min:50,unit:"uds",alert:"Crítico"},
 {id:"c3",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas 30x20x20 Castaño",stock:150,min:100,unit:"uds",alert:""},
-{id:"cb3",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas transparentes 200ml",stock:12,min:50,unit:"uds",alert:"Pedir urgente"},
-{id:"o2",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 50x50",stock:0,min:50,unit:"uds",alert:""}
+{id:"p1",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Pequeña 20x30x10",stock:117,min:50,unit:"uds",alert:""},
+{id:"p2",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Plástica",stock:24,min:30,unit:"rollos",alert:"Pedir"},
+{id:"cb1",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas transparentes 200ml",stock:12,min:50,unit:"uds",alert:"Pedir urgente"},
+{id:"o1",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 50x50",stock:0,min:50,unit:"uds",alert:""},
+{id:"m1",cat:"Molinos profesionales",subcat:"Eureka",name:"Eureka Atom 75",stock:2,min:1,unit:"uds",alert:"",family:"Mercadería",stockList:"Equipamiento"},
+{id:"m2",cat:"Cafeteras",subcat:"Rocket",name:"Rocket Appartamento",stock:1,min:1,unit:"uds",alert:"",family:"Mercadería",stockList:"Equipamiento"},
+{id:"bf1",cat:"Botellas y Tapas",subcat:"Tapas negras",name:"Tapas negras 200ml",stock:332,min:100,unit:"uds",alert:"",family:"Bebidas Frías",stockList:"Sala Bebidas Frías"},
+{id:"cv1",cat:"Lotes",subcat:"Guatemala",name:"Guatemala Huehuetenango",stock:8,min:3,unit:"sacos",alert:"",family:"Café Verde",stockList:"Stock Café Verde"}
 ];
 
 var CC_KNOWN={
@@ -83,6 +92,10 @@ var CC_KNOWN={
   "Empaque y Despacho":{i:'deployed_code',c:'#B54708'},
   "Cold Brew":{i:'local_cafe',c:'#175CD3'},
   "Otros":{i:'widgets',c:'#667085'},
+  "Molinos profesionales":{i:'tune',c:'#175CD3'},
+  "Cafeteras":{i:'coffee_maker',c:'#7F56D9'},
+  "Botellas y Tapas":{i:'sports_bar',c:'#175CD3'},
+  "Lotes":{i:'eco',c:'#079455'},
   "Kawas General":{i:'inventory_2',c:'#7F56D9'},
   "Clientes Especiales":{i:'storefront',c:'#B42318'},
   "Mercadería":{i:'coffee_maker',c:'#175CD3'},
@@ -91,8 +104,8 @@ var CC_KNOWN={
 };
 
 var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}],AUTH_CACHE_KEY='kw4_auth_users',AUTH_USERS=[];
-var authLoaded=false,authLoading=false,authError=false,authSource='none',authMessage='Esperando conexión con Apps Script',authPromise=null,syncCounter=0;
-var items=[],hist=[],user=null,pg='login',selFamily=null,selStockList=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false,histFilterQuery='',histFilterType='all',histSortKey='ts',histSortDir='desc';
+var authLoaded=false,authLoading=false,authError=false,authPromise=null,syncCounter=0;
+var items=[],hist=[],user=null,pg='login',selFamily=null,selStockList=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false,histFilterQuery='',histFilterType='all',histSortKey='ts',histSortDir='desc',stockListSearchQ='';
 
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function ts(){var d=new Date(),p=n=>("0"+n).slice(-2);return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
@@ -106,25 +119,27 @@ function statusTheme(s){
 }
 
 function gc(c){if(CC_KNOWN[c])return CC_KNOWN[c];return{i:'category',c:'#7F56D9'}}
-function alerts(){return items.filter(x=>st(x)!=='ok').sort((a,b)=>({zero:0,crit:1,low:2,ok:3}[st(a)]-({zero:0,crit:1,low:2,ok:3}[st(b)])))}
+function alerts(){return items.filter(function(x){return st(x)!=='ok'}).sort(function(a,b){return({zero:0,crit:1,low:2,ok:3}[st(a)]-({zero:0,crit:1,low:2,ok:3}[st(b)]))})}
 function familyMap(){var m={};items.forEach(function(x){var f=x.family||'Sin familia';if(!m[f])m[f]=[];m[f].push(x)});return m}
 function stockListMap(familyName){var m={};items.filter(function(x){return (x.family||'Sin familia')===familyName}).forEach(function(x){var sl=x.stockList||'General';if(!m[sl])m[sl]=[];m[sl].push(x)});return m}
+function categoryMapForStockList(familyName,stockListName){var m={};items.filter(function(x){return (x.family||'Sin familia')===familyName && (x.stockList||'General')===stockListName}).forEach(function(x){var c=x.cat||'General';if(!m[c])m[c]=[];m[c].push(x)});return m}
 
 function enrichItem(x){
   var name=String(x.name||x.nombre||'');
+  var cat=String(x.cat||x.categoria||'');
   var family=x.family||x.familia||(
     /castaño|castano/i.test(name)?'Clientes Especiales':
-    (String(x.cat||x.categoria||'')==='Cold Brew'?'Bebidas Frías':'Kawas General')
+    (cat==='Cold Brew'?'Bebidas Frías':'Kawas General')
   );
   var stockList=x.stockList||x.lista_stock||(
     /castaño|castano/i.test(name)?'Stock Castaño':
-    (String(x.cat||x.categoria||'')==='Cold Brew'?'Sala Bebidas Frías':'Stock General Kawas')
+    (cat==='Cold Brew'?'Sala Bebidas Frías':'Stock General Kawas')
   );
   return {
     id:String(x.id||''),
     family:String(family||''),
     stockList:String(stockList||''),
-    cat:String(x.cat||x.categoria||''),
+    cat:cat,
     subcat:String(x.subcat||x.subcategoria||''),
     name:String(x.name||x.nombre||''),
     stock:Number(x.stock)||0,
@@ -143,13 +158,13 @@ function load(){
   }catch(e){items=ITEMS.map(enrichItem);hist=[]}
 }
 function isOnline(){return API_URL!==''&&API_URL!=='DEMO'&&API_URL!=='TU_URL_AQUI'}
-function normalizeUsers(arr){return(arr||[]).map(u=>({n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()})).filter(u=>u.n&&u.p)}
-function loadCachedUsers(){try{var raw=localStorage.getItem(AUTH_CACHE_KEY);if(!raw)return[];var parsed=JSON.parse(raw),users=normalizeUsers(parsed);if(users.length){AUTH_USERS=users;authSource='cache';authMessage='Usuarios cargados desde caché local'}return users}catch(e){return[]}}
+function normalizeUsers(arr){return(arr||[]).map(function(u){return{n:String(u.nombre||u.n||'Usuario').trim(),p:String(u.pin||u.p||'').trim()}}).filter(function(u){return u.n&&u.p})}
+function loadCachedUsers(){try{var raw=localStorage.getItem(AUTH_CACHE_KEY);if(!raw)return[];var parsed=JSON.parse(raw),users=normalizeUsers(parsed);if(users.length)AUTH_USERS=users;return users}catch(e){return[]}}
 function saveCachedUsers(users){try{localStorage.setItem(AUTH_CACHE_KEY,JSON.stringify(users||[]))}catch(e){}}
-function buildApiUrl(params){var q=Object.keys(params||{}).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');return API_URL+(API_URL.indexOf('?')>-1?'&':'?')+q}
-function fetchTextWithTimeout(url,opts,timeoutMs){timeoutMs=timeoutMs||12000;return new Promise((resolve,reject)=>{var done=false;var t=setTimeout(()=>{if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);fetch(url,opts||{}).then(r=>{if(done)return;clearTimeout(t);done=true;resolve(r)}).catch(err=>{if(done)return;clearTimeout(t);done=true;reject(err)})})}
-function fetchJsonWithTimeout(url,opts,timeoutMs){return fetchTextWithTimeout(url,opts,timeoutMs).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(txt=>{try{return JSON.parse(txt)}catch(e){throw new Error('Respuesta no JSON desde Apps Script')}})}
-function toast(m,t){toastMsg=m;toastT=t||'ok';safeDraw();clearTimeout(window.__toastTm);window.__toastTm=setTimeout(()=>{toastMsg=null;safeDraw()},2200)}
+function buildApiUrl(params){var q=Object.keys(params||{}).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k])}).join('&');return API_URL+(API_URL.indexOf('?')>-1?'&':'?')+q}
+function fetchTextWithTimeout(url,opts,timeoutMs){timeoutMs=timeoutMs||12000;return new Promise(function(resolve,reject){var done=false;var t=setTimeout(function(){if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);fetch(url,opts||{}).then(function(r){if(done)return;clearTimeout(t);done=true;resolve(r)}).catch(function(err){if(done)return;clearTimeout(t);done=true;reject(err)})})}
+function fetchJsonWithTimeout(url,opts,timeoutMs){return fetchTextWithTimeout(url,opts,timeoutMs).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(txt){try{return JSON.parse(txt)}catch(e){throw new Error('Respuesta no JSON desde Apps Script')}})}
+function toast(m,t){toastMsg=m;toastT=t||'ok';safeDraw();clearTimeout(window.__toastTm);window.__toastTm=setTimeout(function(){toastMsg=null;safeDraw()},2200)}
 
 function loadUsers(force){
   if(authLoading&&authPromise)return authPromise;
@@ -160,14 +175,15 @@ function loadUsers(force){
     return Promise.resolve(AUTH_USERS);
   }
   authLoading=true;
-  authPromise=fetchJsonWithTimeout(buildApiUrl({action:'getUsers',_ts:Date.now()}),{cache:'no-store'},12000).then(d=>{
+  authPromise=fetchJsonWithTimeout(buildApiUrl({action:'getUsers',_ts:Date.now()}),{cache:'no-store'},12000).then(function(d){
     if(d&&d.success&&d.users&&d.users.length){
       AUTH_USERS=normalizeUsers(d.users);
-      saveCachedUsers(AUTH_USERS);authError=false;authSource='backend';
+      saveCachedUsers(AUTH_USERS);
+      authError=false;
     }else throw new Error('getUsers no devolvió usuarios');
     authLoaded=true;authLoading=false;authPromise=null;
     return AUTH_USERS;
-  }).catch(()=>{
+  }).catch(function(){
     authLoaded=true;authLoading=false;authError=true;authPromise=null;
     AUTH_USERS=AUTH_USERS.length?AUTH_USERS:USERS.slice();
     return AUTH_USERS;
@@ -199,25 +215,27 @@ function attemptLogin(pinAttempt){
 function sync(){
   if(!isOnline()){save();return Promise.resolve(false)}
   var syncId=++syncCounter;
-  var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(d=>{
+  var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
     if(!(d&&d.success&&d.items))throw new Error('getAll inválido');
     return d.items.map(enrichItem);
   });
-  var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(d=>{
+  var histReq=fetchJsonWithTimeout(buildApiUrl({action:'getHistory',limit:100,_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
     if(!(d&&d.success&&d.entries))throw new Error('getHistory inválido');
-    return d.entries.map(x=>({
-      id:String(x.itemId||x.item_id||x.id||''),
-      nm:String(x.itemNombre||x.item_nombre||x.nm||''),
-      cat:String(x.categoria||x.cat||''),
-      tp:String(x.tipo||x.tp||''),
-      os:Number(x.stockAnterior!=null?x.stockAnterior:(x.stock_anterior!=null?x.stock_anterior:x.os))||0,
-      ns:Number(x.stockNuevo!=null?x.stockNuevo:(x.stock_nuevo!=null?x.stock_nuevo:x.ns))||0,
-      nt:String(x.nota||x.nt||''),
-      u:String(x.usuario||x.u||'?'),
-      ts:x.timestamp?String(x.timestamp).substring(0,16).replace('T',' '):(x.ts||'')
-    }))
+    return d.entries.map(function(x){
+      return{
+        id:String(x.itemId||x.item_id||x.id||''),
+        nm:String(x.itemNombre||x.item_nombre||x.nm||''),
+        cat:String(x.categoria||x.cat||''),
+        tp:String(x.tipo||x.tp||''),
+        os:Number(x.stockAnterior!=null?x.stockAnterior:(x.stock_anterior!=null?x.stock_anterior:x.os))||0,
+        ns:Number(x.stockNuevo!=null?x.stockNuevo:(x.stock_nuevo!=null?x.stock_nuevo:x.ns))||0,
+        nt:String(x.nota||x.nt||''),
+        u:String(x.usuario||x.u||'?'),
+        ts:x.timestamp?String(x.timestamp).substring(0,16).replace('T',' '):(x.ts||'')
+      }
+    })
   });
-  return Promise.allSettled([stockReq,histReq]).then(results=>{
+  return Promise.allSettled([stockReq,histReq]).then(function(results){
     if(syncId!==syncCounter)return false;
     var stockOk=results[0].status==='fulfilled',histOk=results[1].status==='fulfilled';
     if(stockOk)items=results[0].value;
@@ -225,16 +243,16 @@ function sync(){
     if(stockOk||histOk){save();safeDraw()}
     if(!stockOk&&!histOk)toast('No se pudo sincronizar con Apps Script','warn');
     return stockOk||histOk;
-  }).catch(()=>{toast('No se pudo sincronizar','warn');return false})
+  }).catch(function(){toast('No se pudo sincronizar','warn');return false})
 }
 
 function pushUpdate(item,oldStock,newStock,type,note){
   if(!isOnline()){save();toast('Sin conexión: cambio guardado localmente','warn');return Promise.resolve(false)}
   var body=JSON.stringify({action:'updateStock',itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:'?',nota:note||''});
-  return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(d=>{
+  return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(function(d){
     if(d&&d.success){toast('Guardado en Sheets');return true}
     toast('Error al guardar','err');return false
-  }).catch(()=>{toast('Error de red - guardado local','warn');return false})
+  }).catch(function(){toast('Error de red - guardado local','warn');return false})
 }
 
 function badge(label,cls,icon){return'<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold '+cls+'">'+(icon?'<span class="material-symbols-rounded text-[14px]">'+icon+'</span>':'')+esc(label)+'</span>'}
@@ -266,10 +284,10 @@ function currentDateLabel(){var d=new Date();return d.toLocaleDateString('es-CL'
 function currentTimeLabel(){var d=new Date();return d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false})}
 
 function appShell(inner,bottom){
-  var alertItems=alerts(),criticalAlerts=alertItems.filter(a=>st(a)==='zero'||st(a)==='crit').length;
+  var alertItems=alerts(),criticalAlerts=alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length;
   var rail='';
   if(user){
-    rail='<aside class="app-shell-rail"><div class="flex h-full flex-col rounded-[32px] border border-gray-200 bg-white p-5 shadow-lgsoft"><div class="flex items-start gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-[18px] border border-gray-200 bg-gray-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div><div class="min-w-0 flex-1"><div class="text-sm font-semibold text-gray-900">Kawas Stock</div><div class="mt-1 text-xs text-gray-500">Panel de inventario</div></div></div><div class="mt-6 space-y-2">'+['home','search','alerts','history','report'].map(function(id){var meta={home:['home','Inicio'],search:['search','Buscar'],alerts:['warning','Alertas'],history:['schedule','Historial'],report:['description','Reporte']}[id];return '<button data-tab="'+id+'" class="rail-tab '+(pg===id?'bg-gray-900 text-white':'bg-transparent text-gray-600 hover:bg-gray-50')+' flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold"><span class="flex items-center gap-3"><span class="material-symbols-rounded text-[20px]">'+meta[0]+'</span><span>'+meta[1]+'</span></span>'+(id==='alerts'&&criticalAlerts?'<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-error-50 px-2 text-[11px] font-bold text-error-700">'+criticalAlerts+'</span>':'')+'</button>'}).join('')+'<div class="mt-6 pt-4 border-t border-gray-200"><button id="rail-logout" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"><span class="material-symbols-rounded text-[18px]">logout</span><span>Salir</span></button></div></div></aside>'
+    rail='<aside class="app-shell-rail"><div class="flex h-full flex-col rounded-[32px] border border-gray-200 bg-white p-5 shadow-lgsoft"><div class="flex items-start gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-[18px] border border-gray-200 bg-gray-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div><div class="min-w-0 flex-1"><div class="text-sm font-semibold text-gray-900">Kawas Stock</div><div class="mt-1 text-xs text-gray-500">Panel de inventario</div></div></div><div class="mt-6 space-y-2">'+['home','search','alerts','history','report'].map(function(id){var meta={home:['home','Inicio'],search:['search','Buscar'],alerts:['warning','Alertas'],history:['schedule','Historial'],report:['description','Reporte']}[id];return '<button data-tab="'+id+'" class="rail-tab '+(pg===id?'bg-gray-900 text-white':'bg-transparent text-gray-600 hover:bg-gray-50')+' flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold"><span class="flex items-center gap-3"><span class="material-symbols-rounded text-[20px]">'+meta[0]+'</span><span>'+meta[1]+'</span></span>'+(id==='alerts'&&criticalAlerts?'<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-error-50 px-2 text-[11px] font-bold text-error-700">'+criticalAlerts+'</span>':'')+'</button>'}).join('')+'<div class="mt-6 pt-4 border-t border-gray-200"><button id="rail-logout" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"><span class="material-symbols-rounded text-[18px]">logout</span><span>Salir</span></button></div></div></aside>';
   }
   return'<div class="app-shell-grid">'+rail+'<div class="app-shell-main">'+inner+(bottom||'')+'</div></div>'
 }
@@ -279,11 +297,11 @@ function renderLogin(){
 }
 
 function renderHome(){
-  var fm=familyMap(),lowCount=items.filter(x=>st(x)==='low').length,criticalCount=items.filter(x=>st(x)==='crit').length,zeroCount=items.filter(x=>st(x)==='zero').length,alertItems=alerts(),familiesCount=Object.keys(fm).length;
+  var fm=familyMap(),lowCount=items.filter(function(x){return st(x)==='low'}).length,criticalCount=items.filter(function(x){return st(x)==='crit'}).length,zeroCount=items.filter(function(x){return st(x)==='zero'}).length,alertItems=alerts(),familiesCount=Object.keys(fm).length;
   var inner='';
   inner+=sectionHeader('Panel principal','Hola, '+user.n,'',{right:topIconButton('top-sync','sync',true)});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span></div></section><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Inventario</div></div><div class="flex gap-2 flex-wrap">'+badge(alertItems.length+' alertas','bg-warning-50 text-warning-700 border-amber-200','notifications_active')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4"><button data-tab="alerts" class="rounded-[24px] border border-primary-200 bg-primary-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div><span class="material-symbols-rounded text-[18px] text-primary-700">arrow_outward</span></div><div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length===0?'Óptima':criticalCount>0||zeroCount>0?'Crítica':lowCount>0?'Atención':'Estable')+'</div><div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length===0?'Sin alertas activas':(items.length-alertItems.length)+' de '+items.length+' ítems estables')+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-red-200 bg-error-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><span class="material-symbols-rounded text-[18px] text-error-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-amber-200 bg-warning-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><span class="material-symbols-rounded text-[18px] text-warning-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Agotados</div><span class="material-symbols-rounded text-[18px] text-gray-500">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+zeroCount+'</div></button></div></section><section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Familias</div>'+badge(familiesCount+' familias','bg-primary-50 text-primary-700 border-primary-200','dashboard')+'</div><div class="grid grid-cols-2 gap-3 xl:grid-cols-3">'+Object.keys(fm).map(function(family,idx){var info=gc(family),itemsFamily=fm[family],familyAlerts=itemsFamily.filter(x=>st(x)!=='ok').length,listsCount=Object.keys(stockListMap(family)).length;return '<button data-family="'+esc(family)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[22px]">'+info.i+'</span></div>'+(familyAlerts?badge(familyAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(family)+'</div><div class="mt-1 text-xs text-gray-500">'+listsCount+' listas · '+itemsFamily.length+' ítems</div></button>'}).join('')+'</div></section></div></main>';
-  return appShell(inner,navHtml('home',alertItems.filter(a=>st(a)==='zero'||st(a)==='crit').length))
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span></div></section><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Inventario</div></div><div class="flex gap-2 flex-wrap">'+badge(alertItems.length+' alertas','bg-warning-50 text-warning-700 border-amber-200','notifications_active')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4"><button data-tab="alerts" class="rounded-[24px] border border-primary-200 bg-primary-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div><span class="material-symbols-rounded text-[18px] text-primary-700">arrow_outward</span></div><div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length===0?'Óptima':criticalCount>0||zeroCount>0?'Crítica':lowCount>0?'Atención':'Estable')+'</div><div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length===0?'Sin alertas activas':(items.length-alertItems.length)+' de '+items.length+' ítems estables')+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-red-200 bg-error-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><span class="material-symbols-rounded text-[18px] text-error-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-amber-200 bg-warning-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><span class="material-symbols-rounded text-[18px] text-warning-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Agotados</div><span class="material-symbols-rounded text-[18px] text-gray-500">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+zeroCount+'</div></button></div></section><section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Familias</div>'+badge(familiesCount+' familias','bg-primary-50 text-primary-700 border-primary-200','dashboard')+'</div><div class="grid grid-cols-2 gap-3 xl:grid-cols-3">'+Object.keys(fm).map(function(family,idx){var info=gc(family),itemsFamily=fm[family],familyAlerts=itemsFamily.filter(function(x){return st(x)!=='ok'}).length,listsCount=Object.keys(stockListMap(family)).length;return '<button data-family="'+esc(family)+'" class="fade-up rounded-[28px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[22px]">'+info.i+'</span></div>'+(familyAlerts?badge(familyAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold text-gray-900">'+esc(family)+'</div><div class="mt-1 text-xs text-gray-500">'+listsCount+' listas · '+itemsFamily.length+' ítems</div></button>'}).join('')+'</div></section></div></main>';
+  return appShell(inner,navHtml('home',alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
 }
 
 function getSearchMatches(raw){
@@ -327,12 +345,59 @@ function getSearchMatches(raw){
     .map(function(x){return x.item});
 }
 
+function getStockListMatches(familyName, stockListName, raw){
+  function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
+  var q=norm(raw||''),terms=q.split(/\s+/).filter(Boolean);
+  var base=items.filter(function(x){return (x.family||'Sin familia')===familyName && (x.stockList||'General')===stockListName});
+  if(!q){
+    return base.slice().sort(function(a,b){
+      var order={zero:0,crit:1,low:2,ok:3},sa=order[st(a)],sb=order[st(b)];
+      if(sa!==sb)return sa-sb;
+      if(a.stock!==b.stock)return a.stock-b.stock;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+  }
+  function searchableText(i){return norm([i.name,i.cat,i.subcat,i.unit,i.alert,i.id].join(' '))}
+  function scoreItem(i){
+    var name=norm(i.name),cat=norm(i.cat),subcat=norm(i.subcat),alert=norm(i.alert),all=searchableText(i),score=0;
+    if(name===q)score+=120;
+    if(cat===q)score+=105;
+    if(subcat===q)score+=100;
+    if(name.indexOf(q)===0)score+=80;
+    if(cat.indexOf(q)===0)score+=70;
+    if(subcat.indexOf(q)===0)score+=70;
+    if(name.indexOf(q)!==-1)score+=50;
+    if(cat.indexOf(q)!==-1)score+=40;
+    if(subcat.indexOf(q)!==-1)score+=40;
+    if(alert.indexOf(q)!==-1)score+=20;
+    if(all.indexOf(q)!==-1)score+=10;
+    var matchedTerms=0;
+    terms.forEach(function(t){
+      if(all.indexOf(t)!==-1){matchedTerms++;score+=8}
+      if(name.indexOf(t)!==-1)score+=4;
+      if(cat.indexOf(t)!==-1)score+=3;
+      if(subcat.indexOf(t)!==-1)score+=3;
+    });
+    return{score:score,matchedTerms:matchedTerms};
+  }
+  return base.map(function(i){var meta=scoreItem(i);return{item:i,score:meta.score,matchedTerms:meta.matchedTerms}})
+    .filter(function(x){return x.score>0 && x.matchedTerms===terms.length})
+    .sort(function(a,b){
+      var order={zero:0,crit:1,low:2,ok:3},sa=order[st(a.item)],sb=order[st(b.item)];
+      if(sa!==sb)return sa-sb;
+      if(b.score!==a.score)return b.score-a.score;
+      if(a.item.stock!==b.item.stock)return a.item.stock-b.item.stock;
+      return (a.item.name||'').localeCompare(b.item.name||'');
+    })
+    .map(function(x){return x.item});
+}
+
 function renderSearch(){
   var quickMatches=(searchQ||'').trim()?getSearchMatches(searchQ).slice(0,6):[];
   var inner='';
   inner+=sectionHeader('Buscador maestro','Buscar en todo el stock','Consulta global con predicción y tabla dinámica.',{right:topIconButton('go-home-search','home',true)});
   inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><div class="rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Busca cualquier ítem</div><div class="mt-1 text-sm text-gray-500">La barra predictiva revisa productos, familias, listas y categorías.</div><div class="mt-4 rounded-[28px] border border-gray-200 bg-gray-50 p-3"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border border-gray-200"><span class="material-symbols-rounded text-gray-400">search</span><input id="search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, familia, lista o categoría" value="'+esc(searchQ)+'"></div></div>'+(quickMatches.length?'<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700">'+esc(i.name)+'</button>'}).join('')+'</div>':'')+'<div id="search-res" class="mt-4"></div></div><aside class="space-y-4"><div class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="text-sm font-medium text-gray-500">Accesos rápidos</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Familias</div><div class="mt-4 grid grid-cols-1 gap-3">'+Object.keys(familyMap()).map(function(f,idx){var info=gc(f),group=familyMap()[f],familyAlerts=group.filter(function(x){return st(x)!=='ok'}).length;return '<button data-family="'+esc(f)+'" class="fade-up rounded-[24px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[20px]">'+info.i+'</span></div>'+(familyAlerts?badge(familyAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-3 text-[15px] font-semibold text-gray-900">'+esc(f)+'</div><div class="mt-1 text-xs text-gray-500">'+group.length+' ítems</div></button>'}).join('')+'</div></div></aside></section></div></main>';
-  return appShell(inner,navHtml('search',alerts().filter(a=>st(a)==='zero'||st(a)==='crit').length))
+  return appShell(inner,navHtml('search',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
 }
 
 function renderSearchResults(){
@@ -347,9 +412,9 @@ function renderSearchResults(){
 }
 
 function renderAlerts(){
-  var alertItems=alerts(),critItems=alertItems.filter(a=>st(a)==='zero'||st(a)==='crit'),lowItems=alertItems.filter(a=>st(a)==='low'),inner='';
+  var alertItems=alerts(),critItems=alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}),lowItems=alertItems.filter(function(a){return st(a)==='low'}),inner='';
   inner+=sectionHeader('Alertas','Estado del inventario',alertItems.length+' alertas activas.',{right:topIconButton('go-home-alerts','home',true)});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+(!alertItems.length?'<div class="mt-4">'+emptyState('check_circle','Todo en orden','No hay productos bajo mínimo ni agotados.')+'</div>':'<div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Alertas</div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-red-200 bg-error-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+critItems.length+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowItems.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+alertItems.length+'</div></div><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Estado</div><div class="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-primary-700">'+(critItems.length?'Prioridad alta':'Monitorear')+'</div></div></div></section></aside><section><div class="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">'+alertItems.map(itemCard).join('')+'</div></section></div>')+'</div></main>';
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+(!alertItems.length?'<div class="mt-4">'+emptyState('check_circle','Todo en orden','No hay productos bajo mínimo ni agotados.')+'</div>':'<div class="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">'+alertItems.map(itemCard).join('')+'</div>')+'</div></main>';
   return appShell(inner,navHtml('alerts',critItems.length))
 }
 
@@ -357,7 +422,7 @@ function renderHistory(){
   var inner='';
   inner+=sectionHeader('Historial','Movimientos','Lista dinámica con filtros y orden por columna.',{right:topIconButton('go-home-history','home',true)});
   inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_200px]"><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><div class="flex items-center gap-3"><span class="material-symbols-rounded text-gray-400">search</span><input id="hist-filter-q" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Filtrar por producto, categoría, usuario o nota" value="'+esc(histFilterQuery)+'"></div></div><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><select id="hist-filter-type" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all"'+(histFilterType==='all'?' selected':'')+'>Todos los tipos</option><option value="ingreso"'+(histFilterType==='ingreso'?' selected':'')+'>Ingresos</option><option value="salida"'+(histFilterType==='salida'?' selected':'')+'>Salidas</option><option value="ajuste"'+(histFilterType==='ajuste'?' selected':'')+'>Ajustes</option></select></div></div></div><div class="mt-4 overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold"><button data-hsort="nm" class="flex items-center gap-1">Producto<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="cat" class="flex items-center gap-1">Categoría<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="tp" class="flex items-center gap-1">Tipo<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold text-right"><button data-hsort="delta" class="ml-auto flex items-center gap-1">Cambio<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="u" class="flex items-center gap-1">Usuario<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="ts" class="flex items-center gap-1">Fecha / hora<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold">Nota</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div></main>';
-  return appShell(inner,navHtml('history',alerts().filter(a=>st(a)==='zero'||st(a)==='crit').length))
+  return appShell(inner,navHtml('history',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
 }
 
 function renderHistoryTable(){
@@ -377,8 +442,8 @@ function renderReport(){
   var crit=items.filter(function(x){return st(x)==='zero'||st(x)==='crit'}).length,low=items.filter(function(x){return st(x)==='low'}).length,ok=items.filter(function(x){return st(x)==='ok'}).length;
   var inner='';
   inner+=sectionHeader('Reporte','Exportación PDF','Exportación con estructura visual estilo Untitled UI.',{right:topIconButton('go-home-report','home',true)});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen para exportar</div><div class="mt-1 text-sm text-gray-500">Descarga un reporte con stock actual, alertas críticas y proyecciones.</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Productos',items.length,'Inventario total','text-primary-700')+metricCard('Stock total',totalS.toLocaleString(),'Unidades registradas','text-gray-900')+metricCard('Críticos',crit,'Reposición inmediata','text-error-700')+metricCard('OK',ok,'Sin alertas','text-success-700')+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+' bajo mínimo','bg-warning-50 text-warning-700 border-amber-200','inventory_2')+badge(crit+' críticos','bg-error-50 text-error-700 border-red-200','warning')+badge('PDF imprimible','bg-bluebrand-50 text-bluebrand-700 border-blue-200','picture_as_pdf')+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="gen-pdf" class="rounded-2xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white">Descargar reporte PDF</button><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
-  return appShell(inner,navHtml('report',alerts().filter(a=>st(a)==='zero'||st(a)==='crit').length))
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen para exportar</div><div class="mt-1 text-sm text-gray-500">Descarga un reporte con stock actual, alertas críticas y proyecciones.</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Productos',items.length,'Inventario total','text-primary-700')+metricCard('Stock total',totalS.toLocaleString(),'Unidades registradas','text-gray-900')+metricCard('Críticos',crit,'Reposición inmediata','text-error-700')+metricCard('OK',ok,'Sin alertas','text-success-700')+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+' bajo mínimo','bg-warning-50 text-warning-700 border-amber-200','inventory_2')+badge(crit+' críticos','bg-error-50 text-error-700 border-red-200','warning')+badge('PDF imprimible','bg-bluebrand-50 text-bluebrand-700 border-blue-200','picture_as_pdf')+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
+  return appShell(inner,navHtml('report',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
 }
 
 function renderFamily(){
@@ -390,14 +455,29 @@ function renderFamily(){
   return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
 }
 
-function renderStockList(){
-  var ci=items.filter(function(x){ return (x.family||'Sin familia')===selFamily && (x.stockList||'General')===selStockList; }).sort(function(a,b){var o={zero:0,crit:1,low:2,ok:3};var ds=o[st(a)]-o[st(b)];if(ds!==0)return ds;return (a.name||'').localeCompare(b.name||'')});
-  var catInfo=gc(selFamily);var totalStock=0,totalAlerts=0,criticalCount=0,lowCount=0,zeroCount=0;
-  ci.forEach(function(x){totalStock+=Number(x.stock)||0;var s=st(x);if(s!=='ok')totalAlerts++;if(s==='crit')criticalCount++;if(s==='low')lowCount++;if(s==='zero')zeroCount++});
+function renderStockListView(){
+  var matches=getStockListMatches(selFamily,selStockList,stockListSearchQ);
+  var categories=categoryMapForStockList(selFamily,selStockList);
+  var quickMatches=(stockListSearchQ||'').trim()?matches.slice(0,6):[];
+  var totalStock=0,totalAlerts=0;
+  items.filter(function(x){return (x.family||'Sin familia')===selFamily && (x.stockList||'General')===selStockList}).forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
+  var categoriesHtml=Object.keys(categories).map(function(cat,idx){
+    var info=gc(cat),itemsCat=categories[cat],catAlerts=itemsCat.filter(function(x){return st(x)!=='ok'}).length;
+    return '<button data-master-cat="'+esc(cat)+'" class="fade-up rounded-[24px] border border-gray-200 bg-white p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s"><div class="flex items-start justify-between gap-3"><div class="flex h-11 w-11 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[20px]">'+info.i+'</span></div>'+(catAlerts?badge(catAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-3 text-[15px] font-semibold text-gray-900">'+esc(cat)+'</div><div class="mt-1 text-xs text-gray-500">'+itemsCat.length+' ítems</div></button>';
+  }).join('');
   var inner='';
-  inner+=sectionHeader('Lista de stock',selStockList||'General',selFamily+' · '+ci.length+' ítems',{left:topIconButton('back-stocklist','arrow_back',false),right:topIconButton('go-home-stocklist','home',true)});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]"><aside class="space-y-4"><section class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+catInfo.c+'"><span class="material-symbols-rounded text-[22px]">'+catInfo.i+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(selStockList)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border border-primary-200 bg-primary-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+ci.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div><div class="rounded-[24px] border border-red-200 bg-error-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+(criticalCount+zeroCount)+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></div></div><div class="mt-4">'+badge(totalAlerts+' con alerta','bg-gray-50 text-gray-700 border-gray-200','notification_important')+'</div></section></aside><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3" id="prod-scroll">'+ci.map(itemCard).join('')+'</div></section></div></div></main>';
+  inner+=sectionHeader('Lista de stock',selStockList,selFamily+' · buscador interno',{left:topIconButton('back-stocklist','arrow_back',false),right:topIconButton('go-home-stocklist','home',true)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_320px]"><div class="rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold text-gray-900">'+esc(selStockList)+'</div><div class="mt-1 text-sm text-gray-500">Barra predictiva sobre tabla dinámica de la lista.</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+' resultados','bg-primary-50 text-primary-700 border-primary-200','table_rows')+badge(totalAlerts+' alertas','bg-warning-50 text-warning-700 border-amber-200','warning')+'</div></div><div class="mt-4 rounded-[28px] border border-gray-200 bg-gray-50 p-3"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border border-gray-200"><span class="material-symbols-rounded text-gray-400">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length?'<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700">'+esc(i.name)+'</button>'}).join('')+'</div>':'')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">'+metricCard('Ítems',items.filter(function(x){return (x.family||'Sin familia')===selFamily && (x.stockList||'General')===selStockList}).length,'en la lista','text-primary-700')+metricCard('Stock total',totalStock.toLocaleString(),'unidades registradas','text-gray-900')+metricCard('Categorías',Object.keys(categories).length,'accesos rápidos','text-gray-900')+metricCard('Alertas',totalAlerts,'activos','text-warning-700')+'</div><div id="stocklist-master-res" class="mt-4"></div></div><aside class="space-y-4"><div class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="text-sm font-medium text-gray-500">Accesos rápidos</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Categorías</div><div class="mt-4 grid grid-cols-1 gap-3">'+categoriesHtml+'</div></div></aside></section></div></main>';
   return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
+}
+
+function renderStockListResults(){
+  var box=document.getElementById('stocklist-master-res');
+  if(!box)return;
+  var res=getStockListMatches(selFamily,selStockList,stockListSearchQ);
+  if(!res.length){box.innerHTML=emptyState('inventory_2','Sin resultados','No encontramos materiales que coincidan en esta lista de stock.');return}
+  box.innerHTML='<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">'+res.length+' material'+(res.length>1?'es':'')+'</div>'+badge('Tabla dinámica','bg-primary-50 text-primary-700 border-primary-200','dataset')+'</div><div class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+res.map(function(i){var info=gc(i.cat),tone=statusTheme(st(i));return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border bg-gray-50" style="color:'+info.c+'"><span class="material-symbols-rounded text-[18px]">'+info.i+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert?'<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>':'')+'</div></div></td><td class="px-4 py-3 text-sm text-gray-700">'+esc(i.cat||'—')+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.subcat||'—')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>'}).join('')+'</tbody></table></div></div>';
+  box.onclick=function(e){var t=e.target;while(t&&t!==box){if(t.hasAttribute&&t.hasAttribute('data-item')){selItem=items.find(function(x){return x.id===t.getAttribute('data-item')});if(selItem)draw();return}t=t.parentElement}};
 }
 
 function renderDetail(){
@@ -409,12 +489,12 @@ function renderDetail(){
 }
 
 function bindCommon(){
-  document.querySelectorAll('[data-tab], .rail-tab').forEach(function(btn){btn.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';draw();if(pg==='search')setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)}});
-  document.querySelectorAll('[data-family]').forEach(function(btn){btn.onclick=function(){selFamily=btn.getAttribute('data-family');draw()}});
-  document.querySelectorAll('[data-stocklist]').forEach(function(btn){btn.onclick=function(){selStockList=btn.getAttribute('data-stocklist');draw()}});
+  document.querySelectorAll('[data-tab], .rail-tab').forEach(function(btn){btn.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';stockListSearchQ='';draw();if(pg==='search')setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)}});
+  document.querySelectorAll('[data-family]').forEach(function(btn){btn.onclick=function(){selFamily=btn.getAttribute('data-family');stockListSearchQ='';draw()}});
+  document.querySelectorAll('[data-stocklist]').forEach(function(btn){btn.onclick=function(){selStockList=btn.getAttribute('data-stocklist');stockListSearchQ='';draw()}});
   document.querySelectorAll('[data-item]').forEach(function(btn){btn.onclick=function(){selItem=items.find(function(x){return x.id===btn.getAttribute('data-item')});if(selItem)draw()}});
-  document.querySelectorAll('[data-home], #go-home-search, #go-home-alerts, #go-home-history, #go-home-report, #go-home-family, #go-home-stocklist, #go-home-item').forEach(function(btn){btn.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;pg='home';draw()}});
-  var hs=document.getElementById('header-search');if(hs)hs.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;pg='search';draw();setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)};
+  document.querySelectorAll('[data-home], #go-home-search, #go-home-alerts, #go-home-history, #go-home-report, #go-home-family, #go-home-stocklist, #go-home-item').forEach(function(btn){btn.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;pg='home';stockListSearchQ='';draw()}});
+  var hs=document.getElementById('header-search');if(hs)hs.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;pg='search';stockListSearchQ='';draw();setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)};
   var rl=document.getElementById('rail-logout');if(rl)rl.onclick=function(){user=null;pg='login';draw()};
 }
 
@@ -464,9 +544,23 @@ function draw(){
   }
 
   if(selFamily&&selStockList){
-    A.innerHTML=html+renderStockList();
+    A.innerHTML=html+renderStockListView();
     bindCommon();
-    document.getElementById('back-stocklist').onclick=function(){selStockList=null;draw()};
+    document.getElementById('back-stocklist').onclick=function(){selStockList=null;stockListSearchQ='';draw()};
+    var ssi=document.getElementById('stocklist-search-in');
+    if(ssi){
+      ssi.oninput=function(){stockListSearchQ=ssi.value;renderStockListResults()};
+      setTimeout(renderStockListResults,0);
+    }
+    document.querySelectorAll('[data-master-cat]').forEach(function(btn){
+      btn.onclick=function(){
+        var cat=btn.getAttribute('data-master-cat');
+        stockListSearchQ=cat;
+        var input=document.getElementById('stocklist-search-in');
+        if(input)input.value=cat;
+        renderStockListResults();
+      };
+    });
     return;
   }
 
@@ -478,7 +572,6 @@ function draw(){
 
   bindCommon();
 
-  document.querySelectorAll('[data-family]').forEach(function(btn){btn.onclick=function(){selFamily=btn.getAttribute('data-family');draw()}});
   var ts2=document.getElementById('top-sync');if(ts2)ts2.onclick=function(){toast('Sincronizando...');sync()};
   var si=document.getElementById('search-in');if(si){si.oninput=function(){searchQ=si.value;renderSearchResults()};setTimeout(renderSearchResults,0)}
   var hfq=document.getElementById('hist-filter-q');if(hfq)hfq.oninput=function(){histFilterQuery=hfq.value;renderHistoryTable()};
