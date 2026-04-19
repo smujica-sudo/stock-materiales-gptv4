@@ -166,7 +166,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-19 sync-fix-01";
+    var APP_VERSION = "2026-04-19 icon-cache-fix-02";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -176,7 +176,8 @@
       app: "kw5_app_state",
       authUsers: "kw5_auth_users",
       session: "kw5_session",
-      pending: "kw5_pending_updates"
+      pending: "kw5_pending_updates",
+      cacheCleared: "kw5_cache_cleared_once_v2"
     };
 
     var ITEMS = [
@@ -246,7 +247,7 @@
     var authPromise = null;
 
     var syncCounter = 0;
-    var syncState = "idle"; // idle | syncing | offline | error | success
+    var syncState = "idle";
     var lastSyncAt = "";
     var lastSyncError = "";
 
@@ -557,6 +558,30 @@
       }catch(e){
         pendingUpdates = [];
       }
+    }
+
+    function clearLegacyCachesOnce(){
+      try{
+        if(localStorage.getItem(STORAGE_KEYS.cacheCleared) === "1"){
+          return Promise.resolve();
+        }
+      }catch(e){}
+
+      var swPromise = ("serviceWorker" in navigator)
+        ? navigator.serviceWorker.getRegistrations().then(function(regs){
+            return Promise.all(regs.map(function(reg){ return reg.unregister(); }));
+          }).catch(function(){})
+        : Promise.resolve();
+
+      var cachePromise = ("caches" in window)
+        ? caches.keys().then(function(keys){
+            return Promise.all(keys.map(function(key){ return caches.delete(key); }));
+          }).catch(function(){})
+        : Promise.resolve();
+
+      return Promise.all([swPromise, cachePromise]).then(function(){
+        try{ localStorage.setItem(STORAGE_KEYS.cacheCleared, "1"); }catch(e){}
+      });
     }
 
     function isOnline(){
@@ -2012,6 +2037,19 @@
       saveSession();
     }
 
+    function bootApp(){
+      loadCachedUsers();
+      loadAppState();
+      loadPendingUpdates();
+      loadSession();
+      safeDraw();
+
+      setTimeout(function(){
+        loadUsers(true).catch(function(){});
+        if(user) sync(true);
+      }, 0);
+    }
+
     window.addEventListener("online", function(){
       authError = false;
       clearSyncError();
@@ -2030,16 +2068,10 @@
       toast("Sin conexión: usando datos locales","warn");
     });
 
-    loadCachedUsers();
-    loadAppState();
-    loadPendingUpdates();
-    loadSession();
-    safeDraw();
-
-    setTimeout(function(){
-      loadUsers(true).catch(function(){});
-      if(user) sync(true);
-    }, 0);
+    if(!window.__KW_APP_BOOTED){
+      window.__KW_APP_BOOTED = true;
+      clearLegacyCachesOnce().finally(bootApp);
+    }
   </script>
 </body>
 </html>
