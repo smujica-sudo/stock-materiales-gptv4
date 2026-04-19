@@ -6,10 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>Kawas Stock - Untitled UI v9</title>
+  <meta name="theme-color" content="#7F56D9" />
+  <meta name="description" content="Kawas Stock PWA para gestión de inventario, alertas y movimientos." />
+  <title>Kawas Stock - Untitled UI v8</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -54,35 +54,24 @@
     .sticky-blur{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,rgba(249,250,251,.96),rgba(249,250,251,.82) 76%,rgba(249,250,251,0));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
     .pill-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
     .pill-scroll::-webkit-scrollbar{display:none}
-    .report-print *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-    .swipe-hint{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:60;padding:8px 14px;border-radius:999px;background:rgba(17,24,39,.88);color:#fff;font-size:11px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .18s ease}
-    .swipe-hint.show{opacity:1}
     @media (min-width:980px){
       body{padding-bottom:32px}
       .app-shell-grid{grid-template-columns:300px minmax(0,1fr);gap:24px;max-width:1440px;margin:0 auto;padding:24px 24px 32px}
       .app-shell-rail{display:block;position:sticky;top:24px;height:calc(100vh - 48px)}
       .mobile-bottom-nav{display:none}
       .safe-top{padding-top:0}
-      .swipe-hint{bottom:28px}
-    }
-    @media print{
-      body{padding:0;background:#fff}
-      .mobile-bottom-nav,.app-shell-rail,.sticky-blur,#header-search,#header-sync,#rail-sync,#rail-logout,.no-print{display:none!important}
-      .app-shell-grid{display:block;max-width:none;padding:0}
-      .app-shell-main{padding:0}
-      .report-print{margin:0!important;padding:24px!important}
-      .shadow-soft,.shadow-mdsoft,.shadow-lgsoft{box-shadow:none!important}
     }
   </style>
 </head>
 <body class="gradient-shell">
   <div id="app"></div>
-  <div id="swipe-hint" class="swipe-hint">Swipe</div>
-
   <script>
-var BUILD_CERTIFIED="2026-04-18 report-plus-export-and-swipe-desktop-mobile";
-var API_URL="https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
+var APP_NAME="Kawas Stock";
+var APP_VERSION="2026-04-18 r1";
+var BUILD_CERTIFIED=APP_VERSION+" api-url-fixed";
+var API_URL="https://script.google.com/macros/s/AKfycbyEc51AIkfpgZzzfv_qHWfkQUObG824eNsg8sCZL0KU8r9k0lhVbx4EKYP1Ktq7Knk_gg/exec";
 var SHEET_URL="https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
+var STORAGE_KEYS={app:'kw4_app_state_v2',auth:'kw4_auth_users_v2',session:'kw4_session_v1'};
 
 var ITEMS=[
 {id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},
@@ -125,17 +114,25 @@ var FAMILY_THEMES={
   "Sin familia":{accent:"#667085",soft:"#F2F4F7",softBorder:"#D0D5DD",text:"#475467",icon:"inventory_2"}
 };
 
-var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}],AUTH_CACHE_KEY='kw4_auth_users',AUTH_USERS=[];
-var authLoaded=false,authLoading=false,authError=false,authPromise=null,syncCounter=0;
+var USERS=[{n:"Admin",p:"1234"},{n:"Bodega",p:"5678"},{n:"Producción",p:"9012"}],AUTH_CACHE_KEY=STORAGE_KEYS.auth,AUTH_USERS=[];
+var authLoaded=false,authLoading=false,authError=false,authPromise=null,syncCounter=0,lastSyncAt='',lastSyncOk=false,lastSyncMode='idle';
 var items=[],hist=[],user=null,pg='login',selFamily=null,selStockList=null,selItem=null,adjMode=null,adjVal='',adjNote='',searchQ='',toastMsg=null,toastT='ok',loginPin='',loginBusy=false,histFilterQuery='',histFilterType='all',histSortKey='ts',histSortDir='desc',stockListSearchQ='';
+
 
 var TOP_LEVEL_TABS=['home','search','alerts','history','report'];
 var touchStartX=0,touchStartY=0,touchStartTarget=null,touchStartScrollable=null;
-var pointerStartX=0,pointerStartY=0,pointerStartTarget=null,pointerScrollable=null,pointerTracking=false;
-var wheelAccX=0,wheelAccT=0,wheelThrottle=false;
 
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function ts(){var d=new Date(),p=n=>("0"+n).slice(-2);return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())}
+function parseHistoryTs(v){
+  var s=String(v||'').trim();
+  if(!s)return 0;
+  var iso=Date.parse(s.replace(' ','T'));
+  if(!isNaN(iso))return iso;
+  var m=s.match(/^(\d{2})\/(\d{2})\s(\d{2}):(\d{2})$/);
+  if(m){var d=new Date();d.setMonth(Number(m[2])-1);d.setDate(Number(m[1]));d.setHours(Number(m[3]),Number(m[4]),0,0);return d.getTime()}
+  return 0;
+}
 function st(x){if(x.stock===0)return'zero';if(x.stock<x.min*.3)return'crit';if(x.stock<x.min)return'low';return'ok'}
 var STC={zero:{l:'Agotado'},crit:{l:'Crítico'},low:{l:'Bajo'},ok:{l:'OK'}};
 
@@ -205,11 +202,13 @@ function enrichItem(x){
   };
 }
 
-function save(){try{localStorage.setItem('kw4',JSON.stringify({items:items,hist:hist}))}catch(e){}}
+function persistSession(){try{if(user)localStorage.setItem(STORAGE_KEYS.session,JSON.stringify({user:user,ts:Date.now()}));else localStorage.removeItem(STORAGE_KEYS.session)}catch(e){}}
+function restoreSession(){try{var raw=localStorage.getItem(STORAGE_KEYS.session);if(!raw)return null;var parsed=JSON.parse(raw);return parsed&&parsed.user?parsed.user:null}catch(e){return null}}
+function save(){try{localStorage.setItem(STORAGE_KEYS.app,JSON.stringify({version:2,items:items,hist:hist,lastSyncAt:lastSyncAt,lastSyncOk:lastSyncOk}))}catch(e){}}
 function load(){
   try{
-    var d=JSON.parse(localStorage.getItem('kw4'));
-    if(d&&d.items&&d.items.length>0){items=d.items.map(enrichItem);hist=d.hist||[]}
+    var d=JSON.parse(localStorage.getItem(STORAGE_KEYS.app));
+    if(d&&d.items&&d.items.length>0){items=d.items.map(enrichItem);hist=d.hist||[];lastSyncAt=d.lastSyncAt||'';lastSyncOk=!!d.lastSyncOk}
     else{items=ITEMS.map(enrichItem);hist=[]}
   }catch(e){items=ITEMS.map(enrichItem);hist=[]}
 }
@@ -221,6 +220,9 @@ function buildApiUrl(params){var q=Object.keys(params||{}).map(function(k){retur
 function fetchTextWithTimeout(url,opts,timeoutMs){timeoutMs=timeoutMs||12000;return new Promise(function(resolve,reject){var done=false;var t=setTimeout(function(){if(done)return;done=true;reject(new Error('Timeout '+timeoutMs+'ms'))},timeoutMs);fetch(url,opts||{}).then(function(r){if(done)return;clearTimeout(t);done=true;resolve(r)}).catch(function(err){if(done)return;clearTimeout(t);done=true;reject(err)})})}
 function fetchJsonWithTimeout(url,opts,timeoutMs){return fetchTextWithTimeout(url,opts,timeoutMs).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(txt){try{return JSON.parse(txt)}catch(e){throw new Error('Respuesta no JSON desde Apps Script')}})}
 function toast(m,t){toastMsg=m;toastT=t||'ok';safeDraw();clearTimeout(window.__toastTm);window.__toastTm=setTimeout(function(){toastMsg=null;safeDraw()},2200)}
+function clearTransientState(){selFamily=null;selStockList=null;selItem=null;adjMode=null;adjVal='';adjNote='';searchQ='';stockListSearchQ=''}
+function logout(){user=null;loginPin='';loginBusy=false;clearTransientState();persistSession();pg='login';safeDraw()}
+function syncStatusLabel(){if(!isOnline())return 'Modo local';if(lastSyncMode==='loading')return 'Sincronizando';if(lastSyncAt)return 'Última sync '+lastSyncAt;return 'Sin sincronizar'}
 
 function loadUsers(force){
   if(authLoading&&authPromise)return authPromise;
@@ -253,7 +255,7 @@ function validatePinAttempt(pinAttempt){
   var u=pool.find(function(x){return String(x.p)===String(pinAttempt)});
   return u?{ok:true,user:u}:{ok:false};
 }
-function completeLogin(u){loginBusy=false;loginPin='';user=u;load();pg='home';safeDraw();sync();toast('Hola, '+u.n)}
+function completeLogin(u){loginBusy=false;loginPin='';user=u;persistSession();load();pg='home';safeDraw();sync({silent:true});toast('Hola, '+u.n)}
 function attemptLogin(pinAttempt){
   if(loginBusy)return;
   var attempt=String(pinAttempt||loginPin||'').replace(/\D/g,'').slice(0,4);
@@ -268,9 +270,13 @@ function attemptLogin(pinAttempt){
   }).catch(function(){loginBusy=false;loginPin='';draw();toast('No se pudo validar el PIN','err')})
 }
 
-function sync(){
-  if(!isOnline()){save();return Promise.resolve(false)}
+function sync(opts){
+  opts=opts||{};
+  if(!isOnline()){save();lastSyncMode='offline';return Promise.resolve(false)}
+  var silent=!!opts.silent;
   var syncId=++syncCounter;
+  lastSyncMode='loading';
+  if(!silent)toast('Sincronizando...');
   var stockReq=fetchJsonWithTimeout(buildApiUrl({action:'getAll',_ts:Date.now()}),{cache:'no-store'},15000).then(function(d){
     if(!(d&&d.success&&d.items))throw new Error('getAll inválido');
     return d.items.map(enrichItem);
@@ -296,20 +302,27 @@ function sync(){
     var stockOk=results[0].status==='fulfilled',histOk=results[1].status==='fulfilled';
     if(stockOk)items=results[0].value;
     if(histOk)hist=results[1].value;
-    if(stockOk||histOk){save();safeDraw();toast('Sincronización completada')}
-    if(!stockOk&&!histOk)toast('No se pudo sincronizar con Apps Script','warn');
-    else if(!stockOk||!histOk)toast('Sincronización parcial','warn');
+    lastSyncAt=ts();
+    lastSyncOk=stockOk||histOk;
+    lastSyncMode=(stockOk||histOk)?'ok':'error';
+    if(stockOk||histOk){save();safeDraw();if(!silent)toast(stockOk&&histOk?'Sincronización completada':'Sincronización parcial',stockOk&&histOk?'ok':'warn')}
+    else if(!silent)toast('No se pudo sincronizar con Apps Script','warn');
     return stockOk||histOk;
-  }).catch(function(){toast('No se pudo sincronizar','warn');return false})
+  }).catch(function(){
+    lastSyncMode='error';
+    lastSyncOk=false;
+    if(!silent)toast('No se pudo sincronizar','warn');
+    return false
+  })
 }
 
 function pushUpdate(item,oldStock,newStock,type,note){
-  if(!isOnline()){save();toast('Sin conexión: cambio guardado localmente','warn');return Promise.resolve(false)}
+  if(!isOnline()){save();lastSyncMode='offline';toast('Sin conexión: cambio guardado localmente','warn');return Promise.resolve(false)}
   var body=JSON.stringify({action:'updateStock',itemId:item.id,newStock:newStock,oldStock:oldStock,tipo:type,usuario:user?user.n:'?',nota:note||''});
   return fetchJsonWithTimeout(API_URL,{method:'POST',body:body,headers:{'Content-Type':'text/plain'}},15000).then(function(d){
-    if(d&&d.success){toast('Guardado en Sheets');return true}
-    toast('Error al guardar','err');return false
-  }).catch(function(){toast('Error de red - guardado local','warn');return false})
+    if(d&&d.success){lastSyncAt=ts();lastSyncOk=true;lastSyncMode='ok';save();toast('Guardado en Sheets');return true}
+    lastSyncMode='error';toast('Error al guardar','err');return false
+  }).catch(function(){lastSyncMode='error';toast('Error de red - guardado local','warn');return false})
 }
 
 function badge(label,cls,icon){return'<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold '+cls+'">'+(icon?'<span class="material-symbols-rounded text-[14px]">'+icon+'</span>':'')+esc(label)+'</span>'}
@@ -326,7 +339,9 @@ function sectionHeader(eyebrow,title,subtitle,actions){
   var rs=(actions&&actions.right?actions.right:'');
   var hs=topIconButton('header-search','search',false,'Buscar');
   var ss=topIconButton('header-sync','sync',true,'Sync');
-  return '<header class="sticky-blur safe-top px-4 pt-1"><div class="mx-auto w-full max-w-md xl:max-w-6xl"><div class="flex items-start gap-3 pb-4">'+(actions&&actions.left?actions.left:'')+'<div class="min-w-0 flex-1"><div class="text-xs font-semibold uppercase tracking-[0.08em] text-primary-700">'+esc(eyebrow||'')+'</div><h1 class="mt-1 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-gray-900">'+esc(title||'')+'</h1>'+(subtitle?'<p class="mt-1 text-sm leading-6 text-gray-600">'+esc(subtitle)+'</p>':'')+'</div><div class="flex items-center gap-2">'+hs+ss+rs+'</div></div></div></header>';
+  var syncTone=!isOnline()?'bg-warning-50 text-warning-700 border-amber-200':lastSyncMode==='error'?'bg-error-50 text-error-700 border-red-200':lastSyncMode==='loading'?'bg-bluebrand-50 text-bluebrand-700 border-blue-200':'bg-success-50 text-success-700 border-green-200';
+  var syncPill='<div class="mt-2">'+badge(syncStatusLabel(),syncTone,lastSyncMode==='loading'?'sync':'cloud_done')+'</div>';
+  return '<header class="sticky-blur safe-top px-4 pt-1"><div class="mx-auto w-full max-w-md xl:max-w-6xl"><div class="flex items-start gap-3 pb-4">'+(actions&&actions.left?actions.left:'')+'<div class="min-w-0 flex-1"><div class="text-xs font-semibold uppercase tracking-[0.08em] text-primary-700">'+esc(eyebrow||'')+'</div><h1 class="mt-1 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-gray-900">'+esc(title||'')+'</h1>'+(subtitle?'<p class="mt-1 text-sm leading-6 text-gray-600">'+esc(subtitle)+'</p>':'')+syncPill+'</div><div class="flex items-center gap-2">'+hs+ss+rs+'</div></div></div></header>';
 }
 function metricCard(label,value,meta,cls){return'<div class="rounded-3xl border border-gray-200 bg-white p-4 shadow-soft"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">'+esc(label)+'</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] '+(cls||'text-gray-900')+'">'+esc(String(value))+'</div><div class="mt-1 text-xs text-gray-500">'+esc(meta||'')+'</div></div>'}
 function emptyState(icon,title,text){return'<div class="rounded-[28px] border border-dashed border-gray-300 bg-white/70 px-6 py-10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-100 text-gray-500"><span class="material-symbols-rounded text-[28px]">'+icon+'</span></div><div class="mt-4 text-lg font-semibold text-gray-900">'+esc(title)+'</div><div class="mt-2 text-sm leading-6 text-gray-500">'+esc(text)+'</div></div>'}
@@ -351,49 +366,17 @@ function roleLabel(u){
 function currentDateLabel(){var d=new Date();return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'})}
 function currentTimeLabel(){var d=new Date();return d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false})}
 
-function reportData(){
-  var totalStock=0,alertItems=alerts(),families=familyMap(),byFamily=[],byCategory={},critical=0,low=0,zero=0,ok=0;
-  items.forEach(function(x){
-    totalStock+=Number(x.stock)||0;
-    var s=st(x);
-    if(s==='zero')zero++;
-    else if(s==='crit')critical++;
-    else if(s==='low')low++;
-    else ok++;
-
-    if(!byCategory[x.cat])byCategory[x.cat]={cat:x.cat,stock:0,count:0,alerts:0,icon:cm(x.cat).icon,color:cm(x.cat).color};
-    byCategory[x.cat].stock+=Number(x.stock)||0;
-    byCategory[x.cat].count++;
-    if(s!=='ok')byCategory[x.cat].alerts++;
-  });
-
-  Object.keys(families).forEach(function(f){
-    var arr=families[f],stock=0,alts=0;
-    arr.forEach(function(x){stock+=Number(x.stock)||0;if(st(x)!=='ok')alts++});
-    byFamily.push({family:f,items:arr.length,stock:stock,alerts:alts,theme:ft(f)});
-  });
-
-  byFamily.sort(function(a,b){if(b.alerts!==a.alerts)return b.alerts-a.alerts;if(b.stock!==a.stock)return b.stock-a.stock;return a.family.localeCompare(b.family)});
-  var byCategoryArr=Object.keys(byCategory).map(function(k){return byCategory[k]}).sort(function(a,b){if(b.alerts!==a.alerts)return b.alerts-a.alerts;if(b.stock!==a.stock)return b.stock-a.stock;return a.cat.localeCompare(b.cat)});
-
-  var topRisk=alertItems.slice(0,8);
-  return{
-    generatedAt:new Date(),
-    totalItems:items.length,
-    totalStock:totalStock,
-    totalFamilies:Object.keys(families).length,
-    totalLists:(function(){var s={};items.forEach(function(x){s[x.stockList||'General']=1});return Object.keys(s).length})(),
-    ok:ok,low:low,critical:critical,zero:zero,
-    totalAlerts:alertItems.length,
-    byFamily:byFamily,
-    byCategory:byCategoryArr,
-    topRisk:topRisk,
-    historyRecent:hist.slice(0,20)
-  };
+function appShell(inner,bottom){
+  var alertItems=alerts(),criticalAlerts=alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length;
+  var rail='';
+  if(user){
+    rail='<aside class="app-shell-rail"><div class="flex h-full flex-col rounded-[32px] border border-gray-200 bg-white p-5 shadow-lgsoft"><div class="flex items-start gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-[18px] border border-gray-200 bg-gray-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div><div class="min-w-0 flex-1"><div class="text-sm font-semibold text-gray-900">Kawas Stock</div><div class="mt-1 text-xs text-gray-500">Panel de inventario</div></div></div><div class="mt-6 space-y-2">'+['home','search','alerts','history','report'].map(function(id){var meta={home:['home','Inicio'],search:['search','Buscar'],alerts:['warning','Alertas'],history:['schedule','Historial'],report:['description','Reporte']}[id];return '<button data-tab="'+id+'" class="rail-tab '+(pg===id?'bg-gray-900 text-white':'bg-transparent text-gray-600 hover:bg-gray-50')+' flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold"><span class="flex items-center gap-3"><span class="material-symbols-rounded text-[20px]">'+meta[0]+'</span><span>'+meta[1]+'</span></span>'+(id==='alerts'&&criticalAlerts?'<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-error-50 px-2 text-[11px] font-bold text-error-700">'+criticalAlerts+'</span>':'')+'</button>'}).join('')+'<div class="mt-4"><button id="rail-sync" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-white"><span class="material-symbols-rounded text-[18px]">sync</span><span>Sincronizar</span></button></div><div class="mt-4 pt-4 border-t border-gray-200"><button id="rail-logout" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"><span class="material-symbols-rounded text-[18px]">logout</span><span>Salir</span></button><div class="mt-auto pt-4 text-xs text-gray-400">'+esc(APP_VERSION)+'</div></div></aside>';
+  }
+  return'<div class="app-shell-grid">'+rail+'<div class="app-shell-main">'+inner+(bottom||'')+'</div></div>'
 }
 
 function renderLogin(){
-  return '<div class="min-h-screen px-4 safe-top safe-bottom"><div class="mx-auto flex min-h-[calc(100vh-24px)] max-w-md items-center justify-center"><div class="w-full max-w-sm rounded-[32px] border border-gray-200 bg-white p-6 shadow-lgsoft"><div class="flex flex-col items-center text-center"><div class="flex h-16 w-16 items-center justify-center rounded-[22px] bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[30px]">inventory_2</span></div><div class="mt-4 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">Stockpro</div></div><div class="mt-8"><label class="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500">PIN</label><div class="mt-3 flex items-center gap-3 rounded-[20px] border border-gray-200 bg-gray-50 px-4 py-3"><span class="material-symbols-rounded text-gray-400">lock</span><input id="pin" class="w-full border-none bg-transparent text-[16px] font-medium tracking-[0.12em] text-gray-900 outline-none placeholder:tracking-normal placeholder:text-gray-400" type="password" inputmode="numeric" maxlength="4" placeholder="••••" value="'+esc(loginPin)+'"></div><div class="mt-3 text-center text-xs leading-5 text-gray-500">Ingresa los 4 dígitos y el acceso se intenta automáticamente.</div></div></div></div></div>'
+  return '<div class="min-h-screen px-4 safe-top safe-bottom"><div class="mx-auto flex min-h-[calc(100vh-24px)] max-w-md items-center justify-center"><div class="w-full max-w-sm rounded-[32px] border border-gray-200 bg-white p-6 shadow-lgsoft"><div class="flex flex-col items-center text-center"><div class="flex h-16 w-16 items-center justify-center rounded-[22px] bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[30px]">inventory_2</span></div><div class="mt-4 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">Stockpro</div></div><div class="mt-8"><label class="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500">PIN</label><div class="mt-3 flex items-center gap-3 rounded-[20px] border border-gray-200 bg-gray-50 px-4 py-3"><span class="material-symbols-rounded text-gray-400">lock</span><input id="pin" class="w-full border-none bg-transparent text-[16px] font-medium tracking-[0.12em] text-gray-900 outline-none placeholder:tracking-normal placeholder:text-gray-400" type="password" inputmode="numeric" maxlength="4" placeholder="••••" value="'+esc(loginPin)+'"></div><div class="mt-3 text-center text-xs leading-5 text-gray-500">Ingresa los 4 dígitos. En entorno productivo esto debe validarse siempre desde backend.</div></div></div></div></div>'
 }
 
 function renderHome(){
@@ -402,6 +385,94 @@ function renderHome(){
   inner+=sectionHeader('Panel principal','Hola, '+user.n,'');
   inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span></div></section><section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Inventario</div></div><div class="flex gap-2 flex-wrap">'+badge(alertItems.length+' alertas','bg-warning-50 text-warning-700 border-amber-200','notifications_active')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4"><button data-tab="alerts" class="rounded-[24px] border border-primary-200 bg-primary-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div><span class="material-symbols-rounded text-[18px] text-primary-700">arrow_outward</span></div><div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length===0?'Óptima':criticalCount>0||zeroCount>0?'Crítica':lowCount>0?'Atención':'Estable')+'</div><div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length===0?'Sin alertas activas':(items.length-alertItems.length)+' de '+items.length+' ítems estables')+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-red-200 bg-error-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><span class="material-symbols-rounded text-[18px] text-error-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-amber-200 bg-warning-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><span class="material-symbols-rounded text-[18px] text-warning-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Agotados</div><span class="material-symbols-rounded text-[18px] text-gray-500">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+zeroCount+'</div></button></div></section><section class="mt-4"><div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">Familias</div>'+badge(familiesCount+' familias','bg-primary-50 text-primary-700 border-primary-200','dashboard')+'</div><div class="grid grid-cols-2 gap-3 xl:grid-cols-3">'+Object.keys(fm).map(function(family,idx){var itemsFamily=fm[family],familyAlerts=itemsFamily.filter(function(x){return st(x)!=='ok'}).length,listsCount=Object.keys(stockListMap(family)).length,t=ft(family);return '<button data-family="'+esc(family)+'" class="fade-up rounded-[28px] border p-4 text-left shadow-soft" style="animation-delay:'+(idx*.03)+'s;'+familyCardStyle(family)+'"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(family)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div>'+(familyAlerts?badge(familyAlerts+' alertas','bg-error-50 text-error-700 border-red-200'):badge('OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold" style="'+familyTextStyle(family)+'">'+esc(family)+'</div><div class="mt-1 text-xs text-gray-600">'+listsCount+' listas · '+itemsFamily.length+' ítems</div></button>'}).join('')+'</div></section></div></main>';
   return appShell(inner,navHtml('home',alertItems.filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
+}
+
+function getSearchMatches(raw){
+  function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
+  var q=norm(raw),terms=q.split(/\s+/).filter(Boolean);
+  if(!q)return[];
+  function searchableText(i){return norm([i.name,i.family,i.stockList,i.cat,i.subcat,i.unit,i.alert,i.id].join(' '))}
+  function scoreItem(i){
+    var name=norm(i.name),family=norm(i.family),stockList=norm(i.stockList),cat=norm(i.cat),subcat=norm(i.subcat),alert=norm(i.alert),all=searchableText(i),score=0;
+    if(name===q)score+=120;
+    if(stockList===q)score+=110;
+    if(cat===q)score+=100;
+    if(subcat===q)score+=100;
+    if(family===q)score+=95;
+    if(name.indexOf(q)===0)score+=80;
+    if(stockList.indexOf(q)===0)score+=70;
+    if(cat.indexOf(q)===0)score+=65;
+    if(subcat.indexOf(q)===0)score+=65;
+    if(family.indexOf(q)===0)score+=60;
+    if(name.indexOf(q)!==-1)score+=50;
+    if(stockList.indexOf(q)!==-1)score+=45;
+    if(cat.indexOf(q)!==-1)score+=40;
+    if(subcat.indexOf(q)!==-1)score+=40;
+    if(family.indexOf(q)!==-1)score+=35;
+    if(alert.indexOf(q)!==-1)score+=20;
+    if(all.indexOf(q)!==-1)score+=10;
+    var matchedTerms=0;
+    terms.forEach(function(t){
+      if(all.indexOf(t)!==-1){matchedTerms++;score+=8}
+      if(name.indexOf(t)!==-1)score+=4;
+      if(stockList.indexOf(t)!==-1)score+=3;
+      if(cat.indexOf(t)!==-1)score+=3;
+      if(subcat.indexOf(t)!==-1)score+=3;
+      if(family.indexOf(t)!==-1)score+=2;
+    });
+    return{score:score,matchedTerms:matchedTerms}
+  }
+  return items.map(function(i){var meta=scoreItem(i);return{item:i,score:meta.score,matchedTerms:meta.matchedTerms}})
+    .filter(function(x){return x.score>0 && x.matchedTerms===terms.length})
+    .sort(function(a,b){var order={zero:0,crit:1,low:2,ok:3},sa=order[st(a.item)],sb=order[st(b.item)];if(sa!==sb)return sa-sb;if(b.score!==a.score)return b.score-a.score;if(a.item.stock!==b.item.stock)return a.item.stock-b.item.stock;return a.item.name>b.item.name?1:-1})
+    .map(function(x){return x.item});
+}
+
+function getStockListMatches(familyName, stockListName, raw){
+  function norm(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
+  var q=norm(raw||''),terms=q.split(/\s+/).filter(Boolean);
+  var base=items.filter(function(x){return (x.family||'Sin familia')===familyName && (x.stockList||'General')===stockListName});
+  if(!q){
+    return base.slice().sort(function(a,b){
+      var order={zero:0,crit:1,low:2,ok:3},sa=order[st(a)],sb=order[st(b)];
+      if(sa!==sb)return sa-sb;
+      if(a.stock!==b.stock)return a.stock-b.stock;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+  }
+  function searchableText(i){return norm([i.name,i.cat,i.subcat,i.unit,i.alert,i.id].join(' '))}
+  function scoreItem(i){
+    var name=norm(i.name),cat=norm(i.cat),subcat=norm(i.subcat),alert=norm(i.alert),all=searchableText(i),score=0;
+    if(name===q)score+=120;
+    if(cat===q)score+=105;
+    if(subcat===q)score+=100;
+    if(name.indexOf(q)===0)score+=80;
+    if(cat.indexOf(q)===0)score+=70;
+    if(subcat.indexOf(q)===0)score+=70;
+    if(name.indexOf(q)!==-1)score+=50;
+    if(cat.indexOf(q)!==-1)score+=40;
+    if(subcat.indexOf(q)!==-1)score+=40;
+    if(alert.indexOf(q)!==-1)score+=20;
+    if(all.indexOf(q)!==-1)score+=10;
+    var matchedTerms=0;
+    terms.forEach(function(t){
+      if(all.indexOf(t)!==-1){matchedTerms++;score+=8}
+      if(name.indexOf(t)!==-1)score+=4;
+      if(cat.indexOf(t)!==-1)score+=3;
+      if(subcat.indexOf(t)!==-1)score+=3;
+    });
+    return{score:score,matchedTerms:matchedTerms};
+  }
+  return base.map(function(i){var meta=scoreItem(i);return{item:i,score:meta.score,matchedTerms:meta.matchedTerms}})
+    .filter(function(x){return x.score>0 && x.matchedTerms===terms.length})
+    .sort(function(a,b){
+      var order={zero:0,crit:1,low:2,ok:3},sa=order[st(a.item)],sb=order[st(b.item)];
+      if(sa!==sb)return sa-sb;
+      if(b.score!==a.score)return b.score-a.score;
+      if(a.item.stock!==b.item.stock)return a.item.stock-b.item.stock;
+      return (a.item.name||'').localeCompare(b.item.name||'');
+    })
+    .map(function(x){return x.item});
 }
 
 function renderSearch(){
@@ -449,18 +520,27 @@ function renderHistoryTable(){
   var q=(histFilterQuery||'').trim().toLowerCase();
   if(q){rows=rows.filter(function(r){return [r.nm,r.cat,r.tp,r.u,r.nt,r.ts].join(' ').toLowerCase().indexOf(q)!==-1})}
   rows=rows.map(function(r){var delta=(Number(r.ns)||0)-(Number(r.os)||0);return Object.assign({delta:delta},r)});
-  rows.sort(function(a,b){var av=a[histSortKey],bv=b[histSortKey];if(histSortKey==='delta'){av=a.delta;bv=b.delta}else if(histSortKey==='ts'){av=String(a.ts||'');bv=String(b.ts||'')}else{av=String(av||'').toLowerCase();bv=String(bv||'').toLowerCase()}if(av<bv)return histSortDir==='asc'?-1:1;if(av>bv)return histSortDir==='asc'?1:-1;return 0});
+  rows.sort(function(a,b){var av=a[histSortKey],bv=b[histSortKey];if(histSortKey==='delta'){av=a.delta;bv=b.delta}else if(histSortKey==='ts'){av=parseHistoryTs(a.ts);bv=parseHistoryTs(b.ts)}else{av=String(av||'').toLowerCase();bv=String(bv||'').toLowerCase()}if(av<bv)return histSortDir==='asc'?-1:1;if(av>bv)return histSortDir==='asc'?1:-1;return 0});
   if(!rows.length){body.innerHTML='<tr><td colspan="7" class="px-4 py-10">'+emptyState('history','Sin resultados','No hay movimientos que coincidan con los filtros actuales.')+'</td></tr>';return}
   body.innerHTML=rows.slice(0,200).map(function(r){var tone=r.delta>0?'text-success-700':r.delta<0?'text-error-700':'text-primary-700';var badgeCls=r.tp==='ingreso'?'bg-success-50 text-success-700 border-green-200':r.tp==='salida'?'bg-error-50 text-error-700 border-red-200':'bg-primary-50 text-primary-700 border-primary-200';return '<tr class="border-t border-gray-200 align-top"><td class="px-4 py-3"><div class="text-sm font-semibold text-gray-900">'+esc(r.nm)+'</div></td><td class="px-4 py-3 text-sm text-gray-600">'+esc(r.cat)+'</td><td class="px-4 py-3">'+badge(r.tp,badgeCls)+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone+'">'+(r.delta>0?'+':'')+r.delta+'</div><div class="text-[11px] text-gray-500">'+r.os+' → '+r.ns+'</div></td><td class="px-4 py-3 text-sm text-gray-600">'+esc(r.u)+'</td><td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">'+esc(r.ts)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(r.nt||'—')+'</td></tr>'}).join('')
 }
 
 function renderReport(){
-  var rd=reportData();
-  var generated=rd.generatedAt.toLocaleString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  var totalS=0;items.forEach(function(x){totalS+=x.stock});
+  var crit=items.filter(function(x){return st(x)==='zero'||st(x)==='crit'}).length,low=items.filter(function(x){return st(x)==='low'}).length,ok=items.filter(function(x){return st(x)==='ok'}).length;
   var inner='';
-  inner+=sectionHeader('Reporte','Centro de reportes','KPI, tablas, alertas y exportación.',{right:'<button id="report-refresh" class="no-print inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 shadow-soft text-gray-700"><span class="material-symbols-rounded text-[20px]">auto_awesome</span><span class="hidden sm:inline text-sm font-semibold">Actualizar</span></button>'});
-  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"><div class="rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex flex-wrap items-start justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Reporte ejecutivo</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Estado general del stock</div><div class="mt-2 text-sm text-gray-500">Generado automáticamente a partir de familias, listas, categorías, alertas y movimientos.</div></div><div class="flex gap-2 flex-wrap">'+badge('Actualizado '+generated,'bg-gray-50 text-gray-700 border-gray-200','schedule')+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">'+metricCard('Ítems',rd.totalItems,'Inventario total','text-primary-700')+metricCard('Stock total',rd.totalStock.toLocaleString(),'Unidades registradas','text-gray-900')+metricCard('Alertas',rd.totalAlerts,'Crítico + bajo mínimo','text-warning-700')+metricCard('Familias',rd.totalFamilies,'Cobertura jerárquica','text-primary-700')+'</div></div><aside class="rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-sm font-medium text-gray-500">Exportación</div><div class="mt-1 text-lg font-semibold text-gray-900">Descarga el reporte</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="report-export-pdf" class="no-print rounded-2xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white">Exportar PDF</button><button id="report-export-xlsx" class="no-print rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Exportar Excel</button><button id="open-db" class="no-print rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></aside></section><section id="report-sheet" class="report-print mt-4 space-y-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]"><div class="space-y-4"><div class="rounded-[28px] border border-gray-200 bg-gray-50 p-4"><div class="text-sm font-medium text-gray-500">KPI principales</div><div class="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4">'+metricCard('OK',rd.ok,'Sin alertas','text-success-700')+metricCard('Bajo mínimo',rd.low,'Requiere atención','text-warning-700')+metricCard('Críticos',rd.critical,'Reposición pronta','text-error-700')+metricCard('Agotados',rd.zero,'Sin stock','text-error-700')+'</div></div><div class="rounded-[28px] border border-gray-200 bg-white overflow-hidden"><div class="border-b border-gray-200 px-4 py-3"><div class="text-base font-semibold text-gray-900">Top alertas</div><div class="mt-1 text-sm text-gray-500">Productos más deteriorados para acción inmediata.</div></div>'+(rd.topRisk.length?'<div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold text-right">Mín.</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+rd.topRisk.map(function(i){return'<tr class="border-t border-gray-200"><td class="px-4 py-3"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(i.cat)+(i.subcat?' · '+esc(i.subcat):'')+'</div></td><td class="px-4 py-3">'+familyBadge(i.family)+'</td><td class="px-4 py-3 text-right mn text-sm font-semibold">'+i.stock.toLocaleString()+'</td><td class="px-4 py-3 text-right mn text-sm text-gray-600">'+i.min.toLocaleString()+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="p-4">'+emptyState('check_circle','Sin alertas','No hay materiales bajo mínimo.')+'</div>')+'</div><div class="rounded-[28px] border border-gray-200 bg-white overflow-hidden"><div class="border-b border-gray-200 px-4 py-3"><div class="text-base font-semibold text-gray-900">Resumen por categoría</div><div class="mt-1 text-sm text-gray-500">Stock, cobertura y presión operativa por categoría.</div></div><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold text-right">Ítems</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold text-right">Alertas</th></tr></thead><tbody>'+rd.byCategory.map(function(c){return'<tr class="border-t border-gray-200"><td class="px-4 py-3"><div class="flex items-center gap-3"><div class="flex h-10 w-10 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(c.cat)+'"><span class="material-symbols-rounded text-[18px]">'+c.icon+'</span></div><div class="text-sm font-semibold text-gray-900">'+esc(c.cat)+'</div></div></td><td class="px-4 py-3 text-right mn text-sm text-gray-700">'+c.count+'</td><td class="px-4 py-3 text-right mn text-sm font-semibold text-gray-900">'+c.stock.toLocaleString()+'</td><td class="px-4 py-3 text-right mn text-sm '+(c.alerts?'text-warning-700 font-semibold':'text-gray-500')+'">'+c.alerts+'</td></tr>'}).join('')+'</tbody></table></div></div></div><div class="space-y-4"><div class="rounded-[28px] border border-gray-200 bg-white overflow-hidden"><div class="border-b border-gray-200 px-4 py-3"><div class="text-base font-semibold text-gray-900">Resumen por familia</div><div class="mt-1 text-sm text-gray-500">Coherencia del stock desde familia hacia abajo.</div></div><div class="divide-y divide-gray-200">'+rd.byFamily.map(function(f){return'<div class="p-4"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="flex items-center gap-2">'+familyBadge(f.family)+'</div><div class="mt-2 text-sm text-gray-500">'+f.items+' ítems</div></div><div class="text-right"><div class="mn text-lg font-semibold text-gray-900">'+f.stock.toLocaleString()+'</div><div class="mt-1 text-xs '+(f.alerts?'text-warning-700':'text-success-700')+'">'+(f.alerts?f.alerts+' alertas':'Sin alertas')+'</div></div></div></div>'}).join('')+'</div></div><div class="rounded-[28px] border border-gray-200 bg-white overflow-hidden"><div class="border-b border-gray-200 px-4 py-3"><div class="text-base font-semibold text-gray-900">Movimientos recientes</div><div class="mt-1 text-sm text-gray-500">Últimos cambios registrados.</div></div>'+(rd.historyRecent.length?'<div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Tipo</th><th class="px-4 py-3 font-semibold text-right">Cambio</th><th class="px-4 py-3 font-semibold">Fecha</th></tr></thead><tbody>'+rd.historyRecent.slice(0,10).map(function(r){var delta=(Number(r.ns)||0)-(Number(r.os)||0);return'<tr class="border-t border-gray-200"><td class="px-4 py-3 text-sm font-semibold text-gray-900">'+esc(r.nm)+'</td><td class="px-4 py-3">'+badge(r.tp,r.tp==='ingreso'?'bg-success-50 text-success-700 border-green-200':r.tp==='salida'?'bg-error-50 text-error-700 border-red-200':'bg-primary-50 text-primary-700 border-primary-200')+'</td><td class="px-4 py-3 text-right mn text-sm font-semibold '+(delta>0?'text-success-700':delta<0?'text-error-700':'text-gray-700')+'">'+(delta>0?'+':'')+delta+'</td><td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">'+esc(r.ts)+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="p-4 text-sm text-gray-500">No hay movimientos recientes.</div>')+'</div><div class="rounded-[28px] border border-gray-200 bg-gray-50 p-4"><div class="text-sm font-medium text-gray-500">Observaciones automáticas</div><ul class="mt-3 space-y-2 text-sm text-gray-700"><li>• '+(rd.zero>0?'Hay '+rd.zero+' ítems agotados que deben priorizarse.':'No hay ítems agotados actualmente.')+'</li><li>• '+(rd.critical>0?'Existen '+rd.critical+' ítems en nivel crítico, con reposición recomendada inmediata.':'No hay ítems en nivel crítico.')+'</li><li>• '+(rd.byFamily[0]?('La familia con mayor presión actual es '+rd.byFamily[0].family+' ('+rd.byFamily[0].alerts+' alertas).'):'Sin datos por familia.')+'</li><li>• '+(rd.byCategory[0]?('La categoría más expuesta en este momento es '+rd.byCategory[0].cat+'.'):'Sin datos por categoría.')+'</li></ul></div></div></div></section></div></main>';
+  inner+=sectionHeader('Reporte','Centro de reporte','Resumen operativo y acceso a base de datos.');
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen para exportar</div><div class="mt-1 text-sm text-gray-500">Descarga un reporte con stock actual, alertas críticas y proyecciones.</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Productos',items.length,'Inventario total','text-primary-700')+metricCard('Stock total',totalS.toLocaleString(),'Unidades registradas','text-gray-900')+metricCard('Críticos',crit,'Reposición inmediata','text-error-700')+metricCard('OK',ok,'Sin alertas','text-success-700')+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+' bajo mínimo','bg-warning-50 text-warning-700 border-amber-200','inventory_2')+badge(crit+' críticos','bg-error-50 text-error-700 border-red-200','warning')+badge('PDF imprimible','bg-bluebrand-50 text-bluebrand-700 border-blue-200','picture_as_pdf')+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
   return appShell(inner,navHtml('report',alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length))
+}
+
+function renderFamily(){
+  var lm=stockListMap(selFamily),listKeys=Object.keys(lm),familyItems=familyMap()[selFamily]||[],totalItems=familyItems.length,t=ft(selFamily||'Sin familia');
+  var totalStock=0,totalAlerts=0;familyItems.forEach(function(x){totalStock+=Number(x.stock)||0;if(st(x)!=='ok')totalAlerts++});
+  var inner='';
+  inner+=sectionHeader('Familia',selFamily||'Sin familia',totalItems+' ítems · '+listKeys.length+' listas',{left:topIconButton('back-family','arrow_back',false)});
+  inner+='<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" id="stocklist-scroll">'+listKeys.map(function(sl,idx){var listItems=lm[sl],issueCount=listItems.filter(function(x){return st(x)!=="ok"}).length,totalSc=0;listItems.forEach(function(x){ totalSc += Number(x.stock)||0; });return '<button data-stocklist="'+esc(sl)+'" class="fade-up rounded-[28px] border p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx*.03)+'s;'+familyCardStyle(selFamily)+'"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(selFamily)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div>'+(issueCount?badge(issueCount+' con alerta','bg-error-50 text-error-700 border-red-200'):badge('Todo OK','bg-success-50 text-success-700 border-green-200'))+'</div><div class="mt-4 text-[15px] font-semibold" style="'+familyTextStyle(selFamily)+'">'+esc(sl)+'</div><div class="mt-1 text-xs text-gray-600">'+listItems.length+' ítems</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>'}).join('')+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(selFamily)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(selFamily)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em]" style="'+familyTextStyle(selFamily)+'">'+esc(selFamily)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(selFamily)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(selFamily)+'">Listas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(selFamily)+'">'+listKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section></aside></div></div></main>';
+  return appShell(inner,navHtml(pg,alerts().filter(function(a){return st(a)==='zero'||st(a)==='crit'}).length));
 }
 
 function renderStockListView(){
@@ -498,27 +578,18 @@ function renderDetail(){
 }
 
 function bindCommon(){
-  document.querySelectorAll('[data-tab], .rail-tab').forEach(function(btn){btn.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;adjVal='';adjNote='';pg=btn.getAttribute('data-tab');searchQ='';stockListSearchQ='';draw();if(pg==='search')setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)}});
+  document.querySelectorAll('[data-tab], .rail-tab').forEach(function(btn){btn.onclick=function(){clearTransientState();pg=btn.getAttribute('data-tab');draw();if(pg==='search')setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)}});
   document.querySelectorAll('[data-family]').forEach(function(btn){btn.onclick=function(){selFamily=btn.getAttribute('data-family');stockListSearchQ='';draw()}});
   document.querySelectorAll('[data-stocklist]').forEach(function(btn){btn.onclick=function(){selStockList=btn.getAttribute('data-stocklist');stockListSearchQ='';draw()}});
   document.querySelectorAll('[data-item]').forEach(function(btn){btn.onclick=function(){selItem=items.find(function(x){return x.id===btn.getAttribute('data-item')});if(selItem)draw()}});
   var hs=document.getElementById('header-search');
   if(hs)hs.onclick=function(){selFamily=null;selStockList=null;selItem=null;adjMode=null;pg='search';stockListSearchQ='';draw();setTimeout(function(){var x=document.getElementById('search-in');if(x)x.focus()},40)};
   var hsync=document.getElementById('header-sync');
-  if(hsync)hsync.onclick=function(){toast('Sincronizando...');sync()};
+  if(hsync)hsync.onclick=function(){sync()};
   var rsync=document.getElementById('rail-sync');
-  if(rsync)rsync.onclick=function(){toast('Sincronizando...');sync()};
+  if(rsync)rsync.onclick=function(){sync()};
   var rl=document.getElementById('rail-logout');
-  if(rl)rl.onclick=function(){user=null;pg='login';draw()};
-}
-
-function showSwipeHint(txt){
-  var el=document.getElementById('swipe-hint');
-  if(!el)return;
-  el.textContent=txt||'Swipe';
-  el.classList.add('show');
-  clearTimeout(window.__swipeHintTm);
-  window.__swipeHintTm=setTimeout(function(){el.classList.remove('show')},650);
+  if(rl)rl.onclick=function(){logout()};
 }
 
 function currentTopTabIndex(){
@@ -527,21 +598,21 @@ function currentTopTabIndex(){
 }
 function goPrevTopTab(){
   var i=currentTopTabIndex();
-  if(i>0){pg=TOP_LEVEL_TABS[i-1];searchQ='';stockListSearchQ='';draw();showSwipeHint('Anterior')}
+  if(i>0){pg=TOP_LEVEL_TABS[i-1];searchQ='';stockListSearchQ='';draw();}
 }
 function goNextTopTab(){
   var i=currentTopTabIndex();
-  if(i<TOP_LEVEL_TABS.length-1){pg=TOP_LEVEL_TABS[i+1];searchQ='';stockListSearchQ='';draw();showSwipeHint('Siguiente')}
+  if(i<TOP_LEVEL_TABS.length-1){pg=TOP_LEVEL_TABS[i+1];searchQ='';stockListSearchQ='';draw();}
 }
 function goBackBySwipe(){
   if(selItem){
-    selItem=null;adjMode=null;adjVal='';adjNote='';draw();showSwipeHint('Atrás');return;
+    selItem=null;adjMode=null;adjVal='';adjNote='';draw();return;
   }
   if(selFamily&&selStockList){
-    selStockList=null;stockListSearchQ='';draw();showSwipeHint('Atrás');return;
+    selStockList=null;stockListSearchQ='';draw();return;
   }
   if(selFamily){
-    selFamily=null;draw();showSwipeHint('Atrás');return;
+    selFamily=null;draw();return;
   }
   goPrevTopTab();
 }
@@ -561,29 +632,12 @@ function findScrollableX(el){
 function shouldIgnoreSwipeTarget(el){
   while(el&&el!==document.body){
     var tag=(el.tagName||'').toUpperCase();
-    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return true;
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='BUTTON')return true;
     if(el.isContentEditable)return true;
     el=el.parentElement;
   }
   return false;
 }
-function evaluateSwipe(dx,dy,target,scrollable){
-  var adx=Math.abs(dx),ady=Math.abs(dy);
-  if(adx<70||adx<ady*1.25)return false;
-  if(shouldIgnoreSwipeTarget(target))return false;
-
-  if(scrollable){
-    var sc=scrollable;
-    var canScrollLeft=sc.scrollLeft>2;
-    var canScrollRight=sc.scrollLeft+sc.clientWidth<sc.scrollWidth-2;
-    if((dx>0&&canScrollLeft)||(dx<0&&canScrollRight))return false;
-  }
-
-  if(dx>0)goBackBySwipe();
-  else goForwardBySwipe();
-  return true;
-}
-
 function bindSwipeNavigation(){
   var root=document.getElementById('app');
   if(!root||root.__swipeBound)return;
@@ -601,115 +655,26 @@ function bindSwipeNavigation(){
   root.addEventListener('touchend',function(e){
     if(!touchStartTarget||!e.changedTouches||!e.changedTouches.length)return;
     var t=e.changedTouches[0];
-    evaluateSwipe(t.clientX-touchStartX,t.clientY-touchStartY,touchStartTarget,touchStartScrollable);
+    var dx=t.clientX-touchStartX;
+    var dy=t.clientY-touchStartY;
+    var adx=Math.abs(dx),ady=Math.abs(dy);
+
+    if(adx<70||adx<ady*1.35){touchStartTarget=null;touchStartScrollable=null;return;}
+    if(shouldIgnoreSwipeTarget(touchStartTarget)){touchStartTarget=null;touchStartScrollable=null;return;}
+
+    if(touchStartScrollable){
+      var sc=touchStartScrollable;
+      var canScrollLeft=sc.scrollLeft>2;
+      var canScrollRight=sc.scrollLeft+sc.clientWidth<sc.scrollWidth-2;
+      if((dx>0&&canScrollLeft)||(dx<0&&canScrollRight)){touchStartTarget=null;touchStartScrollable=null;return;}
+    }
+
+    if(dx>0)goBackBySwipe();
+    else goForwardBySwipe();
+
     touchStartTarget=null;
     touchStartScrollable=null;
   },{passive:true});
-
-  root.addEventListener('pointerdown',function(e){
-    if(e.pointerType==='touch')return;
-    if(e.button!==0)return;
-    pointerTracking=true;
-    pointerStartX=e.clientX;
-    pointerStartY=e.clientY;
-    pointerStartTarget=e.target;
-    pointerScrollable=findScrollableX(e.target);
-  },{passive:true});
-
-  root.addEventListener('pointerup',function(e){
-    if(!pointerTracking)return;
-    pointerTracking=false;
-    evaluateSwipe(e.clientX-pointerStartX,e.clientY-pointerStartY,pointerStartTarget,pointerScrollable);
-    pointerStartTarget=null;
-    pointerScrollable=null;
-  },{passive:true});
-
-  root.addEventListener('pointercancel',function(){
-    pointerTracking=false;
-    pointerStartTarget=null;
-    pointerScrollable=null;
-  },{passive:true});
-
-  root.addEventListener('wheel',function(e){
-    if(Math.abs(e.deltaX)<90||Math.abs(e.deltaX)<Math.abs(e.deltaY)*1.2)return;
-    var now=Date.now();
-    if(now-wheelAccT>260)wheelAccX=0;
-    wheelAccT=now;
-    wheelAccX+=e.deltaX;
-    if(wheelThrottle)return;
-    wheelThrottle=true;
-    setTimeout(function(){
-      if(Math.abs(wheelAccX)>180){
-        if(wheelAccX<0)goBackBySwipe();
-        else goForwardBySwipe();
-      }
-      wheelAccX=0;
-      wheelThrottle=false;
-    },120);
-  },{passive:true});
-}
-
-function exportReportPdf(){
-  var node=document.getElementById('report-sheet');
-  if(!node){toast('No se encontró el reporte','err');return}
-  toast('Generando PDF...');
-  var opt={
-    margin:[8,8,8,8],
-    filename:'kawas-stock-reporte.pdf',
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  };
-  html2pdf().set(opt).from(node).save().then(function(){toast('PDF exportado')}).catch(function(){toast('No se pudo exportar PDF','err')});
-}
-
-function exportReportExcel(){
-  try{
-    var rd=reportData();
-    var wb=XLSX.utils.book_new();
-
-    var summary=[
-      ['Kawas Stock - Reporte'],
-      ['Generado', rd.generatedAt.toLocaleString('es-CL')],
-      [],
-      ['KPI','Valor'],
-      ['Total ítems', rd.totalItems],
-      ['Stock total', rd.totalStock],
-      ['Familias', rd.totalFamilies],
-      ['Listas', rd.totalLists],
-      ['Alertas totales', rd.totalAlerts],
-      ['OK', rd.ok],
-      ['Bajo mínimo', rd.low],
-      ['Críticos', rd.critical],
-      ['Agotados', rd.zero]
-    ];
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),'Resumen');
-
-    var fam=[['Familia','Items','Stock total','Alertas']];
-    rd.byFamily.forEach(function(f){fam.push([f.family,f.items,f.stock,f.alerts])});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(fam),'Familias');
-
-    var cat=[['Categoria','Items','Stock total','Alertas']];
-    rd.byCategory.forEach(function(c){cat.push([c.cat,c.count,c.stock,c.alerts])});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cat),'Categorias');
-
-    var risk=[['Producto','Familia','Lista','Categoria','Subcategoria','Stock','Minimo','Unidad','Estado','Alerta']];
-    rd.topRisk.forEach(function(i){risk.push([i.name,i.family,i.stockList,i.cat,i.subcat,i.stock,i.min,i.unit,STC[st(i)].l,i.alert||''])});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(risk),'Alertas');
-
-    var stock=[['ID','Familia','Lista','Categoria','Subcategoria','Producto','Stock','Minimo','Unidad','Estado','Alerta']];
-    items.forEach(function(i){stock.push([i.id,i.family,i.stockList,i.cat,i.subcat,i.name,i.stock,i.min,i.unit,STC[st(i)].l,i.alert||''])});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(stock),'Stock');
-
-    var movement=[['Producto','Categoria','Tipo','Stock anterior','Stock nuevo','Cambio','Usuario','Fecha','Nota']];
-    hist.forEach(function(r){movement.push([r.nm,r.cat,r.tp,r.os,r.ns,(Number(r.ns)||0)-(Number(r.os)||0),r.u,r.ts,r.nt||''])});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(movement),'Historial');
-
-    XLSX.writeFile(wb,'kawas-stock-reporte.xlsx');
-    toast('Excel exportado');
-  }catch(e){
-    toast('No se pudo exportar Excel','err');
-  }
 }
 
 function safeDraw(){
@@ -796,15 +761,14 @@ function draw(){
   var hft=document.getElementById('hist-filter-type');if(hft)hft.onchange=function(){histFilterType=hft.value;renderHistoryTable()};
   document.querySelectorAll('[data-hsort]').forEach(function(btn){btn.onclick=function(){var k=btn.getAttribute('data-hsort');if(histSortKey===k){histSortDir=histSortDir==='asc'?'desc':'asc'}else{histSortKey=k;histSortDir=(k==='delta'?'desc':'asc')}renderHistoryTable()}});
   var db=document.getElementById('open-db');if(db)db.onclick=function(){window.open(SHEET_URL,'_blank')};
-  var rr=document.getElementById('report-refresh');if(rr)rr.onclick=function(){draw();toast('Reporte actualizado')};
-  var pdf=document.getElementById('report-export-pdf');if(pdf)pdf.onclick=function(){exportReportPdf()};
-  var xlsx=document.getElementById('report-export-xlsx');if(xlsx)xlsx.onclick=function(){exportReportExcel()};
   if(pg==='history')setTimeout(renderHistoryTable,0);
 }
 
-window.addEventListener('online',function(){authError=false;loadUsers(true);if(user)sync()});
-window.addEventListener('offline',function(){authError=true;safeDraw();toast('Sin conexión: usando datos locales','warn')});
+window.addEventListener('online',function(){authError=false;loadUsers(true);if(user)sync({silent:true})});
+window.addEventListener('offline',function(){authError=true;lastSyncMode='offline';safeDraw();toast('Sin conexión: usando datos locales','warn')});
 loadCachedUsers();
+user=restoreSession();
+if(user)load();
 safeDraw();
 setTimeout(function(){loadUsers(true).catch(function(){})},0);
   </script>
