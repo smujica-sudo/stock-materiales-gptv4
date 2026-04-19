@@ -166,7 +166,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-19 icon-cache-fix-02";
+    var APP_VERSION = "2026-04-19 family-icon-normalize-fix";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -226,11 +226,21 @@
     };
 
     var FAMILY_THEMES = {
-      "Kawas General": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"warehouse"},
+      "Producción": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+      "Produccion": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+      "Kawas General": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+
       "Clientes Especiales": {accent:"#B42318",soft:"#FEF3F2",softBorder:"#FECDCA",text:"#B42318",icon:"storefront"},
+
       "Mercadería": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
+      "Mercaderia": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
+
       "Bebidas Frías": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
-      "Café Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"grain"},
+      "Bebidas Frias": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
+
+      "Café Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
+      "Cafe Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
+
       "Sin familia": {accent:"#667085",soft:"#F2F4F7",softBorder:"#D0D5DD",text:"#475467",icon:"inventory_2"}
     };
 
@@ -297,11 +307,9 @@
     function parseDateLoose(v){
       if(!v) return 0;
       if(v instanceof Date) return v.getTime();
-
       var s = String(v).trim();
       var iso = Date.parse(s);
       if(!isNaN(iso)) return iso;
-
       var m = s.match(/^(\d{2})\/(\d{2})(?:\/(\d{2,4}))?\s+(\d{2}):(\d{2})$/);
       if(m){
         var dd = Number(m[1]);
@@ -312,8 +320,20 @@
         var mi = Number(m[5]);
         return new Date(yy, mm, dd, hh, mi, 0, 0).getTime();
       }
-
       return 0;
+    }
+
+    function normalizeFamilyName(v){
+      var s = String(v || "").trim();
+      if(!s) return "Sin familia";
+      var plain = s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+
+      if(plain === "produccion" || plain === "kawas general") return "Producción";
+      if(plain === "mercaderia") return "Mercadería";
+      if(plain === "cafe verde") return "Café Verde";
+      if(plain === "bebidas frias") return "Bebidas Frías";
+      if(plain === "clientes especiales") return "Clientes Especiales";
+      return s;
     }
 
     function st(x){
@@ -331,7 +351,7 @@
     };
 
     function ft(family){
-      return FAMILY_THEMES[family] || FAMILY_THEMES["Sin familia"];
+      return FAMILY_THEMES[normalizeFamilyName(family)] || FAMILY_THEMES["Sin familia"];
     }
 
     function cm(cat){
@@ -421,7 +441,7 @@
     function familyMap(){
       var m = {};
       items.forEach(function(x){
-        var f = x.family || "Sin familia";
+        var f = normalizeFamilyName(x.family || "Sin familia");
         if(!m[f]) m[f] = [];
         m[f].push(x);
       });
@@ -431,7 +451,7 @@
     function stockListMap(familyName){
       var m = {};
       items
-        .filter(function(x){ return (x.family || "Sin familia") === familyName; })
+        .filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName); })
         .forEach(function(x){
           var sl = x.stockList || "General";
           if(!m[sl]) m[sl] = [];
@@ -444,7 +464,7 @@
       var m = {};
       items
         .filter(function(x){
-          return (x.family || "Sin familia") === familyName && (x.stockList || "General") === stockListName;
+          return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName) && (x.stockList || "General") === stockListName;
         })
         .forEach(function(x){
           var c = x.cat || "General";
@@ -457,17 +477,19 @@
     function enrichItem(x){
       var name = String(x.name || x.nombre || "");
       var cat = String(x.cat || x.categoria || "");
-      var family = x.family || x.familia || (
+      var familyRaw = x.family || x.familia || (
         /castaño|castano/i.test(name) ? "Clientes Especiales" :
-        (cat === "Cold Brew" ? "Bebidas Frías" : "Kawas General")
+        (cat === "Cold Brew" ? "Bebidas Frías" : "Producción")
       );
+      var family = normalizeFamilyName(familyRaw);
       var stockList = x.stockList || x.lista_stock || (
         /castaño|castano/i.test(name) ? "Stock Castaño" :
         (cat === "Cold Brew" ? "Sala Bebidas Frías" : "Stock General Kawas")
       );
+
       return {
         id: String(x.id || ""),
-        family: String(family || ""),
+        family: family,
         stockList: String(stockList || ""),
         cat: cat,
         subcat: String(x.subcat || x.subcategoria || ""),
@@ -480,9 +502,7 @@
     }
 
     function saveAppState(){
-      try{
-        localStorage.setItem(STORAGE_KEYS.app, JSON.stringify({items:items,hist:hist}));
-      }catch(e){}
+      try{ localStorage.setItem(STORAGE_KEYS.app, JSON.stringify({items:items,hist:hist})); }catch(e){}
     }
 
     function loadAppState(){
@@ -546,9 +566,7 @@
     }
 
     function savePendingUpdates(){
-      try{
-        localStorage.setItem(STORAGE_KEYS.pending, JSON.stringify(pendingUpdates || []));
-      }catch(e){}
+      try{ localStorage.setItem(STORAGE_KEYS.pending, JSON.stringify(pendingUpdates || [])); }catch(e){}
     }
 
     function loadPendingUpdates(){
@@ -613,16 +631,12 @@
     }
 
     function saveCachedUsers(users){
-      try{
-        localStorage.setItem(STORAGE_KEYS.authUsers, JSON.stringify(users || []));
-      }catch(e){}
+      try{ localStorage.setItem(STORAGE_KEYS.authUsers, JSON.stringify(users || [])); }catch(e){}
     }
 
     function buildApiUrl(params){
       var q = Object.keys(params || {})
-        .map(function(k){
-          return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
-        })
+        .map(function(k){ return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); })
         .join("&");
       return API_URL + (API_URL.indexOf("?") > -1 ? "&" : "?") + q;
     }
@@ -670,13 +684,8 @@
         });
     }
 
-    function setSyncError(msg){
-      lastSyncError = String(msg || "");
-    }
-
-    function clearSyncError(){
-      lastSyncError = "";
-    }
+    function setSyncError(msg){ lastSyncError = String(msg || ""); }
+    function clearSyncError(){ lastSyncError = ""; }
 
     function toast(m,t){
       toastMsg = m;
@@ -772,7 +781,6 @@
 
     function attemptLogin(pinAttempt){
       if(loginBusy) return;
-
       var attempt = String(pinAttempt || loginPin || "").replace(/\D/g,"").slice(0,4);
       if(attempt.length !== 4) return;
 
@@ -1006,8 +1014,9 @@
     }
 
     function familyBadge(family){
-      var t = ft(family || "Sin familia");
-      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:'+t.softBorder+';background:'+t.soft+';color:'+t.text+'"><span class="material-symbols-rounded text-[14px]">'+t.icon+'</span>'+esc(family || "Sin familia")+'</span>';
+      var f = normalizeFamilyName(family || "Sin familia");
+      var t = ft(f);
+      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:'+t.softBorder+';background:'+t.soft+';color:'+t.text+'"><span class="material-symbols-rounded text-[14px]">'+t.icon+'</span>'+esc(f)+'</span>';
     }
 
     function statusBadge(item){
@@ -1063,10 +1072,10 @@
       var submeta = scm(item.subcat,item.cat,item.name);
       var s = st(item);
       var th = statusTheme(s);
-      var fam = item.family || "Sin familia";
+      var fam = normalizeFamilyName(item.family || "Sin familia");
       var t = ft(fam);
 
-      return '<button data-item="'+item.id+'" class="fade-up w-full rounded-3xl border bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(((idx || 0) * .03))+'s;border-color:'+t.softBorder+'"><div class="flex items-start gap-3"><div class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(item.cat)+'"><span class="material-symbols-rounded text-[22px]">'+meta.icon+'</span>'+(item.subcat ? '<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-xl border border-white bg-white shadow-soft" style="'+subcategoryIconStyle(item.subcat,item.cat,item.name)+'"><span class="material-symbols-rounded text-[14px]">'+submeta.icon+'</span></span>' : '')+'</div><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="line-clamp-2 text-[15px] font-semibold text-gray-900">'+esc(item.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(item.family || "")+(item.stockList ? " · "+esc(item.stockList) : "")+'</div></div><div class="text-right"><div class="mn text-[22px] font-semibold tracking-[-0.03em] '+th.text+'">'+item.stock.toLocaleString()+'</div><div class="text-[11px] text-gray-500">'+esc(item.unit)+'</div></div></div><div class="mt-3 flex items-center gap-2 flex-wrap">'+familyBadge(item.family)+taxonomyPill(item.cat,meta.icon,'border-color:#EAECF0;background:#F9FAFB;color:'+meta.color)+' '+(item.subcat ? taxonomyPill(item.subcat,submeta.icon,'border-color:#EAECF0;background:#FFFFFF;color:'+submeta.color) : '')+statusBadge(item)+(item.alert ? badge(item.alert,'bg-gray-50 text-gray-700 border-gray-200','notification_important') : '')+'</div>'+progressBar(item,accent || t.accent)+'</div></div></button>';
+      return '<button data-item="'+item.id+'" class="fade-up w-full rounded-3xl border bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(((idx || 0) * .03))+'s;border-color:'+t.softBorder+'"><div class="flex items-start gap-3"><div class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(item.cat)+'"><span class="material-symbols-rounded text-[22px]">'+meta.icon+'</span>'+(item.subcat ? '<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-xl border border-white bg-white shadow-soft" style="'+subcategoryIconStyle(item.subcat,item.cat,item.name)+'"><span class="material-symbols-rounded text-[14px]">'+submeta.icon+'</span></span>' : '')+'</div><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="line-clamp-2 text-[15px] font-semibold text-gray-900">'+esc(item.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(fam || "")+(item.stockList ? " · "+esc(item.stockList) : "")+'</div></div><div class="text-right"><div class="mn text-[22px] font-semibold tracking-[-0.03em] '+th.text+'">'+item.stock.toLocaleString()+'</div><div class="text-[11px] text-gray-500">'+esc(item.unit)+'</div></div></div><div class="mt-3 flex items-center gap-2 flex-wrap">'+familyBadge(fam)+taxonomyPill(item.cat,meta.icon,'border-color:#EAECF0;background:#F9FAFB;color:'+meta.color)+' '+(item.subcat ? taxonomyPill(item.subcat,submeta.icon,'border-color:#EAECF0;background:#FFFFFF;color:'+submeta.color) : '')+statusBadge(item)+(item.alert ? badge(item.alert,'bg-gray-50 text-gray-700 border-gray-200','notification_important') : '')+'</div>'+progressBar(item,accent || t.accent)+'</div></div></button>';
     }
 
     function navHtml(current,critCount){
@@ -1250,7 +1259,7 @@
       var q = norm(raw || "");
       var terms = q.split(/\s+/).filter(Boolean);
       var base = items.filter(function(x){
-        return (x.family || "Sin familia") === familyName && (x.stockList || "General") === stockListName;
+        return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName) && (x.stockList || "General") === stockListName;
       });
 
       if(!q){
@@ -1360,7 +1369,8 @@
           var meta = cm(i.cat);
           var tone = statusTheme(st(i));
           var submeta = scm(i.subcat,i.cat,i.name);
-          return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3">'+familyBadge(i.family)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || "—")+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
+          var fam = normalizeFamilyName(i.family);
+          return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3">'+familyBadge(fam)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || "—")+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
         }).join("")+
       '</tbody></table></div></div>';
 
@@ -1466,11 +1476,12 @@
     }
 
     function renderFamily(){
-      var lm = stockListMap(selFamily);
+      var familyLabel = normalizeFamilyName(selFamily);
+      var lm = stockListMap(familyLabel);
       var listKeys = Object.keys(lm);
-      var familyItems = familyMap()[selFamily] || [];
+      var familyItems = familyMap()[familyLabel] || [];
       var totalItems = familyItems.length;
-      var t = ft(selFamily || "Sin familia");
+      var t = ft(familyLabel);
 
       var totalStock = 0;
       var totalAlerts = 0;
@@ -1480,29 +1491,30 @@
       });
 
       var inner = "";
-      inner += sectionHeader("Familia", selFamily || "Sin familia", totalItems+" ítems · "+listKeys.length+" listas", {left:topIconButton("back-family","arrow_back",false)});
+      inner += sectionHeader("Familia", familyLabel || "Sin familia", totalItems+" ítems · "+listKeys.length+" listas", {left:topIconButton("back-family","arrow_back",false)});
       inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" id="stocklist-scroll">'+listKeys.map(function(sl,idx){
         var listItems = lm[sl];
         var issueCount = listItems.filter(function(x){ return st(x) !== "ok"; }).length;
         var totalSc = 0;
         listItems.forEach(function(x){ totalSc += Number(x.stock) || 0; });
-        return '<button data-stocklist="'+esc(sl)+'" class="fade-up rounded-[28px] border p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx * .03)+'s;'+familyCardStyle(selFamily)+'"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(selFamily)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div>'+(issueCount ? badge(issueCount+" con alerta","bg-error-50 text-error-700 border-red-200") : badge("Todo OK","bg-success-50 text-success-700 border-green-200"))+'</div><div class="mt-4 text-[15px] font-semibold" style="'+familyTextStyle(selFamily)+'">'+esc(sl)+'</div><div class="mt-1 text-xs text-gray-600">'+listItems.length+' ítems</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>';
-      }).join("")+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(selFamily)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(selFamily)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em]" style="'+familyTextStyle(selFamily)+'">'+esc(selFamily)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(selFamily)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(selFamily)+'">Listas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(selFamily)+'">'+listKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section></aside></div></div></main>';
+        return '<button data-stocklist="'+esc(sl)+'" class="fade-up rounded-[28px] border p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx * .03)+'s;'+familyCardStyle(familyLabel)+'"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(familyLabel)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div>'+(issueCount ? badge(issueCount+" con alerta","bg-error-50 text-error-700 border-red-200") : badge("Todo OK","bg-success-50 text-success-700 border-green-200"))+'</div><div class="mt-4 text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(sl)+'</div><div class="mt-1 text-xs text-gray-600">'+listItems.length+' ítems</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>';
+      }).join("")+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(familyLabel)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em]" style="'+familyTextStyle(familyLabel)+'">'+esc(familyLabel)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Listas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+listKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section></aside></div></div></main>';
 
       return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
 
     function renderStockListView(){
-      var theme = ft(selFamily || "Sin familia");
-      var matches = getStockListMatches(selFamily,selStockList,stockListSearchQ);
-      var categories = categoryMapForStockList(selFamily,selStockList);
+      var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
+      var theme = ft(familyLabel);
+      var matches = getStockListMatches(familyLabel,selStockList,stockListSearchQ);
+      var categories = categoryMapForStockList(familyLabel,selStockList);
       var quickMatches = (stockListSearchQ || "").trim() ? matches.slice(0,6) : [];
       var totalStock = 0;
       var totalAlerts = 0;
 
       items
         .filter(function(x){
-          return (x.family || "Sin familia") === selFamily && (x.stockList || "General") === selStockList;
+          return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList;
         })
         .forEach(function(x){
           totalStock += Number(x.stock) || 0;
@@ -1513,12 +1525,12 @@
         var itemsCat = categories[cat];
         var catAlerts = itemsCat.filter(function(x){ return st(x) !== "ok"; }).length;
         var meta = cm(cat);
-        return '<button data-master-cat="'+esc(cat)+'" class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(selFamily,false)+'"><span class="material-symbols-rounded text-[16px]" style="color:'+meta.color+'">'+meta.icon+'</span><span>'+esc(cat)+'</span>'+(catAlerts ? '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error-50 px-1.5 text-[10px] font-bold text-error-700">'+catAlerts+'</span>' : '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold" style="background:'+theme.soft+';color:'+theme.text+'">'+itemsCat.length+'</span>')+'</button>';
+        return '<button data-master-cat="'+esc(cat)+'" class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'"><span class="material-symbols-rounded text-[16px]" style="color:'+meta.color+'">'+meta.icon+'</span><span>'+esc(cat)+'</span>'+(catAlerts ? '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error-50 px-1.5 text-[10px] font-bold text-error-700">'+catAlerts+'</span>' : '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold" style="background:'+theme.soft+';color:'+theme.text+'">'+itemsCat.length+'</span>')+'</button>';
       }).join("");
 
       var inner = "";
-      inner += sectionHeader("Lista de stock", selStockList, selFamily+" · buscador interno", {left:topIconButton("back-stocklist","arrow_back",false)});
-      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(selFamily)+'"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold" style="'+familyTextStyle(selFamily)+'">'+esc(selStockList)+'</div><div class="mt-1 text-sm text-gray-600">Barra predictiva sobre tabla dinámica de la lista.</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+" resultados","bg-white text-gray-700 border-gray-200","table_rows")+badge(totalAlerts+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div></div><div class="mt-4 rounded-[28px] border p-3" style="'+familyMetricStyle(selFamily)+'"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border" style="border-color:'+theme.softBorder+'"><span class="material-symbols-rounded" style="color:'+theme.accent+'">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(selFamily,false)+'">'+esc(i.name)+'</button>'; }).join("")+'</div>' : '')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(selFamily)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(selFamily)+'">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(selFamily)+'">'+items.filter(function(x){ return (x.family || "Sin familia") === selFamily && (x.stockList || "General") === selStockList; }).length+'</div><div class="mt-1 text-xs text-gray-500">en la lista</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">unidades registradas</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(selFamily)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(selFamily)+'">Categorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(selFamily)+'">'+Object.keys(categories).length+'</div><div class="mt-1 text-xs text-gray-500">accesos rápidos</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div><div class="mt-1 text-xs text-gray-500">activos</div></div></div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold" style="'+familyTextStyle(selFamily)+'">Accesos rápidos</div><div class="text-xs text-gray-500">Categorías</div></div><div class="pill-scroll">'+categoryPills+'</div></div><div id="stocklist-master-res" class="mt-4"></div></section></div></main>';
+      inner += sectionHeader("Lista de stock", selStockList, familyLabel+" · buscador interno", {left:topIconButton("back-stocklist","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(selStockList)+'</div><div class="mt-1 text-sm text-gray-600">Barra predictiva sobre tabla dinámica de la lista.</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+" resultados","bg-white text-gray-700 border-gray-200","table_rows")+badge(totalAlerts+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div></div><div class="mt-4 rounded-[28px] border p-3" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border" style="border-color:'+theme.softBorder+'"><span class="material-symbols-rounded" style="color:'+theme.accent+'">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'">'+esc(i.name)+'</button>'; }).join("")+'</div>' : '')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+items.filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList; }).length+'</div><div class="mt-1 text-xs text-gray-500">en la lista</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">unidades registradas</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Categorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+Object.keys(categories).length+'</div><div class="mt-1 text-xs text-gray-500">accesos rápidos</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div><div class="mt-1 text-xs text-gray-500">activos</div></div></div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold" style="'+familyTextStyle(familyLabel)+'">Accesos rápidos</div><div class="text-xs text-gray-500">Categorías</div></div><div class="pill-scroll">'+categoryPills+'</div></div><div id="stocklist-master-res" class="mt-4"></div></section></div></main>';
 
       return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
@@ -1527,15 +1539,16 @@
       var box = document.getElementById("stocklist-master-res");
       if(!box) return;
 
-      var res = getStockListMatches(selFamily,selStockList,stockListSearchQ);
-      var theme = ft(selFamily || "Sin familia");
+      var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
+      var res = getStockListMatches(familyLabel,selStockList,stockListSearchQ);
+      var theme = ft(familyLabel);
 
       if(!res.length){
         box.innerHTML = emptyState("inventory_2","Sin resultados","No encontramos materiales que coincidan en esta lista de stock.");
         return;
       }
 
-      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(selFamily)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla dinámica","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla dinámica","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
         res.map(function(i){
           var meta = cm(i.cat);
           var tone = statusTheme(st(i));
@@ -1560,20 +1573,21 @@
     function renderDetail(){
       var si = selItem;
       var pct = si.min > 0 ? Math.min(100,Math.round(si.stock / si.min * 100)) : 100;
-      var theme = ft(si.family || "Sin familia");
+      var familyLabel = normalizeFamilyName(si.family || "Sin familia");
+      var theme = ft(familyLabel);
       var meta = cm(si.cat);
       var submeta = scm(si.subcat,si.cat,si.name);
 
       var inner = "";
-      inner += sectionHeader("Detalle de producto", si.name, (si.family ? si.family+" · " : "")+(si.stockList ? si.stockList+" · " : "")+(si.subcat ? si.subcat+" · " : "")+si.cat, {left:topIconButton("back-item","arrow_back",false)});
-      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]"><div class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(si.family)+'"><div class="flex items-start justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em]" style="'+familyTextStyle(si.family)+'">Estado actual</div></div>'+statusBadge(si)+'</div><div class="mt-3 flex items-center gap-2 flex-wrap">'+
-        familyBadge(si.family)+
+      inner += sectionHeader("Detalle de producto", si.name, (familyLabel ? familyLabel+" · " : "")+(si.stockList ? si.stockList+" · " : "")+(si.subcat ? si.subcat+" · " : "")+si.cat, {left:topIconButton("back-item","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]"><div class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-start justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">Estado actual</div></div>'+statusBadge(si)+'</div><div class="mt-3 flex items-center gap-2 flex-wrap">'+
+        familyBadge(familyLabel)+
         '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:#EAECF0;background:#F9FAFB;color:'+meta.color+'"><span class="material-symbols-rounded text-[14px]">'+meta.icon+'</span>'+esc(si.cat)+'</span>'+
         (si.subcat ? '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:#EAECF0;background:#FFFFFF;color:'+submeta.color+'"><span class="material-symbols-rounded text-[14px]">'+submeta.icon+'</span>'+esc(si.subcat)+'</span>' : '')+
-      '</div><div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(si.family)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(si.family)+'">Stock</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(si.family)+'">'+si.stock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Mínimo</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em] text-gray-900">'+si.min.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(si.family)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(si.family)+'">Cobertura</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(si.family)+'">'+pct+'%</div><div class="mt-1 text-xs text-gray-500">del mínimo</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Estado</div><div class="mt-2">'+statusBadge(si)+'</div></div></div><div class="mt-5 h-2 overflow-hidden rounded-full bg-gray-100"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+theme.accent+'"></div></div><div class="mt-2 flex items-center justify-between text-[11px] text-gray-500"><span>Stock mínimo: '+si.min+' '+esc(si.unit)+'</span><span>'+pct+'%</span></div></section></div><div class="space-y-4">'+
+      '</div><div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Stock</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+si.stock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Mínimo</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em] text-gray-900">'+si.min.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Cobertura</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+pct+'%</div><div class="mt-1 text-xs text-gray-500">del mínimo</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Estado</div><div class="mt-2">'+statusBadge(si)+'</div></div></div><div class="mt-5 h-2 overflow-hidden rounded-full bg-gray-100"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+theme.accent+'"></div></div><div class="mt-2 flex items-center justify-between text-[11px] text-gray-500"><span>Stock mínimo: '+si.min+' '+esc(si.unit)+'</span><span>'+pct+'%</span></div></section></div><div class="space-y-4">'+
         (!adjMode
-          ? '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(si.family)+'"><div class="mb-3"><div class="text-lg font-semibold" style="'+familyTextStyle(si.family)+'">Modifica Stock</div><div class="text-sm text-gray-600">Ingresos, salidas y ajustes.</div></div><div class="grid grid-cols-1 gap-3"><button data-adj="in" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(si.family)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">south_west</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(si.family)+'">Ingreso</div><div class="text-sm text-gray-500">Suma unidades al stock actual</div></div></div></button><button data-adj="out" class="rounded-[28px] border border-red-200 bg-white p-4 text-left shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-error-50 text-error-700"><span class="material-symbols-rounded">north_east</span></div><div><div class="text-[15px] font-semibold text-gray-900">Salida</div><div class="text-sm text-gray-500">Descuenta unidades del inventario</div></div></div></button><button data-adj="set" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(si.family)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">edit_square</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(si.family)+'">Ajustar</div><div class="text-sm text-gray-500">Define un stock manual</div></div></div></button></div></section>'
-          : '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(si.family)+'"><div class="text-lg font-semibold" style="'+familyTextStyle(si.family)+'">'+(adjMode === "in" ? "Registrar ingreso" : adjMode === "out" ? "Registrar salida" : "Ajustar stock")+'</div><div class="mt-4 space-y-3"><div class="rounded-2xl border px-4 py-3" style="'+familyMetricStyle(si.family)+'"><input id="adj-v" type="number" inputmode="numeric" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="'+(adjMode === "set" ? "Nuevo stock" : "Cantidad")+'" value="'+esc(adjVal)+'"></div><div class="rounded-2xl border border-gray-200 bg-white px-4 py-3"><input id="adj-n" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Nota opcional" value="'+esc(adjNote)+'"></div><div class="grid grid-cols-2 gap-3"><button id="adj-cancel" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Cancelar</button><button id="adj-ok" class="rounded-2xl px-4 py-3 text-sm font-semibold text-white" style="background:'+theme.accent+'">Confirmar</button></div></div></section>'
+          ? '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="mb-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">Modifica Stock</div><div class="text-sm text-gray-600">Ingresos, salidas y ajustes.</div></div><div class="grid grid-cols-1 gap-3"><button data-adj="in" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">south_west</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">Ingreso</div><div class="text-sm text-gray-500">Suma unidades al stock actual</div></div></div></button><button data-adj="out" class="rounded-[28px] border border-red-200 bg-white p-4 text-left shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-error-50 text-error-700"><span class="material-symbols-rounded">north_east</span></div><div><div class="text-[15px] font-semibold text-gray-900">Salida</div><div class="text-sm text-gray-500">Descuenta unidades del inventario</div></div></div></button><button data-adj="set" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">edit_square</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">Ajustar</div><div class="text-sm text-gray-500">Define un stock manual</div></div></div></button></div></section>'
+          : '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+(adjMode === "in" ? "Registrar ingreso" : adjMode === "out" ? "Registrar salida" : "Ajustar stock")+'</div><div class="mt-4 space-y-3"><div class="rounded-2xl border px-4 py-3" style="'+familyMetricStyle(familyLabel)+'"><input id="adj-v" type="number" inputmode="numeric" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="'+(adjMode === "set" ? "Nuevo stock" : "Cantidad")+'" value="'+esc(adjVal)+'"></div><div class="rounded-2xl border border-gray-200 bg-white px-4 py-3"><input id="adj-n" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Nota opcional" value="'+esc(adjNote)+'"></div><div class="grid grid-cols-2 gap-3"><button id="adj-cancel" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Cancelar</button><button id="adj-ok" class="rounded-2xl px-4 py-3 text-sm font-semibold text-white" style="background:'+theme.accent+'">Confirmar</button></div></div></section>'
         )+
       '</div></div></div></main>';
 
@@ -1605,7 +1619,7 @@
 
       document.querySelectorAll("[data-family]").forEach(function(btn){
         btn.onclick = function(){
-          selFamily = btn.getAttribute("data-family");
+          selFamily = normalizeFamilyName(btn.getAttribute("data-family"));
           stockListSearchQ = "";
           saveSession();
           draw();
