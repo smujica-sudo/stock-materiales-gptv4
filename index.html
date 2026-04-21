@@ -310,18 +310,13 @@
       "Producción": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
       "Produccion": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
       "Kawas General": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
-
       "Clientes Especiales": {accent:"#B42318",soft:"#FEF3F2",softBorder:"#FECDCA",text:"#B42318",icon:"storefront"},
-
       "Mercadería": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
       "Mercaderia": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
-
       "Bebidas Frías": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
       "Bebidas Frias": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
-
       "Café Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
       "Cafe Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
-
       "Sin familia": {accent:"#667085",soft:"#F2F4F7",softBorder:"#D0D5DD",text:"#475467",icon:"inventory_2"}
     };
 
@@ -1145,22 +1140,11 @@
     }
 
     function metricCard(label,value,meta,cls){
-      return '<div class="metric-tile rounded-[28px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">'+esc(label)+'</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] '+(cls || 'text-gray-900')+'">'+esc(String(value))+'</div><div class="mt-1 text-xs text-gray-500">'+esc(meta || '')+'</div></div>';
+      return '<div class="metric-tile rounded-[28px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">'+esc(label)+'</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] '+(cls || 'text-gray-900')+'">'+esc(String(value))+'</div>'+(meta ? '<div class="mt-1 text-xs text-gray-500">'+esc(meta)+'</div>' : '')+'</div>';
     }
 
     function emptyState(icon,title,text){
       return '<div class="surface-card panel-outline rounded-[30px] px-6 py-10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] border border-gray-200 bg-gray-50 text-gray-500"><span class="material-symbols-rounded text-[28px]">'+icon+'</span></div><div class="mt-4 text-lg font-semibold text-gray-900">'+esc(title)+'</div><div class="mt-2 text-sm leading-6 text-gray-500">'+esc(text)+'</div></div>';
-    }
-
-    function itemCard(item,idx,accent){
-      var meta = cm(item.cat);
-      var submeta = scm(item.subcat,item.cat,item.name);
-      var s = st(item);
-      var th = statusTheme(s);
-      var fam = normalizeFamilyName(item.family || "Sin familia");
-      var t = ft(fam);
-
-      return '<button data-item="'+item.id+'" class="fade-up w-full rounded-3xl border bg-white p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(((idx || 0) * .03))+'s;border-color:'+t.softBorder+'"><div class="flex items-start gap-3"><div class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(item.cat)+'"><span class="material-symbols-rounded text-[22px]">'+meta.icon+'</span>'+(item.subcat ? '<span class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-xl border border-white bg-white shadow-soft" style="'+subcategoryIconStyle(item.subcat,item.cat,item.name)+'"><span class="material-symbols-rounded text-[14px]">'+submeta.icon+'</span></span>' : '')+'</div><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="line-clamp-2 text-[15px] font-semibold text-gray-900">'+esc(item.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(fam || "")+(item.stockList ? " · "+esc(item.stockList) : "")+'</div></div><div class="text-right"><div class="mn text-[22px] font-semibold tracking-[-0.03em] '+th.text+'">'+item.stock.toLocaleString()+'</div><div class="text-[11px] text-gray-500">'+esc(item.unit)+'</div></div></div><div class="mt-3 flex items-center gap-2 flex-wrap">'+familyBadge(fam)+taxonomyPill(item.cat,meta.icon,'border-color:#EAECF0;background:#F9FAFB;color:'+meta.color)+' '+(item.subcat ? taxonomyPill(item.subcat,submeta.icon,'border-color:#EAECF0;background:#FFFFFF;color:'+submeta.color) : '')+statusBadge(item)+(item.alert ? badge(item.alert,'bg-gray-50 text-gray-700 border-gray-200','notification_important') : '')+'</div>'+progressBar(item,accent || t.accent)+'</div></div></button>';
     }
 
     function navHtml(current,critCount){
@@ -1209,7 +1193,7 @@
           '<div class="surface-muted panel-outline rounded-[28px] p-4">'+
             '<div class="flex items-start gap-3">'+
               '<div class="flex h-12 w-12 items-center justify-center rounded-[18px] border border-primary-200 bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div>'+
-              '<div class="min-w-0 flex-1"><div class="text-base font-semibold tracking-[-0.02em] text-gray-900">'+APP_NAME+'</div><div class="mt-1 text-xs leading-5 text-gray-500">Inventario operativo con sincronización y modo offline.</div><div class="mt-3 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-600"><span class="sync-dot" style="background:'+syncMeta.dot+'"></span><span>'+esc(syncMeta.label)+'</span></div></div>'+
+              '<div class="min-w-0 flex-1"><div class="text-base font-semibold tracking-[-0.02em] text-gray-900">'+APP_NAME+'</div><div class="mt-3 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-600"><span class="sync-dot" style="background:'+syncMeta.dot+'"></span><span>'+esc(syncMeta.label)+'</span></div></div>'+
             '</div>'+
           '</div>'+
           '<div class="mt-4 surface-card panel-outline rounded-[28px] p-4">'+
@@ -1226,13 +1210,13 @@
           '<div class="mt-3 space-y-2">'+
             ["home","search","alerts","history","report"].map(function(id){
               var meta = {
-                home:["home","Inicio","Vista general y familias"],
-                search:["search","Buscar","Consulta transversal"],
-                alerts:["warning","Alertas","Priorización operativa"],
-                history:["schedule","Historial","Trazabilidad de cambios"],
-                report:["description","Reporte","Exportación visual"]
+                home:["home","Inicio"],
+                search:["search","Buscar"],
+                alerts:["warning","Alertas"],
+                history:["schedule","Historial"],
+                report:["description","Reporte"]
               }[id];
-              return '<button data-tab="'+id+'" class="rail-tab group flex w-full items-center justify-between rounded-[22px] border px-4 py-3.5 text-left transition '+(pg === id ? 'border-gray-900 bg-gray-900 text-white shadow-soft' : 'border-gray-200 bg-white/78 text-gray-700 hover:bg-gray-50')+'"><span class="flex min-w-0 items-start gap-3"><span class="mt-0.5 material-symbols-rounded text-[20px]">'+meta[0]+'</span><span class="min-w-0"><span class="block text-sm font-semibold">'+meta[1]+'</span><span class="mt-0.5 block text-xs '+(pg === id ? 'text-gray-300' : 'text-gray-500')+'">'+meta[2]+'</span></span></span>'+(id === "alerts" && criticalAlerts ? '<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full '+(pg === id ? 'bg-white/10 text-white' : 'bg-error-50 text-error-700')+' px-2 text-[11px] font-bold">'+criticalAlerts+'</span>' : '<span class="material-symbols-rounded text-[18px] '+(pg === id ? 'text-white/70' : 'text-gray-300 group-hover:text-gray-500')+'">chevron_right</span>')+'</button>';
+              return '<button data-tab="'+id+'" class="rail-tab group flex w-full items-center justify-between rounded-[22px] border px-4 py-3.5 text-left transition '+(pg === id ? 'border-gray-900 bg-gray-900 text-white shadow-soft' : 'border-gray-200 bg-white/78 text-gray-700 hover:bg-gray-50')+'"><span class="flex min-w-0 items-center gap-3"><span class="material-symbols-rounded text-[20px]">'+meta[0]+'</span><span class="block text-sm font-semibold">'+meta[1]+'</span></span>'+(id === "alerts" && criticalAlerts ? '<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full '+(pg === id ? 'bg-white/10 text-white' : 'bg-error-50 text-error-700')+' px-2 text-[11px] font-bold">'+criticalAlerts+'</span>' : '<span class="material-symbols-rounded text-[18px] '+(pg === id ? 'text-white/70' : 'text-gray-300 group-hover:text-gray-500')+'">chevron_right</span>')+'</button>';
             }).join("")+
           '</div>'+
           '<div class="mt-auto space-y-2 pt-5">'+
@@ -1269,10 +1253,9 @@
             : badge('Atención','bg-warning-50 text-warning-700 border-amber-200','notifications_active'));
       var inner = "";
 
-      inner += sectionHeader("Centro operativo","Hola, "+user.n,"Rediseño visual profundo manteniendo login por PIN, sincronización, historial, navegación, alertas y operación offline.");
+      inner += sectionHeader("Centro operativo","Hola, "+user.n,"");
 
       inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">';
-
       inner += '<section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.28fr)_minmax(340px,.72fr)]">'+
         '<div class="surface-card-strong panel-outline brand-glow hero-mesh rounded-[34px] p-5 sm:p-6">'+
           '<div class="flex flex-wrap items-center gap-2.5">'+
@@ -1281,35 +1264,31 @@
             badge(pendingUpdates.length ? pendingUpdates.length+" pendientes" : "Sin cola pendiente", pendingUpdates.length ? "bg-warning-50 text-warning-700 border-amber-200" : "bg-primary-50 text-primary-700 border-primary-200", pendingUpdates.length ? "cloud_off" : "cloud_done")+
           '</div>'+
           '<div class="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">'+
-            '<div class="min-w-0 flex-1">'+
-              '<div class="text-sm font-medium text-gray-500">Visión general</div>'+
-              '<div class="mt-2 max-w-2xl text-[30px] font-semibold leading-[1.02] tracking-[-0.05em] text-gray-900 sm:text-[38px]">Un inventario operativo más claro, más jerárquico y más rápido de leer.</div>'+
-              '<p class="mt-3 max-w-2xl text-sm leading-6 text-gray-600">La capa visual ahora prioriza salud del stock, familias y accesos de trabajo sin alterar la lógica de sincronización, ajustes ni persistencia local.</p>'+
-            '</div>'+
+            '<div class="min-w-0 flex-1"></div>'+
             '<div class="grid w-full max-w-[320px] grid-cols-2 gap-3">'+
-              '<div class="metric-tile rounded-[24px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">unidades registradas</div></div>'+
-              '<div class="metric-tile rounded-[24px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Familias</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+familiesCount+'</div><div class="mt-1 text-xs text-gray-500">núcleos operativos</div></div>'+
+              '<div class="metric-tile rounded-[24px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div>'+
+              '<div class="metric-tile rounded-[24px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Familias</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-primary-700">'+familiesCount+'</div></div>'+
             '</div>'+
           '</div>'+
           '<div class="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">'+
-            '<button data-tab="search" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Buscar</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-gray-900">Consulta global</div><div class="mt-1 text-xs text-gray-500">familias, listas y productos</div></button>'+
-            '<button data-tab="alerts" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Alertas</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mn mt-2 text-[24px] font-semibold tracking-[-0.04em] text-error-700">'+(criticalCount + zeroCount)+'</div><div class="mt-1 text-xs text-gray-500">críticas y agotadas</div></button>'+
-            '<button data-tab="history" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Historial</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mn mt-2 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+hist.length+'</div><div class="mt-1 text-xs text-gray-500">movimientos cargados</div></button>'+
-            '<button data-tab="report" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Reporte</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-gray-900">PDF visual</div><div class="mt-1 text-xs text-gray-500">exportación ejecutiva</div></button>'+
+            '<button data-tab="search" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Buscar</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-gray-900">Buscar</div></button>'+
+            '<button data-tab="alerts" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Alertas</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mn mt-2 text-[24px] font-semibold tracking-[-0.04em] text-error-700">'+(criticalCount + zeroCount)+'</div></button>'+
+            '<button data-tab="history" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Historial</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mn mt-2 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+hist.length+'</div></button>'+
+            '<button data-tab="report" class="metric-tile rounded-[24px] p-4 text-left transition active:scale-[0.99]"><div class="flex items-center justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">Reporte</div><span class="material-symbols-rounded text-[18px] text-gray-400">arrow_outward</span></div><div class="mt-2 text-[18px] font-semibold tracking-[-0.03em] text-gray-900">PDF</div></button>'+
           '</div>'+
         '</div>'+
         '<aside class="space-y-4">'+
           '<section class="surface-card panel-outline rounded-[34px] p-5">'+
-            '<div class="flex items-start justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Estado operativo</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">'+(alertItems.length === 0 ? 'Todo estable' : (criticalCount + zeroCount > 0 ? 'Reposición prioritaria' : 'Atención preventiva'))+'</div></div>'+statusSummaryBadge+'</div>'+
+            '<div class="flex items-start justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Estado</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">'+(alertItems.length === 0 ? 'Todo estable' : (criticalCount + zeroCount > 0 ? 'Reposición prioritaria' : 'Atención'))+'</div></div>'+statusSummaryBadge+'</div>'+
             '<div class="mt-5 grid grid-cols-2 gap-3">'+
-              metricCard('OK',okCount,'ítems estables','text-success-700')+
-              metricCard('Bajo mínimo',lowCount,'revisión cercana','text-warning-700')+
-              metricCard('Críticos',criticalCount,'reponer pronto','text-error-700')+
-              metricCard('Agotados',zeroCount,'sin stock','text-gray-900')+
+              metricCard('OK',okCount,'','text-success-700')+
+              metricCard('Bajo mínimo',lowCount,'','text-warning-700')+
+              metricCard('Críticos',criticalCount,'','text-error-700')+
+              metricCard('Agotados',zeroCount,'','text-gray-900')+
             '</div>'+
           '</section>'+
           '<section class="surface-card panel-outline rounded-[34px] p-5">'+
-            '<div class="flex items-center justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Sesión activa</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(user.n)+'</div></div><span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600">'+esc(roleLabel(user))+'</span></div>'+
+            '<div class="flex items-center justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Sesión</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">'+esc(user.n)+'</div></div><span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600">'+esc(roleLabel(user))+'</span></div>'+
             '<div class="mt-4 space-y-3 text-sm text-gray-600">'+
               '<div class="flex items-center justify-between gap-3"><span class="inline-flex items-center gap-2"><span class="material-symbols-rounded text-[18px] text-gray-400">calendar_today</span><span>Fecha</span></span><strong class="font-semibold text-gray-900">'+esc(currentDateLabel())+'</strong></div>'+
               '<div class="flex items-center justify-between gap-3"><span class="inline-flex items-center gap-2"><span class="material-symbols-rounded text-[18px] text-gray-400">schedule</span><span>Hora</span></span><strong class="font-semibold text-gray-900">'+esc(currentTimeLabel())+'</strong></div>'+
@@ -1320,14 +1299,14 @@
       '</section>';
 
       inner += '<section class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4">'+
-        metricCard('Ítems',items.length,'inventario total','text-gray-900')+
-        metricCard('Alertas',alertItems.length,'ítems bajo umbral','text-warning-700')+
-        metricCard('Pendientes',pendingUpdates.length,'cola local','text-primary-700')+
-        metricCard('Movimientos',hist.length,'historial cargado','text-gray-900')+
+        metricCard('Ítems',items.length,'','text-gray-900')+
+        metricCard('Alertas',alertItems.length,'','text-warning-700')+
+        metricCard('Pendientes',pendingUpdates.length,'','text-primary-700')+
+        metricCard('Movimientos',hist.length,'','text-gray-900')+
       '</section>';
 
       inner += '<section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(300px,.88fr)]">';
-      inner += '<div><div class="mb-3 flex items-center justify-between gap-3"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">Familias de inventario</div><div class="mt-1 text-sm text-gray-500">Cada bloque mantiene acceso directo a sus listas de stock y estado de salud.</div></div>'+badge(familiesCount+" familias","bg-primary-50 text-primary-700 border-primary-200","dashboard")+'</div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2">'+families.map(function(family,idx){
+      inner += '<div><div class="mb-3 flex items-center justify-between gap-3"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">Familias</div></div>'+badge(familiesCount+" familias","bg-primary-50 text-primary-700 border-primary-200","dashboard")+'</div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2">'+families.map(function(family,idx){
         var itemsFamily = fm[family];
         var familyAlerts = itemsFamily.filter(function(x){ return st(x) !== "ok"; }).length;
         var listsCount = Object.keys(stockListMap(family)).length;
@@ -1349,7 +1328,7 @@
         '</button>';
       }).join('')+'</div></div>';
 
-      inner += '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Actividad reciente</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Últimos movimientos</div></div><button data-tab="history" class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-soft"><span>Ver todo</span><span class="material-symbols-rounded text-[16px]">arrow_outward</span></button></div>'+
+      inner += '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="flex items-center justify-between gap-3"><div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Últimos movimientos</div></div><button data-tab="history" class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-soft"><span>Ver todo</span><span class="material-symbols-rounded text-[16px]">arrow_outward</span></button></div>'+
         (recentMovements.length ? '<div class="mt-4 space-y-3">'+recentMovements.map(function(r){
           var delta = (Number(r.ns) || 0) - (Number(r.os) || 0);
           var tone = delta > 0 ? 'text-success-700' : delta < 0 ? 'text-error-700' : 'text-primary-700';
@@ -1538,32 +1517,29 @@
       }).join("");
 
       var inner = "";
-      inner += sectionHeader("Buscador maestro","Buscar en todo el stock","Motor de consulta transversal para productos, familias, listas, categorías y subcategorías.");
+      inner += sectionHeader("Buscador","Buscar","");
       inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+
         '<section class="mt-4 surface-card-strong panel-outline hero-mesh rounded-[34px] p-5 sm:p-6">'+
           '<div class="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,.88fr)] xl:items-start">'+
             '<div>'+
               '<div class="flex flex-wrap items-center gap-2">'+badge(items.length+" ítems","bg-primary-50 text-primary-700 border-primary-200","inventory_2")+badge(Object.keys(fm).length+" familias","bg-bluebrand-50 text-bluebrand-700 border-blue-200","dashboard")+badge(alertItems.length+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div>'+
-              '<div class="mt-4 text-[30px] font-semibold leading-[1.02] tracking-[-0.05em] text-gray-900 sm:text-[36px]">Consulta el inventario como una vista maestra, no como una lista plana.</div>'+
-              '<p class="mt-3 max-w-2xl text-sm leading-6 text-gray-600">Se mantienen los resultados predictivos y la navegación a detalle, pero ahora la experiencia prioriza contexto, atajos y lectura jerárquica.</p>'+
               '<div class="mt-5 command-field rounded-[28px] p-3 sm:p-4">'+
                 '<div class="flex items-center gap-3 rounded-[22px] bg-white px-4 py-3 border border-gray-200 shadow-soft">'+
                   '<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[20px]">search</span></div>'+
                   '<input id="search-in" class="w-full border-none bg-transparent text-[15px] font-medium outline-none placeholder:text-gray-400" placeholder="Buscar por producto, familia, lista o categoría" value="'+esc(searchQ)+'">'+
                 '</div>'+
-                '<div class="mt-3 flex flex-wrap gap-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5"><span class="material-symbols-rounded text-[14px]">keyboard</span><span>Usa términos como “funsmart”, “cold brew” o “cajas”.</span></span></div>'+
               '</div>'+
               (quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft">'+esc(i.name)+'</button>'; }).join('')+'</div>' : '')+
             '</div>'+
             '<aside class="grid grid-cols-2 gap-3">'+
-              metricCard('Resultados', (searchQ || '').trim() ? getSearchMatches(searchQ).length : 0, 'coincidencias activas','text-gray-900')+
-              metricCard('Pendientes', pendingUpdates.length, 'sincronización local','text-primary-700')+
-              metricCard('Listas', stockListCount, 'listas cargadas','text-gray-900')+
-              metricCard('Familias', Object.keys(fm).length, 'ámbitos operativos','text-primary-700')+
+              metricCard('Resultados', (searchQ || '').trim() ? getSearchMatches(searchQ).length : 0, '','text-gray-900')+
+              metricCard('Pendientes', pendingUpdates.length, '','text-primary-700')+
+              metricCard('Listas', stockListCount, '','text-gray-900')+
+              metricCard('Familias', Object.keys(fm).length, '','text-primary-700')+
             '</aside>'+
           '</div>'+
           '<div class="mt-5 rounded-[28px] border border-gray-200 bg-white/80 p-3 sm:p-4">'+
-            '<div class="mb-2 flex items-center justify-between gap-3"><div><div class="text-sm font-semibold text-gray-900">Atajos por familia</div><div class="mt-1 text-xs text-gray-500">Toca una familia para entrar a sus listas de stock.</div></div><span class="text-xs text-gray-500">Scroll horizontal</span></div>'+
+            '<div class="mb-2 flex items-center justify-between gap-3"><div><div class="text-sm font-semibold text-gray-900">Familias</div></div></div>'+
             '<div class="pill-scroll">'+familyPills+'</div>'+
           '</div>'+
           '<div id="search-res" class="mt-5"></div>'+
@@ -1579,7 +1555,7 @@
 
       var raw = (searchQ || "").trim();
       if(!raw){
-        box.innerHTML = '<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"><div class="surface-card panel-outline rounded-[30px] p-5"><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">Consulta preparada</div><div class="mt-2 text-sm leading-6 text-gray-600">Escribe un término para activar la búsqueda predictiva. La app seguirá resolviendo productos, familias, listas, categorías y subcategorías.</div><div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">'+metricCard('Cobertura',items.length,'ítems consultables','text-gray-900')+metricCard('Alertas',alerts().length,'prioridades visibles','text-warning-700')+metricCard('Historial',hist.length,'movimientos cargados','text-gray-900')+'</div></div><div class="surface-card panel-outline rounded-[30px] p-5"><div class="text-sm font-medium text-gray-500">Búsquedas sugeridas</div><div class="mt-4 flex flex-wrap gap-2">'+['Funsmart','Cold Brew','Cajas','Guatemala','Rocket'].map(function(s){ return '<button data-search-suggestion="'+s+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft">'+s+'</button>'; }).join('')+'</div></div></div>';
+        box.innerHTML = '<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"><div class="surface-card panel-outline rounded-[30px] p-5"><div class="grid grid-cols-1 gap-3 sm:grid-cols-3">'+metricCard('Cobertura',items.length,'','text-gray-900')+metricCard('Alertas',alerts().length,'','text-warning-700')+metricCard('Historial',hist.length,'','text-gray-900')+'</div></div><div class="surface-card panel-outline rounded-[30px] p-5"><div class="flex flex-wrap gap-2">'+['Funsmart','Cold Brew','Cajas','Guatemala','Rocket'].map(function(s){ return '<button data-search-suggestion="'+s+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft">'+s+'</button>'; }).join('')+'</div></div></div>';
         box.querySelectorAll('[data-search-suggestion]').forEach(function(btn){
           btn.onclick = function(){
             searchQ = btn.getAttribute('data-search-suggestion') || '';
@@ -1602,17 +1578,19 @@
 
       box.innerHTML = '<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">'+
         '<div>'+
-          '<div class="mb-3 flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">'+res.length+' resultado'+(res.length > 1 ? 's' : '')+'</div><div class="mt-1 text-sm text-gray-500">Coincidencias ordenadas por relevancia y urgencia de stock.</div></div>'+badge('Consulta activa','bg-primary-50 text-primary-700 border-primary-200','manage_search')+'</div>'+
+          '<div class="mb-3 flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">'+res.length+' resultado'+(res.length > 1 ? 's' : '')+'</div></div>'+badge('Consulta','bg-primary-50 text-primary-700 border-primary-200','manage_search')+'</div>'+
           '<div class="xl:hidden space-y-3">'+res.map(function(i,idx){ return itemCard(i,idx,familyBarColor(i.family || 'Sin familia')); }).join('')+'</div>'+
-          '<div class="hidden xl:block overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-mdsoft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.08em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+res.map(function(i){
+          '<div class="hidden xl:block overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-mdsoft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.08em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+          res.map(function(i){
             var meta = cm(i.cat);
             var tone = statusTheme(st(i));
             var submeta = scm(i.subcat,i.cat,i.name);
             var fam = normalizeFamilyName(i.family);
             return '<tr data-item="'+i.id+'" class="row-hover cursor-pointer border-t border-gray-200 align-top"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(i.unit)+'</div></div></div></td><td class="px-4 py-3">'+familyBadge(fam)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || '—')+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || '—')+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
-          }).join('')+'</tbody></table></div></div>'+
+          }).join('')+
+          '</tbody></table></div></div>'+
         '</div>'+
-        '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="text-sm font-medium text-gray-500">Resumen de la consulta</div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Total',res.length,'coincidencias','text-gray-900')+metricCard('Alertas',res.filter(function(i){ return st(i) !== 'ok'; }).length,'en resultados','text-warning-700')+metricCard('Familias',resultFamiliesCount,'distintas','text-primary-700')+metricCard('Listas',resultListsCount,'distintas','text-gray-900')+'</div></section><section class="surface-card panel-outline rounded-[30px] p-5"><div class="text-sm font-medium text-gray-500">Sugerencias</div><div class="mt-3 space-y-2 text-sm text-gray-600"><div class="rounded-[20px] border border-gray-200 bg-gray-50 px-3 py-3">Prueba con familias como <strong class="font-semibold text-gray-900">Mercadería</strong> o <strong class="font-semibold text-gray-900">Café Verde</strong>.</div><div class="rounded-[20px] border border-gray-200 bg-gray-50 px-3 py-3">También puedes usar categorías como <strong class="font-semibold text-gray-900">Cajas</strong>, <strong class="font-semibold text-gray-900">Bolsas</strong> o listas de stock específicas.</div></div></section></aside>'+
+        '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Total',res.length,'','text-gray-900')+metricCard('Alertas',res.filter(function(i){ return st(i) !== 'ok'; }).length,'','text-warning-700')+metricCard('Familias',resultFamiliesCount,'','text-primary-700')+metricCard('Listas',resultListsCount,'','text-gray-900')+'</div></section></aside>'+
       '</div>';
 
       box.onclick = function(e){
@@ -1633,7 +1611,7 @@
       var critItems = alertItems.filter(function(a){ return st(a) === "zero" || st(a) === "crit"; });
       var inner = "";
 
-      inner += sectionHeader("Alertas","Estado del inventario",alertItems.length+" alertas activas.");
+      inner += sectionHeader("Alertas","Estado","");
       inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+(!alertItems.length ? '<div class="mt-4">'+emptyState("check_circle","Todo en orden","No hay productos bajo mínimo ni agotados.")+'</div>' : '<div class="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">'+alertItems.map(function(x,i){ return itemCard(x,i,familyBarColor(x.family || "Sin familia")); }).join("")+'</div>')+'</div></main>';
 
       return appShell(inner, navHtml("alerts", critItems.length));
@@ -1641,7 +1619,7 @@
 
     function renderHistory(){
       var inner = "";
-      inner += sectionHeader("Historial","Movimientos","Lista dinámica con filtros y orden por columna.");
+      inner += sectionHeader("Historial","Movimientos","");
       inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_200px]"><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><div class="flex items-center gap-3"><span class="material-symbols-rounded text-gray-400">search</span><input id="hist-filter-q" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Filtrar por producto, categoría, usuario o nota" value="'+esc(histFilterQuery)+'"></div></div><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><select id="hist-filter-type" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all"'+(histFilterType === "all" ? " selected" : "")+'>Todos los tipos</option><option value="ingreso"'+(histFilterType === "ingreso" ? " selected" : "")+'>Ingresos</option><option value="salida"'+(histFilterType === "salida" ? " selected" : "")+'>Salidas</option><option value="ajuste"'+(histFilterType === "ajuste" ? " selected" : "")+'>Ajustes</option></select></div></div></div><div class="mt-4 overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold"><button data-hsort="nm" class="flex items-center gap-1">Producto<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="cat" class="flex items-center gap-1">Categoría<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="tp" class="flex items-center gap-1">Tipo<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold text-right"><button data-hsort="delta" class="ml-auto flex items-center gap-1">Cambio<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="u" class="flex items-center gap-1">Usuario<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="ts" class="flex items-center gap-1">Fecha / hora<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold">Nota</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div></main>';
       return appShell(inner, navHtml("history", alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
@@ -1710,8 +1688,8 @@
       var ok = items.filter(function(x){ return st(x) === "ok"; }).length;
 
       var inner = "";
-      inner += sectionHeader("Reporte","Exportación PDF","Exportación con estructura visual estilo Untitled UI.");
-      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen para exportar</div><div class="mt-1 text-sm text-gray-500">Descarga un reporte con stock actual, alertas críticas y proyecciones.</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard("Productos",items.length,"Inventario total","text-primary-700")+metricCard("Stock total",totalS.toLocaleString(),"Unidades registradas","text-gray-900")+metricCard("Críticos",crit,"Reposición inmediata","text-error-700")+metricCard("OK",ok,"Sin alertas","text-success-700")+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+" bajo mínimo","bg-warning-50 text-warning-700 border-amber-200","inventory_2")+badge(crit+" críticos","bg-error-50 text-error-700 border-red-200","warning")+badge("PDF imprimible","bg-bluebrand-50 text-bluebrand-700 border-blue-200","picture_as_pdf")+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
+      inner += sectionHeader("Reporte","PDF","");
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard("Productos",items.length,"","text-primary-700")+metricCard("Stock total",totalS.toLocaleString(),"","text-gray-900")+metricCard("Críticos",crit,"","text-error-700")+metricCard("OK",ok,"","text-success-700")+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+" bajo mínimo","bg-warning-50 text-warning-700 border-amber-200","inventory_2")+badge(crit+" críticos","bg-error-50 text-error-700 border-red-200","warning")+badge("PDF","bg-bluebrand-50 text-bluebrand-700 border-blue-200","picture_as_pdf")+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
 
       return appShell(inner, navHtml("report", alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
@@ -1770,10 +1748,10 @@
       }).join("");
 
       var inner = "";
-      inner += sectionHeader("Lista de stock", selStockList, familyLabel+" · buscador interno", {left:topIconButton("back-stocklist","arrow_back",false)});
-      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(selStockList)+'</div><div class="mt-1 text-sm text-gray-600">Barra predictiva sobre tabla dinámica de la lista.</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+" resultados","bg-white text-gray-700 border-gray-200","table_rows")+badge(totalAlerts+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div></div><div class="mt-4 rounded-[28px] border p-3" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border" style="border-color:'+theme.softBorder+'"><span class="material-symbols-rounded" style="color:'+theme.accent+'">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'">'+esc(i.name)+'</button>'; }).join("")+'</div>' : '')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+items.filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList; }).length+'</div><div class="mt-1 text-xs text-gray-500">en la lista</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">unidades registradas</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Categorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+Object.keys(categories).length+'</div><div class="mt-1 text-xs text-gray-500">accesos rápidos</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div><div class="mt-1 text-xs text-gray-500">activos</div></div></div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold" style="'+familyTextStyle(familyLabel)+'">Accesos rápidos</div><div class="text-xs text-gray-500">Categorías</div></div><div class="pill-scroll">'+categoryPills+'</div></div><div id="stocklist-master-res" class="mt-4"></div></section></div></main>';
+      inner += sectionHeader("Lista de stock", selStockList, "", {left:topIconButton("back-stocklist","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(selStockList)+'</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+" resultados","bg-white text-gray-700 border-gray-200","table_rows")+badge(totalAlerts+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div></div><div class="mt-4 rounded-[28px] border p-3" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border" style="border-color:'+theme.softBorder+'"><span class="material-symbols-rounded" style="color:'+theme.accent+'">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'">'+esc(i.name)+'</button>'; }).join("")+'</div>' : '')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+items.filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList; }).length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Categorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+Object.keys(categories).length+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div></div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold" style="'+familyTextStyle(familyLabel)+'">Categorías</div></div><div class="pill-scroll">'+categoryPills+'</div></div><div id="stocklist-master-res" class="mt-4"></div></section></div></main>';
 
-      return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+      return appShell(pg === "home" ? inner : inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
 
     function renderStockListResults(){
@@ -1789,7 +1767,7 @@
         return;
       }
 
-      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla dinámica","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
         res.map(function(i){
           var meta = cm(i.cat);
           var tone = statusTheme(st(i));
