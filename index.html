@@ -211,7 +211,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-22 report-bi-minimal-square";
+    var APP_VERSION = "2026-04-22 search-smart-filters";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -328,6 +328,13 @@
     var histSortKey = "ts";
     var histSortDir = "desc";
     var stockListSearchQ = "";
+    var searchFilterFamily = "all";
+    var searchFilterStockList = "all";
+    var searchFilterCategory = "all";
+    var searchFilterStatus = "all";
+    var stockListFilterCategory = "all";
+    var stockListFilterSubcategory = "all";
+    var stockListFilterStatus = "all";
     var reportFilterFamily = "all";
     var reportFilterStockList = "all";
     var reportFilterCategory = "all";
@@ -587,6 +594,13 @@
             pg:pg,
             selFamily:selFamily,
             selStockList:selStockList,
+            searchFilterFamily:searchFilterFamily,
+            searchFilterStockList:searchFilterStockList,
+            searchFilterCategory:searchFilterCategory,
+            searchFilterStatus:searchFilterStatus,
+            stockListFilterCategory:stockListFilterCategory,
+            stockListFilterSubcategory:stockListFilterSubcategory,
+            stockListFilterStatus:stockListFilterStatus,
             reportFilterFamily:reportFilterFamily,
             reportFilterStockList:reportFilterStockList,
             reportFilterCategory:reportFilterCategory,
@@ -610,6 +624,13 @@
           pg = data.pg || "home";
           selFamily = data.selFamily || null;
           selStockList = data.selStockList || null;
+          searchFilterFamily = data.searchFilterFamily || "all";
+          searchFilterStockList = data.searchFilterStockList || "all";
+          searchFilterCategory = data.searchFilterCategory || "all";
+          searchFilterStatus = data.searchFilterStatus || "all";
+          stockListFilterCategory = data.stockListFilterCategory || "all";
+          stockListFilterSubcategory = data.stockListFilterSubcategory || "all";
+          stockListFilterStatus = data.stockListFilterStatus || "all";
           reportFilterFamily = data.reportFilterFamily || "all";
           reportFilterStockList = data.reportFilterStockList || "all";
           reportFilterCategory = data.reportFilterCategory || "all";
@@ -632,6 +653,13 @@
       searchQ = "";
       stockListSearchQ = "";
       loginPin = "";
+      searchFilterFamily = "all";
+      searchFilterStockList = "all";
+      searchFilterCategory = "all";
+      searchFilterStatus = "all";
+      stockListFilterCategory = "all";
+      stockListFilterSubcategory = "all";
+      stockListFilterStatus = "all";
       reportFilterFamily = "all";
       reportFilterStockList = "all";
       reportFilterCategory = "all";
@@ -1948,6 +1976,92 @@
         .map(function(x){ return x.item; });
     }
 
+
+    function uniqueSortedValues(arr){
+      var seen = {};
+      return (arr || [])
+        .filter(function(v){
+          var key = String(v == null ? "" : v).trim();
+          if(!key) return false;
+          if(seen[key]) return false;
+          seen[key] = true;
+          return true;
+        })
+        .sort(function(a,b){ return String(a).localeCompare(String(b)); });
+    }
+
+    function getSearchTableBaseResults(){
+      var raw = (searchQ || "").trim();
+      return raw ? getSearchMatches(raw) : [];
+    }
+
+    function getSearchTableOptions(base){
+      base = base || [];
+      return {
+        families: uniqueSortedValues(base.map(function(i){ return normalizeFamilyName(i.family || "Sin familia"); })),
+        stockLists: uniqueSortedValues(base.map(function(i){ return i.stockList || "General"; })),
+        categories: uniqueSortedValues(base.map(function(i){ return i.cat || "General"; })),
+        statuses: uniqueSortedValues(base.map(function(i){ return st(i); }))
+      };
+    }
+
+    function getFilteredSearchTableResults(){
+      var base = getSearchTableBaseResults();
+      var options = getSearchTableOptions(base);
+
+      if(searchFilterFamily !== "all" && options.families.indexOf(searchFilterFamily) === -1) searchFilterFamily = "all";
+      if(searchFilterStockList !== "all" && options.stockLists.indexOf(searchFilterStockList) === -1) searchFilterStockList = "all";
+      if(searchFilterCategory !== "all" && options.categories.indexOf(searchFilterCategory) === -1) searchFilterCategory = "all";
+      if(searchFilterStatus !== "all" && options.statuses.indexOf(searchFilterStatus) === -1) searchFilterStatus = "all";
+
+      return base.filter(function(i){
+        var family = normalizeFamilyName(i.family || "Sin familia");
+        var listName = i.stockList || "General";
+        var category = i.cat || "General";
+        var status = st(i);
+
+        if(searchFilterFamily !== "all" && family !== searchFilterFamily) return false;
+        if(searchFilterStockList !== "all" && listName !== searchFilterStockList) return false;
+        if(searchFilterCategory !== "all" && category !== searchFilterCategory) return false;
+        if(searchFilterStatus !== "all" && status !== searchFilterStatus) return false;
+        return true;
+      });
+    }
+
+    function getStockListTableBaseResults(){
+      var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
+      return getStockListMatches(familyLabel, selStockList, stockListSearchQ);
+    }
+
+    function getStockListTableOptions(base){
+      base = base || [];
+      return {
+        categories: uniqueSortedValues(base.map(function(i){ return i.cat || "General"; })),
+        subcategories: uniqueSortedValues(base.map(function(i){ return i.subcat || "Sin subcategoría"; })),
+        statuses: uniqueSortedValues(base.map(function(i){ return st(i); }))
+      };
+    }
+
+    function getFilteredStockListTableResults(){
+      var base = getStockListTableBaseResults();
+      var options = getStockListTableOptions(base);
+
+      if(stockListFilterCategory !== "all" && options.categories.indexOf(stockListFilterCategory) === -1) stockListFilterCategory = "all";
+      if(stockListFilterSubcategory !== "all" && options.subcategories.indexOf(stockListFilterSubcategory) === -1) stockListFilterSubcategory = "all";
+      if(stockListFilterStatus !== "all" && options.statuses.indexOf(stockListFilterStatus) === -1) stockListFilterStatus = "all";
+
+      return base.filter(function(i){
+        var category = i.cat || "General";
+        var subcategory = i.subcat || "Sin subcategoría";
+        var status = st(i);
+
+        if(stockListFilterCategory !== "all" && category !== stockListFilterCategory) return false;
+        if(stockListFilterSubcategory !== "all" && subcategory !== stockListFilterSubcategory) return false;
+        if(stockListFilterStatus !== "all" && status !== stockListFilterStatus) return false;
+        return true;
+      });
+    }
+
     function renderSearch(){
       var quickMatches = (searchQ || "").trim() ? getSearchMatches(searchQ).slice(0,6) : [];
       var families = Object.keys(familyMap());
@@ -1966,7 +2080,8 @@
       return appShell(inner, navHtml("search", alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
 
-    function renderSearchResults(){
+    
+function renderSearchResults(){
       var box = document.getElementById("search-res");
       if(!box) return;
 
@@ -1976,22 +2091,69 @@
         return;
       }
 
-      var res = getSearchMatches(raw);
+      var base = getSearchTableBaseResults();
+      var options = getSearchTableOptions(base);
 
-      if(!res.length){
+      if(!base.length){
         box.innerHTML = emptyState("inventory_2","Sin resultados","No encontramos coincidencias con tu búsqueda.");
         return;
       }
 
-      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold text-gray-900">'+res.length+' resultado'+(res.length > 1 ? "s" : "")+'</div>'+badge("Vista tabla","bg-primary-50 text-primary-700 border-primary-200","table_rows")+'</div><div class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
-        res.map(function(i){
-          var meta = cm(i.cat);
-          var tone = statusTheme(st(i));
-          var submeta = scm(i.subcat,i.cat,i.name);
-          var fam = normalizeFamilyName(i.family);
-          return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3">'+familyBadge(fam)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || "—")+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
-        }).join("")+
-      '</tbody></table></div></div>';
+      var res = getFilteredSearchTableResults();
+
+      box.innerHTML = '<div class="space-y-3">'+
+        '<div class="flex items-center justify-between gap-3 flex-wrap"><div class="text-lg font-semibold text-gray-900">'+res.length+' resultado'+(res.length !== 1 ? "s" : "")+'</div><div class="flex items-center gap-2 flex-wrap">'+badge(base.length+" base","bg-gray-50 text-gray-700 border-gray-200","dataset")+badge("Filtros inteligentes","bg-primary-50 text-primary-700 border-primary-200","tune")+'</div></div>'+
+        '<div class="grid gap-2 md:grid-cols-2 xl:grid-cols-5">'+
+          '<div class="border border-gray-200 bg-gray-50 px-3 py-3"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Familia</div><select id="search-filter-family" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todas</option>'+options.families.map(function(opt){ return '<option value="'+esc(opt)+'"'+(searchFilterFamily === opt ? ' selected' : '')+'>'+esc(opt)+'</option>'; }).join('')+'</select></div>'+
+          '<div class="border border-gray-200 bg-gray-50 px-3 py-3"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Lista</div><select id="search-filter-stocklist" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todas</option>'+options.stockLists.map(function(opt){ return '<option value="'+esc(opt)+'"'+(searchFilterStockList === opt ? ' selected' : '')+'>'+esc(opt)+'</option>'; }).join('')+'</select></div>'+
+          '<div class="border border-gray-200 bg-gray-50 px-3 py-3"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Categoría</div><select id="search-filter-category" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todas</option>'+options.categories.map(function(opt){ return '<option value="'+esc(opt)+'"'+(searchFilterCategory === opt ? ' selected' : '')+'>'+esc(opt)+'</option>'; }).join('')+'</select></div>'+
+          '<div class="border border-gray-200 bg-gray-50 px-3 py-3"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Estado</div><select id="search-filter-status" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todos</option>'+options.statuses.map(function(opt){ return '<option value="'+esc(opt)+'"'+(searchFilterStatus === opt ? ' selected' : '')+'>'+esc(reportSeverityLabel(opt))+'</option>'; }).join('')+'</select></div>'+
+          '<button id="search-filters-reset" class="border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Limpiar filtros</button>'+
+        '</div>'+
+        (res.length ? '<div class="overflow-hidden border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+          res.map(function(i){
+            var meta = cm(i.cat);
+            var tone = statusTheme(st(i));
+            var submeta = scm(i.subcat,i.cat,i.name);
+            var fam = normalizeFamilyName(i.family);
+            return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3">'+familyBadge(fam)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || "—")+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
+          }).join("")+
+        '</tbody></table></div></div>' : emptyState("filter_alt","Sin coincidencias después de filtrar","Ajusta o limpia los filtros inteligentes para volver a ver resultados."))+
+      '</div>';
+
+      var onFilterChange = function(){
+        var familyEl = document.getElementById("search-filter-family");
+        var stockListEl = document.getElementById("search-filter-stocklist");
+        var categoryEl = document.getElementById("search-filter-category");
+        var statusEl = document.getElementById("search-filter-status");
+        searchFilterFamily = familyEl ? familyEl.value : "all";
+        searchFilterStockList = stockListEl ? stockListEl.value : "all";
+        searchFilterCategory = categoryEl ? categoryEl.value : "all";
+        searchFilterStatus = statusEl ? statusEl.value : "all";
+        saveSession();
+        renderSearchResults();
+      };
+
+      var sf1 = document.getElementById("search-filter-family");
+      var sf2 = document.getElementById("search-filter-stocklist");
+      var sf3 = document.getElementById("search-filter-category");
+      var sf4 = document.getElementById("search-filter-status");
+      if(sf1) sf1.onchange = onFilterChange;
+      if(sf2) sf2.onchange = onFilterChange;
+      if(sf3) sf3.onchange = onFilterChange;
+      if(sf4) sf4.onchange = onFilterChange;
+
+      var resetBtn = document.getElementById("search-filters-reset");
+      if(resetBtn){
+        resetBtn.onclick = function(){
+          searchFilterFamily = "all";
+          searchFilterStockList = "all";
+          searchFilterCategory = "all";
+          searchFilterStatus = "all";
+          saveSession();
+          renderSearchResults();
+        };
+      }
 
       box.onclick = function(e){
         var t = e.target;
@@ -2215,27 +2377,69 @@
       return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
     }
 
-    function renderStockListResults(){
+    
+function renderStockListResults(){
       var box = document.getElementById("stocklist-master-res");
       if(!box) return;
 
       var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
-      var res = getStockListMatches(familyLabel,selStockList,stockListSearchQ);
       var theme = ft(familyLabel);
+      var base = getStockListTableBaseResults();
+      var options = getStockListTableOptions(base);
 
-      if(!res.length){
+      if(!base.length){
         box.innerHTML = emptyState("inventory_2","Sin resultados","No encontramos materiales que coincidan en esta lista de stock.");
         return;
       }
 
-      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla dinámica","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
-        res.map(function(i){
-          var meta = cm(i.cat);
-          var tone = statusTheme(st(i));
-          var submeta = scm(i.subcat,i.cat,i.name);
-          return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
-        }).join("")+
-      '</tbody></table></div></div>';
+      var res = getFilteredStockListTableResults();
+
+      box.innerHTML = '<div class="space-y-3">'+
+        '<div class="flex items-center justify-between gap-3 flex-wrap"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length !== 1 ? "es" : "")+'</div><div class="flex items-center gap-2 flex-wrap">'+badge(base.length+" base","bg-white text-gray-700 border-gray-200","dataset")+badge("Filtros inteligentes","bg-primary-50 text-primary-700 border-primary-200","tune")+'</div></div>'+
+        '<div class="grid gap-2 md:grid-cols-2 xl:grid-cols-4">'+
+          '<div class="border px-3 py-3" style="'+familyMetricStyle(familyLabel)+'"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Categoría</div><select id="stocklist-filter-category" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todas</option>'+options.categories.map(function(opt){ return '<option value="'+esc(opt)+'"'+(stockListFilterCategory === opt ? ' selected' : '')+'>'+esc(opt)+'</option>'; }).join('')+'</select></div>'+
+          '<div class="border px-3 py-3" style="'+familyMetricStyle(familyLabel)+'"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Subcategoría</div><select id="stocklist-filter-subcategory" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todas</option>'+options.subcategories.map(function(opt){ return '<option value="'+esc(opt)+'"'+(stockListFilterSubcategory === opt ? ' selected' : '')+'>'+esc(opt)+'</option>'; }).join('')+'</select></div>'+
+          '<div class="border px-3 py-3" style="'+familyMetricStyle(familyLabel)+'"><div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Estado</div><select id="stocklist-filter-status" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all">Todos</option>'+options.statuses.map(function(opt){ return '<option value="'+esc(opt)+'"'+(stockListFilterStatus === opt ? ' selected' : '')+'>'+esc(reportSeverityLabel(opt))+'</option>'; }).join('')+'</select></div>'+
+          '<button id="stocklist-filters-reset" class="border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Limpiar filtros</button>'+
+        '</div>'+
+        (res.length ? '<div class="overflow-hidden border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+          res.map(function(i){
+            var meta = cm(i.cat);
+            var tone = statusTheme(st(i));
+            var submeta = scm(i.subcat,i.cat,i.name);
+            return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
+          }).join("")+
+        '</tbody></table></div></div>' : emptyState("filter_alt","Sin coincidencias después de filtrar","Ajusta o limpia los filtros inteligentes para volver a ver materiales."))+
+      '</div>';
+
+      var onFilterChange = function(){
+        var c = document.getElementById("stocklist-filter-category");
+        var s = document.getElementById("stocklist-filter-subcategory");
+        var stEl = document.getElementById("stocklist-filter-status");
+        stockListFilterCategory = c ? c.value : "all";
+        stockListFilterSubcategory = s ? s.value : "all";
+        stockListFilterStatus = stEl ? stEl.value : "all";
+        saveSession();
+        renderStockListResults();
+      };
+
+      var f1 = document.getElementById("stocklist-filter-category");
+      var f2 = document.getElementById("stocklist-filter-subcategory");
+      var f3 = document.getElementById("stocklist-filter-status");
+      if(f1) f1.onchange = onFilterChange;
+      if(f2) f2.onchange = onFilterChange;
+      if(f3) f3.onchange = onFilterChange;
+
+      var resetBtn = document.getElementById("stocklist-filters-reset");
+      if(resetBtn){
+        resetBtn.onclick = function(){
+          stockListFilterCategory = "all";
+          stockListFilterSubcategory = "all";
+          stockListFilterStatus = "all";
+          saveSession();
+          renderStockListResults();
+        };
+      }
 
       box.onclick = function(e){
         var t = e.target;
@@ -2286,6 +2490,13 @@
           pg = btn.getAttribute("data-tab");
           searchQ = "";
           stockListSearchQ = "";
+          searchFilterFamily = "all";
+          searchFilterStockList = "all";
+          searchFilterCategory = "all";
+          searchFilterStatus = "all";
+          stockListFilterCategory = "all";
+          stockListFilterSubcategory = "all";
+          stockListFilterStatus = "all";
           saveSession();
           draw();
           if(pg === "search"){
@@ -2301,6 +2512,9 @@
         btn.onclick = function(){
           selFamily = normalizeFamilyName(btn.getAttribute("data-family"));
           stockListSearchQ = "";
+          stockListFilterCategory = "all";
+          stockListFilterSubcategory = "all";
+          stockListFilterStatus = "all";
           saveSession();
           draw();
         };
@@ -2310,6 +2524,9 @@
         btn.onclick = function(){
           selStockList = btn.getAttribute("data-stocklist");
           stockListSearchQ = "";
+          stockListFilterCategory = "all";
+          stockListFilterSubcategory = "all";
+          stockListFilterStatus = "all";
           saveSession();
           draw();
         };
@@ -2331,6 +2548,10 @@
           adjMode = null;
           pg = "search";
           stockListSearchQ = "";
+          searchFilterFamily = "all";
+          searchFilterStockList = "all";
+          searchFilterCategory = "all";
+          searchFilterStatus = "all";
           saveSession();
           draw();
           setTimeout(function(){
@@ -2388,6 +2609,13 @@
         pg = TOP_LEVEL_TABS[i-1];
         searchQ = "";
         stockListSearchQ = "";
+        searchFilterFamily = "all";
+        searchFilterStockList = "all";
+        searchFilterCategory = "all";
+        searchFilterStatus = "all";
+        stockListFilterCategory = "all";
+        stockListFilterSubcategory = "all";
+        stockListFilterStatus = "all";
         saveSession();
         draw();
       }
@@ -2399,6 +2627,13 @@
         pg = TOP_LEVEL_TABS[i+1];
         searchQ = "";
         stockListSearchQ = "";
+        searchFilterFamily = "all";
+        searchFilterStockList = "all";
+        searchFilterCategory = "all";
+        searchFilterStatus = "all";
+        stockListFilterCategory = "all";
+        stockListFilterSubcategory = "all";
+        stockListFilterStatus = "all";
         saveSession();
         draw();
       }
@@ -2661,6 +2896,9 @@
         document.getElementById("back-stocklist").onclick = function(){
           selStockList = null;
           stockListSearchQ = "";
+          stockListFilterCategory = "all";
+          stockListFilterSubcategory = "all";
+          stockListFilterStatus = "all";
           saveSession();
           draw();
         };
@@ -2669,6 +2907,10 @@
         if(ssi){
           ssi.oninput = function(){
             stockListSearchQ = ssi.value;
+            stockListFilterCategory = "all";
+            stockListFilterSubcategory = "all";
+            stockListFilterStatus = "all";
+            saveSession();
             renderStockListResults();
           };
           setTimeout(renderStockListResults,0);
@@ -2678,8 +2920,12 @@
           btn.onclick = function(){
             var cat = btn.getAttribute("data-master-cat");
             stockListSearchQ = cat;
+            stockListFilterCategory = "all";
+            stockListFilterSubcategory = "all";
+            stockListFilterStatus = "all";
             var input = document.getElementById("stocklist-search-in");
             if(input) input.value = cat;
+            saveSession();
             renderStockListResults();
           };
         });
