@@ -1,616 +1,2430 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Tasters | Especialidad en Verde</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; background-color: #f9fafb; color: #1f2937; }
-        
-        .marquee-container { overflow: hidden; white-space: nowrap; width: 100vw; background: #064e3b; color: #ecfdf5; padding: 1rem 0; border-top: 1px solid #047857; border-bottom: 1px solid #047857; }
-        .marquee-content { display: inline-block; animation: marquee 20s linear infinite; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.875rem; }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#F9FAFB" />
+  <meta
+    name="description"
+    content="Kawas Stock. Inventario con sincronización, historial, alertas y operación offline."
+  />
+  <title>Kawas Stock</title>
+  <link
+    rel="icon"
+    href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="%237F56D9"/><path d="M17 22c0-2.76 2.24-5 5-5h20c2.76 0 5 2.24 5 5v20c0 2.76-2.24 5-5 5H22c-2.76 0-5-2.24-5-5V22Z" fill="white"/><rect x="23" y="26" width="18" height="4" rx="2" fill="%237F56D9"/><rect x="23" y="34" width="12" height="4" rx="2" fill="%237F56D9"/></svg>'
+  />
 
-        .bg-parallax { background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; }
-        
-        .view-section { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .view-active { display: block; opacity: 1; }
-        .cart-open, .menu-open, .search-open { transform: translateX(0%); opacity: 1; pointer-events: auto; }
-        .cart-closed, .menu-closed { transform: translateX(100%); }
-        .search-closed { transform: translateY(-100%); opacity: 0; pointer-events: none; }
-        
-        table th { cursor: pointer; user-select: none; }
-        table th:hover { background-color: #f3f4f6; }
-
-        .img-protegida { pointer-events: none; user-select: none; -webkit-user-drag: none; }
-        .watermark-overlay::after {
-            content: "SUPER TASTERS"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 2rem; font-weight: 900; color: rgba(255,255,255,0.15); white-space: nowrap; pointer-events: none; z-index: 10;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            gray: {
+              25: '#FCFCFD',
+              50: '#F9FAFB',
+              100: '#F2F4F7',
+              200: '#EAECF0',
+              300: '#D0D5DD',
+              400: '#98A2B3',
+              500: '#667085',
+              600: '#475467',
+              700: '#344054',
+              800: '#1D2939',
+              900: '#101828'
+            },
+            primary: {
+              25: '#FCFAFF',
+              50: '#F9F5FF',
+              100: '#F4EBFF',
+              200: '#E9D7FE',
+              300: '#D6BBFB',
+              400: '#B692F6',
+              500: '#9E77ED',
+              600: '#7F56D9',
+              700: '#6941C6',
+              800: '#53389E',
+              900: '#42307D'
+            },
+            success: { 50: '#ECFDF3', 700: '#027A48' },
+            warning: { 50: '#FFFAEB', 700: '#B54708' },
+            error: { 50: '#FEF3F2', 700: '#B42318' },
+            bluebrand: { 50: '#EFF8FF', 700: '#175CD3' }
+          },
+          boxShadow: {
+            soft: '0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10)',
+            mdsoft: '0 4px 8px rgba(16,24,40,.08), 0 2px 4px rgba(16,24,40,.06)',
+            lgsoft: '0 12px 24px rgba(16,24,40,.10), 0 4px 8px rgba(16,24,40,.08)'
+          }
         }
-        .lightbox-watermark::after { font-size: 4rem; color: rgba(255,255,255,0.1); }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { opacity: 1; }
-    </style>
+      }
+    };
+  </script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Rounded"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root{
+      --app-bg:#F8F9FC;
+      --app-text:#101828;
+      --surface-0:#FFFFFF;
+      --surface-1:#FCFCFD;
+      --surface-2:#F9FAFB;
+      --surface-3:#F2F4F7;
+      --border-soft:rgba(16,24,40,.08);
+      --border-strong:#D0D5DD;
+      --shadow-xs:0 1px 2px rgba(16,24,40,.06);
+      --shadow-sm:0 4px 10px rgba(16,24,40,.06),0 2px 4px rgba(16,24,40,.04);
+      --shadow-md:0 10px 24px rgba(16,24,40,.08),0 4px 8px rgba(16,24,40,.05);
+      --shadow-lg:0 24px 48px rgba(16,24,40,.10),0 8px 16px rgba(16,24,40,.05);
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px)
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{
+      margin:0;
+      background:var(--app-bg);
+      color:var(--app-text);
+      font-family:Inter,system-ui,sans-serif;
+      min-height:100%;
+      overflow-x:hidden
+    }
+    body{padding-bottom:calc(92px + var(--safe-bottom))}
+    .material-symbols-rounded{
+      font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24
+    }
+    .mn{font-variant-numeric:tabular-nums}
+    .glass{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .fade-up{animation:fadeUp .24s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    @keyframes toastin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+    .safe-top{padding-top:max(20px,calc(16px + var(--safe-top)))}
+    .safe-bottom{padding-bottom:max(16px,calc(12px + var(--safe-bottom)))}
+    .bottom-shadow{box-shadow:0 -12px 32px rgba(16,24,40,.12)}
+    .gradient-shell{
+      background:
+        radial-gradient(circle at top left, rgba(127,86,217,.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(23,92,211,.12), transparent 24%),
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,.75), transparent 38%),
+        linear-gradient(180deg,#FBFCFE 0%,#F7F8FB 100%)
+    }
+    .line-clamp-2{
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden
+    }
+    .app-shell-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      min-height:100vh
+    }
+    .app-shell-main{min-width:0}
+    .app-shell-rail{display:none}
+    .sticky-blur{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:linear-gradient(180deg,rgba(248,249,252,.96),rgba(248,249,252,.88) 72%,rgba(248,249,252,0));
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px)
+    }
+    .surface-card{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--border-soft);
+      box-shadow:var(--shadow-sm)
+    }
+    .surface-card-strong{
+      background:rgba(255,255,255,.98);
+      border:1px solid rgba(208,213,221,.9);
+      box-shadow:var(--shadow-md)
+    }
+    .surface-muted{
+      background:linear-gradient(180deg,rgba(252,252,253,.98),rgba(249,250,251,.96));
+      border:1px solid rgba(208,213,221,.75)
+    }
+    .panel-outline{
+      position:relative;
+      overflow:hidden
+    }
+    .panel-outline:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      border-radius:inherit;
+      border:1px solid rgba(255,255,255,.7)
+    }
+    .brand-glow{
+      position:relative;
+      overflow:hidden
+    }
+    .brand-glow:after{
+      content:"";
+      position:absolute;
+      inset:auto -24px -32px auto;
+      width:160px;
+      height:160px;
+      border-radius:999px;
+      background:radial-gradient(circle,rgba(127,86,217,.18),transparent 68%);
+      pointer-events:none
+    }
+    .pill-scroll{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding-bottom:4px;
+      scrollbar-width:none
+    }
+    .pill-scroll::-webkit-scrollbar{display:none}
+    .sync-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      display:inline-block
+    }
+    .nav-blur{
+      background:rgba(255,255,255,.82);
+      border:1px solid rgba(255,255,255,.82)
+    }
+    .command-field{
+      background:linear-gradient(180deg,#FFFFFF 0%,#FCFCFD 100%);
+      border:1px solid rgba(208,213,221,.82);
+      box-shadow:var(--shadow-xs)
+    }
+    .rail-shell{
+      background:linear-gradient(180deg,rgba(255,255,255,.95) 0%,rgba(252,252,253,.9) 100%);
+      border:1px solid rgba(208,213,221,.72);
+      box-shadow:var(--shadow-lg)
+    }
+    .desktop-scroll{overflow:auto;scrollbar-width:none}
+    .desktop-scroll::-webkit-scrollbar{display:none}
+    .hero-mesh{
+      background:
+        radial-gradient(circle at top left, rgba(127,86,217,.14), transparent 28%),
+        radial-gradient(circle at 90% 15%, rgba(23,92,211,.10), transparent 24%),
+        linear-gradient(180deg,rgba(255,255,255,.98),rgba(252,252,253,.96));
+    }
+    .metric-tile{
+      background:linear-gradient(180deg,#FFFFFF 0%,#FCFCFD 100%);
+      border:1px solid rgba(208,213,221,.7);
+      box-shadow:var(--shadow-xs)
+    }
+    .compact-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:48px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(208,213,221,.82);
+      box-shadow:var(--shadow-xs)
+    }
+    .compact-pill-kpi{
+      display:grid;
+      grid-template-columns:auto auto;
+      align-items:center;
+      gap:2px 10px
+    }
+    .compact-pill-kpi .value{
+      font-size:18px;
+      line-height:1;
+      font-weight:700;
+      letter-spacing:-0.03em
+    }
+    .compact-pill-kpi .label{
+      font-size:11px;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#667085
+    }
+    .action-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height:46px;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(208,213,221,.82);
+      background:rgba(255,255,255,.96);
+      color:#344054;
+      font-size:13px;
+      font-weight:600;
+      box-shadow:var(--shadow-xs);
+      transition:transform .18s ease, background .18s ease, border-color .18s ease
+    }
+    .action-pill:active{transform:scale(.99)}
+    .swipe-desktop{cursor:grab}
+    .swipe-desktop.swiping{cursor:grabbing}
+    .row-hover{transition:background .18s ease,transform .18s ease}
+    .row-hover:hover{background:rgba(249,250,251,.94)}
+    @media (min-width:980px){
+      body{padding-bottom:32px}
+      .app-shell-grid{
+        grid-template-columns:320px minmax(0,1fr);
+        gap:28px;
+        max-width:1520px;
+        margin:0 auto;
+        padding:28px 28px 36px
+      }
+      .app-shell-rail{
+        display:block;
+        position:sticky;
+        top:28px;
+        height:calc(100vh - 56px)
+      }
+      .mobile-bottom-nav{display:none}
+      .safe-top{padding-top:0}
+    }
+  </style>
 </head>
-<body>
+<body class="gradient-shell">
+  <div id="app"></div>
 
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 z-[100] hidden flex items-center justify-center p-4" onclick="closeLightbox()">
-        <button class="absolute top-6 right-6 text-white hover:text-gray-300 transition z-50">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-        <div class="relative max-w-5xl w-full h-full flex items-center justify-center watermark-overlay lightbox-watermark" oncontextmenu="return false;">
-            <img id="lightbox-img" src="" class="max-h-full max-w-full object-contain rounded img-protegida shadow-2xl">
-        </div>
-    </div>
+  <script>
+    var APP_NAME = "Kawas Stock";
+    var APP_VERSION = "2026-04-21 untitled-ui-shell-home-search-v2-connectivity-fix";
+    var BUILD_CERTIFIED = APP_VERSION;
 
-    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleMenu()" class="text-green-900 hover:text-green-600 transition">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <div class="cursor-pointer" onclick="navigateTo('home')">
-                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tighter text-green-900">Super Tasters</h1>
-                </div>
-            </div>
-            <div class="flex items-center gap-5">
-                <button onclick="toggleSearch()" class="text-green-900 hover:text-green-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </button>
-                <button onclick="toggleCarrito()" class="relative text-green-900 hover:text-green-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden shadow-md">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
+    var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
+    var SHEET_URL = "https://docs.google.com/spreadsheets/d/1eF4MZHXzz_UQOvNbni-g0ljoD1fJIeg_QsHG8H6ievo/edit";
 
-    <div id="side-menu" class="fixed inset-y-0 left-0 z-[60] w-full md:w-96 bg-green-900 text-white shadow-2xl transition-transform duration-300 -translate-x-full flex flex-col">
-        <div class="p-6 flex justify-between items-center border-b border-green-800">
-            <h2 class="text-2xl font-black tracking-tighter">Menú</h2>
-            <button onclick="toggleMenu()" class="text-green-200 hover:text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        </div>
-        <div class="flex flex-col p-8 space-y-6 text-2xl font-bold tracking-tight">
-            <a href="#" onclick="navigateTo('home'); toggleMenu()" class="hover:text-green-300 transition">Inicio</a>
-            <a href="#" onclick="navigateTo('offerlist'); toggleMenu()" class="hover:text-green-300 transition">Offer List (Catálogo)</a>
-            <a href="#" onclick="navigateTo('about'); toggleMenu()" class="hover:text-green-300 transition">Nosotros</a>
-            <a href="#" onclick="navigateTo('partners'); toggleMenu()" class="hover:text-green-300 transition">Nuestros Socios</a>
-            <a href="#" onclick="navigateTo('contact'); toggleMenu()" class="hover:text-green-300 transition">Contacto</a>
-        </div>
-    </div>
+    var STORAGE_KEYS = {
+      app: "kw5_app_state",
+      authUsers: "kw5_auth_users",
+      session: "kw5_session",
+      pending: "kw5_pending_updates",
+      cacheCleared: "kw5_cache_cleared_once_v2"
+    };
 
-    <div id="search-modal" class="fixed top-0 left-0 w-full bg-white z-[55] shadow-xl p-6 transition-all duration-300 search-closed">
-        <div class="max-w-4xl mx-auto relative">
-            <input type="text" id="global-search" onkeyup="predictiveSearch(this.value)" placeholder="Busca por origen, proceso, finca o notas..." class="w-full text-xl md:text-4xl font-black text-gray-900 border-none outline-none placeholder-gray-300 bg-transparent py-4">
-            <button onclick="toggleSearch()" class="absolute right-0 top-4 text-gray-400 hover:text-gray-900"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            <div id="search-results" class="mt-4 max-h-96 overflow-y-auto space-y-2 hidden"></div>
-        </div>
-    </div>
+    var ITEMS = [
+      {id:"e1",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Original",stock:600,min:100,unit:"uds",alert:""},
+      {id:"e2",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Espresso Frutal",stock:142,min:150,unit:"uds",alert:"Pedir pronto"},
+      {id:"e3",cat:"Etiquetas Adhesivas",subcat:"1Kg Funsmart 90×60",name:"Bolivia Caranavi Regional",stock:230,min:200,unit:"uds",alert:"Pedir pronto"},
+      {id:"b1",cat:"Bolsas",subcat:"MTPACK Impresas",name:"MTPACK Impresas 250g",stock:75,min:500,unit:"uds",alert:""},
+      {id:"b2",cat:"Bolsas",subcat:"Funsmart",name:"Funsmart Blancas 1Kg",stock:800,min:300,unit:"uds",alert:""},
+      {id:"c1",cat:"Cajas",subcat:"Kawas Grandes",name:"Caja Kawas SYT 12KG",stock:1850,min:500,unit:"uds",alert:""},
+      {id:"c2",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas formato nuevo 58x30x21",stock:41,min:50,unit:"uds",alert:"Crítico"},
+      {id:"c3",cat:"Cajas",subcat:"Kawas Grandes",name:"Cajas 30x20x20 Castaño",stock:150,min:100,unit:"uds",alert:""},
+      {id:"p1",cat:"Empaque y Despacho",subcat:"",name:"Bolsa Kraft Pequeña 20x30x10",stock:117,min:50,unit:"uds",alert:""},
+      {id:"p2",cat:"Empaque y Despacho",subcat:"",name:"Cinta embalaje Plástica",stock:24,min:30,unit:"rollos",alert:"Pedir"},
+      {id:"cb1",cat:"Cold Brew",subcat:"Botellas y Tapas",name:"Botellas transparentes 200ml",stock:12,min:50,unit:"uds",alert:"Pedir urgente"},
+      {id:"o1",cat:"Otros",subcat:"Sellos Kawas",name:"Sello Redondo 50x50",stock:0,min:50,unit:"uds",alert:""},
+      {id:"m1",cat:"Molinos profesionales",subcat:"Eureka",name:"Eureka Atom 75",stock:2,min:1,unit:"uds",alert:"",family:"Mercadería",stockList:"Equipamiento"},
+      {id:"m2",cat:"Cafeteras",subcat:"Rocket",name:"Rocket Appartamento",stock:1,min:1,unit:"uds",alert:"",family:"Mercadería",stockList:"Equipamiento"},
+      {id:"bf1",cat:"Botellas y Tapas",subcat:"Tapas negras",name:"Tapas negras 200ml",stock:332,min:100,unit:"uds",alert:"",family:"Bebidas Frías",stockList:"Sala Bebidas Frías"},
+      {id:"cv1",cat:"Lotes",subcat:"Guatemala",name:"Guatemala Huehuetenango",stock:8,min:3,unit:"sacos",alert:"",family:"Café Verde",stockList:"Stock Café Verde"}
+    ];
 
-    <div id="cart-panel" class="fixed inset-y-0 right-0 z-[70] w-full max-w-md bg-white shadow-2xl cart-closed transition-transform duration-300 flex flex-col">
-        <div class="px-6 py-4 border-b flex justify-between items-center"><h2 class="text-lg font-bold">🛒 Tu Pedido</h2><button onclick="toggleCarrito()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
-        <div id="cart-items" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-6 bg-gray-50 border-t">
-            <div class="flex justify-between mb-4"><span class="font-bold">Total Pedido</span><span class="text-xl font-black">$<span id="cart-subtotal">0</span></span></div>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="enviarPedido('Fintoc')" class="bg-black text-white py-3 rounded-lg text-xs font-bold hover:bg-gray-800">Transferencia</button>
-                <button onclick="enviarPedido('MercadoPago')" class="bg-[#009EE3] text-white py-3 rounded-lg text-xs font-bold hover:bg-[#0089C7]">Mercado Pago</button>
-            </div>
-        </div>
-    </div>
-    <div id="cart-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity" onclick="toggleCarrito()"></div>
+    var CATEGORY_META = {
+      "Etiquetas Adhesivas": {icon:"sell",color:"#175CD3"},
+      "Bolsas": {icon:"shopping_bag",color:"#079455"},
+      "Cajas": {icon:"inventory",color:"#B42318"},
+      "Empaque y Despacho": {icon:"local_shipping",color:"#B54708"},
+      "Cold Brew": {icon:"local_cafe",color:"#0E9384"},
+      "Otros": {icon:"category",color:"#667085"},
+      "Molinos profesionales": {icon:"tune",color:"#175CD3"},
+      "Cafeteras": {icon:"espresso",color:"#7F56D9"},
+      "Botellas y Tapas": {icon:"water_bottle",color:"#175CD3"},
+      "Lotes": {icon:"grain",color:"#079455"}
+    };
 
-    <main id="app-content">
+    var SUBCATEGORY_META = {
+      "1Kg Funsmart 90×60": {icon:"sell"},
+      "MTPACK Impresas": {icon:"inventory_2"},
+      "Funsmart": {icon:"deployed_code"},
+      "Kawas Grandes": {icon:"inventory"},
+      "Botellas y Tapas": {icon:"water_bottle"},
+      "Sellos Kawas": {icon:"approval"},
+      "Eureka": {icon:"tune"},
+      "Rocket": {icon:"espresso"},
+      "Tapas negras": {icon:"radio_button_checked"},
+      "Guatemala": {icon:"public"}
+    };
 
-        <section id="view-home" class="view-section view-active">
-            <div class="relative h-[80vh] flex items-center justify-center bg-black overflow-hidden">
-                <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover opacity-80"><source src="video.mp4" type="video/mp4"></video>
-                <div class="absolute inset-0 bg-green-900/20"></div>
-                <div class="relative z-10 text-center px-4">
-                    <h2 class="text-5xl md:text-7xl font-black text-white tracking-tighter mb-6 shadow-black drop-shadow-2xl">Elevando el Estándar.</h2>
-                    <p class="text-xl text-green-50 font-medium max-w-2xl mx-auto drop-shadow-lg mb-10">Relaciones directas, calidad inquebrantable y trazabilidad total para tostadores exigentes.</p>
-                    <button onclick="navigateTo('offerlist')" class="bg-white text-green-900 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition shadow-2xl">Ver Offer List</button>
-                </div>
-            </div>
+    var FAMILY_THEMES = {
+      "Producción": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+      "Produccion": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+      "Kawas General": {accent:"#7F56D9",soft:"#F4EBFF",softBorder:"#E9D7FE",text:"#6941C6",icon:"precision_manufacturing"},
+      "Clientes Especiales": {accent:"#B42318",soft:"#FEF3F2",softBorder:"#FECDCA",text:"#B42318",icon:"storefront"},
+      "Mercadería": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
+      "Mercaderia": {accent:"#175CD3",soft:"#EFF8FF",softBorder:"#B2DDFF",text:"#175CD3",icon:"shopping_bag"},
+      "Bebidas Frías": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
+      "Bebidas Frias": {accent:"#0E9384",soft:"#ECFDF3",softBorder:"#A6F4C5",text:"#027A48",icon:"local_bar"},
+      "Café Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
+      "Cafe Verde": {accent:"#079455",soft:"#ECFDF3",softBorder:"#ABEFC6",text:"#027A48",icon:"eco"},
+      "Sin familia": {accent:"#667085",soft:"#F2F4F7",softBorder:"#D0D5DD",text:"#475467",icon:"inventory_2"}
+    };
 
-            <div class="marquee-container">
-                <div class="marquee-content">
-                    • DIRECT TRADE COFFEE • ROAST BETTER COFFEE • SOSTENIBILIDAD EN ORIGEN • Q GRADER CERTIFIED • ANALÍTICA SENSORIAL • DIRECT TRADE COFFEE • ROAST BETTER COFFEE • SOSTENIBILIDAD EN ORIGEN • Q GRADER CERTIFIED • ANALÍTICA SENSORIAL • 
-                </div>
-            </div>
+    var USERS = [
+      {n:"Admin",p:"1234"},
+      {n:"Bodega",p:"5678"},
+      {n:"Producción",p:"9012"}
+    ];
 
-            <div class="max-w-7xl mx-auto px-6 py-24">
-                <div class="text-center mb-16">
-                    <h3 class="text-4xl font-black text-gray-900 tracking-tighter">Descubre el Origen</h3>
-                    <p class="text-gray-500 mt-4">Nuestra selección de cafés recién aterrizados.</p>
-                </div>
-                <div id="home-featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    </div>
-            </div>
+    var AUTH_USERS = [];
+    var authLoaded = false;
+    var authLoading = false;
+    var authError = false;
+    var authPromise = null;
 
-            <div class="bg-white py-24 border-t border-gray-100">
-                <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                    <div>
-                        <h3 class="text-4xl font-black tracking-tighter mb-6">Expertise que se saborea.</h3>
-                        <p class="text-gray-600 leading-relaxed mb-6">Contamos con certificaciones SCA en Brewing, Barista, Sensory y Roasting. Cada lote es evaluado exhaustivamente por nuestro equipo y un Q Grader pre-embarque, garantizando que recibas exactamente la calidad que tu tostaduría necesita.</p>
-                        <button onclick="navigateTo('about')" class="text-green-800 font-bold border-b-2 border-green-800 pb-1">Conoce nuestra historia →</button>
-                    </div>
-                    <div class="rounded-3xl overflow-hidden shadow-2xl h-96">
-                        <img src="https://images.unsplash.com/photo-1611162618479-ee4dcb1ba44d?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover">
-                    </div>
-                </div>
-            </div>
-        </section>
+    var syncCounter = 0;
+    var syncState = "idle";
+    var lastSyncAt = "";
+    var lastSyncError = "";
+    var browserOnlineHint = (typeof navigator !== "undefined" ? navigator.onLine !== false : true);
+    var apiReachable = null;
 
-        <section id="view-offerlist" class="view-section min-h-screen py-12 px-6 max-w-7xl mx-auto">
-            <h2 class="text-4xl font-black tracking-tighter mb-2">Offer List</h2>
-            <p class="text-gray-500 mb-10">Explora, filtra y ordena nuestra disponibilidad en tiempo real.</p>
-            
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <input type="text" id="table-search" onkeyup="filterTable()" placeholder="Buscar lote..." class="w-full md:w-1/3 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-600">
-                <span class="text-xs font-bold text-gray-400 self-center uppercase tracking-widest">Clic en cabeceras para ordenar</span>
-            </div>
+    var items = [];
+    var hist = [];
+    var pendingUpdates = [];
 
-            <div class="overflow-x-auto bg-white rounded-xl shadow-xl border border-gray-100">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th onclick="sortTable('Nombre')" class="p-4 font-black text-gray-700 hover:text-green-700">Café ↕</th>
-                            <th onclick="sortTable('Origen')" class="p-4 font-black text-gray-700 hover:text-green-700">Origen ↕</th>
-                            <th onclick="sortTable('Proceso')" class="p-4 font-black text-gray-700 hover:text-green-700">Proceso ↕</th>
-                            <th onclick="sortTable('Puntaje')" class="p-4 font-black text-gray-700 hover:text-green-700 text-center">SCA ↕</th>
-                            <th class="p-4 font-black text-gray-700 text-center">Stock</th>
-                            <th class="p-4 font-black text-gray-700 text-right">Precio/Kg</th>
-                            <th class="p-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="offerlist-tbody" class="divide-y divide-gray-100 text-gray-600 font-medium">
-                        </tbody>
-                </table>
-            </div>
-        </section>
+    var user = null;
+    var pg = "login";
+    var selFamily = null;
+    var selStockList = null;
+    var selItem = null;
+    var adjMode = null;
+    var adjVal = "";
+    var adjNote = "";
+    var searchQ = "";
+    var toastMsg = null;
+    var toastT = "ok";
+    var loginPin = "";
+    var loginBusy = false;
+    var histFilterQuery = "";
+    var histFilterType = "all";
+    var histSortKey = "ts";
+    var histSortDir = "desc";
+    var stockListSearchQ = "";
 
-        <section id="view-about" class="view-section pb-20">
-            <div class="h-[60vh] bg-parallax relative flex items-center justify-center" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=2000');">
-                <div class="absolute inset-0 bg-green-900/70"></div>
-                <h2 class="relative z-10 text-5xl md:text-7xl font-black text-white tracking-tighter">Nuestra Historia</h2>
-            </div>
-            <div class="max-w-4xl mx-auto px-6 mt-16 prose prose-lg prose-green">
-                <h3 class="text-3xl font-black tracking-tight mb-6">Más que importadores, somos aliados.</h3>
-                <p>En Super Tasters, creemos que la calidad de una taza comienza mucho antes del tueste. Comienza en las manos del caficultor, en la tierra que nutre la planta y en la transparencia de la cadena de suministro.</p>
-                <p>Nuestra misión es estrechar la brecha entre el origen y el tostador, ofreciendo cafés con trazabilidad total, análisis físicos y sensoriales rigurosos, y relaciones de comercio directo que benefician a toda la cadena.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-black text-xl mb-2">Visión</h4>
-                        <p class="text-sm text-gray-600">Ser el estándar de oro en la importación de café verde de especialidad, impulsando prácticas sostenibles y educando a la industria local.</p>
-                    </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-black text-xl mb-2">Valores</h4>
-                        <p class="text-sm text-gray-600">Transparencia radical, equidad en origen, rigor técnico y pasión obsesiva por la calidad del grano.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    var TOP_LEVEL_TABS = ["home","search","alerts","history","report"];
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchStartTarget = null;
+    var touchStartScrollable = null;
+    var mouseSwipeActive = false;
+    var swipeWheelLockUntil = 0;
 
-        <section id="view-partners" class="view-section py-20 px-6 max-w-7xl mx-auto min-h-screen">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-black tracking-tighter mb-4">Nuestros Socios</h2>
-                <p class="text-xl text-gray-500 max-w-2xl mx-auto">Colaboramos con cooperativas y fincas que comparten nuestra pasión por la excelencia y la sostenibilidad.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 group">
-                    <div class="h-48 bg-gray-200 overflow-hidden"><img src="https://images.unsplash.com/photo-1511537190424-bbbab87ac5eb?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition"></div>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-black mb-2">Cooperativa COPAGRI</h3>
-                        <p class="text-sm text-green-700 font-bold mb-4 uppercase tracking-widest">Satipo, Perú</p>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-6">Una cooperativa que agrupa a cientos de familias productoras, enfocados en la certificación orgánica y procesos de lavado de altísima calidad.</p>
-                        <button onclick="document.getElementById('global-search').value='COPAGRI'; predictiveSearch('COPAGRI'); toggleSearch();" class="text-green-800 font-bold text-sm">Ver sus cafés →</button>
-                    </div>
-                </div>
-                 <div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 group">
-                    <div class="h-48 bg-gray-200 overflow-hidden"><img src="https://images.unsplash.com/photo-1552346513-403d15c7e095?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition"></div>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-black mb-2">Carmo de Minas</h3>
-                        <p class="text-sm text-green-700 font-bold mb-4 uppercase tracking-widest">Sul de Minas, Brasil</p>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-6">Región legendaria que produce tazas con un dulzor excepcional, cuerpo denso y notas clásicas de chocolate y avellana tostada.</p>
-                        <button onclick="document.getElementById('global-search').value='Brasil'; predictiveSearch('Brasil'); toggleSearch();" class="text-green-800 font-bold text-sm">Explorar región →</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+    function esc(s){
+      return s == null ? "" : String(s)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;");
+    }
 
-        <section id="view-contact" class="view-section py-20 px-6 max-w-5xl mx-auto min-h-screen">
-            <h2 class="text-5xl font-black tracking-tighter mb-4 text-center">Hablemos de Café</h2>
-            <p class="text-gray-500 text-center mb-16">¿Buscas un perfil específico o necesitas agendar una cata?</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-                <div class="p-10 bg-green-900 text-white flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-3xl font-black mb-6">Nuestros Datos</h3>
-                        <div class="space-y-6 text-green-100">
-                            <p class="flex items-center gap-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg> Bodega Central, Santiago, Chile</p>
-                            <p class="flex items-center gap-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> +569 75552708</p>
-                            <p class="flex items-center gap-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg> contacto@supertasters.cl</p>
-                        </div>
-                    </div>
-                    <button onclick="window.open('https://wa.me/56975552708', '_blank')" class="mt-12 bg-white text-green-900 font-black py-4 rounded-xl hover:bg-green-50 transition w-full">Chat Directo por WhatsApp</button>
-                </div>
-                <div class="p-10">
-                    <form onsubmit="event.preventDefault(); window.open('https://wa.me/56975552708?text=Hola, vengo del formulario web. Mi nombre es ' + document.getElementById('fname').value, '_blank')" class="space-y-6">
-                        <div><label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Nombre Completo</label><input type="text" id="fname" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 outline-none focus:border-green-800"></div>
-                        <div><label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Tostaduría / Marca</label><input type="text" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 outline-none focus:border-green-800"></div>
-                        <div><label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Mensaje</label><textarea rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 outline-none focus:border-green-800"></textarea></div>
-                        <button type="submit" class="w-full bg-green-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-800 transition">Enviar Solicitud</button>
-                    </form>
-                </div>
-            </div>
-        </section>
+    function ts(){
+      var d = new Date();
+      var p = function(n){ return ("0" + n).slice(-2); };
+      return p(d.getDate()) + "/" + p(d.getMonth()+1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+    }
 
-        <section id="view-detalle" class="view-section pb-20">
-            <div class="max-w-7xl mx-auto px-6 pt-6">
-                <button onclick="navigateTo('offerlist')" class="text-gray-400 hover:text-gray-900 font-bold flex items-center gap-2 mb-8 text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Volver a la Lista</button>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    
-                    <div class="lg:col-span-8">
-                        
-                        <div class="mb-10 lg:hidden">
-                            <h2 id="detalle-nombre-mobile" class="text-4xl font-black text-gray-900 tracking-tighter mb-2"></h2>
-                            <p id="detalle-origen-texto-mobile" class="text-lg text-green-700 font-medium"></p>
-                        </div>
+    function parseDateLoose(v){
+      if(!v) return 0;
+      if(v instanceof Date) return v.getTime();
+      var s = String(v).trim();
+      var iso = Date.parse(s);
+      if(!isNaN(iso)) return iso;
+      var m = s.match(/^(\d{2})\/(\d{2})(?:\/(\d{2,4}))?\s+(\d{2}):(\d{2})$/);
+      if(m){
+        var dd = Number(m[1]);
+        var mm = Number(m[2]) - 1;
+        var yy = m[3] ? Number(m[3]) : new Date().getFullYear();
+        if(yy < 100) yy += 2000;
+        var hh = Number(m[4]);
+        var mi = Number(m[5]);
+        return new Date(yy, mm, dd, hh, mi, 0, 0).getTime();
+      }
+      return 0;
+    }
 
-                        <div class="relative mb-16 shadow-2xl rounded-3xl overflow-hidden cursor-zoom-in watermark-overlay" onclick="openLightbox(document.getElementById('detalle-img').src)">
-                            <img id="detalle-img" src="" class="w-full h-[400px] object-cover img-protegida">
-                        </div>
+    function normalizeFamilyName(v){
+      var s = String(v || "").trim();
+      if(!s) return "Sin familia";
+      var plain = s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 
-                        <div class="mb-16 prose prose-gray">
-                            <h4 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-4 border-b pb-2">Historia del Lote</h4>
-                            <p id="detalle-resena" class="text-gray-600 leading-relaxed font-medium">Este café refleja el arduo trabajo y la dedicación de sus productores en origen, procesado con los más altos estándares de calidad.</p>
-                        </div>
+      if(plain === "produccion" || plain === "kawas general") return "Producción";
+      if(plain === "mercaderia") return "Mercadería";
+      if(plain === "cafe verde") return "Café Verde";
+      if(plain === "bebidas frias") return "Bebidas Frías";
+      if(plain === "clientes especiales") return "Clientes Especiales";
+      return s;
+    }
 
-                        <div class="mb-16">
-                            <h4 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 border-b pb-2">Evaluación Sensorial</h4>
-                            <div class="flex flex-wrap gap-2 mb-10" id="contenedor-pildoras-sabor"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                <div class="relative w-full h-80"><canvas id="radarChart"></canvas></div>
-                                <div>
-                                    <table class="w-full text-left text-xs text-gray-600">
-                                        <tbody id="tabla-sca-desglose" class="divide-y divide-gray-100"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+    function st(x){
+      if(x.stock === 0) return "zero";
+      if(x.stock < x.min * .3) return "crit";
+      if(x.stock < x.min) return "low";
+      return "ok";
+    }
 
-                        <div id="contenedor-pie-chart" class="mb-16 hidden">
-                            <h4 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 border-b pb-2">Granulometría</h4>
-                            <div class="relative w-full max-w-sm h-64"><canvas id="pieChart"></canvas></div>
-                        </div>
-                        
-                        <div id="seccion-galeria" class="mb-16 hidden">
-                            <h4 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 border-b pb-2">Trazabilidad Visual</h4>
-                            <div id="galeria-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4" oncontextmenu="return false;"></div>
-                        </div>
-                    </div>
+    var STC = {
+      zero:{l:"Agotado"},
+      crit:{l:"Crítico"},
+      low:{l:"Bajo"},
+      ok:{l:"OK"}
+    };
 
-                    <div class="lg:col-span-4">
-                        <div class="sticky top-28">
-                            
-                            <div class="mb-8 hidden lg:block">
-                                <h2 id="detalle-nombre" class="text-5xl font-black text-gray-900 tracking-tighter mb-4 leading-tight"></h2>
-                                <div id="detalle-certificaciones" class="flex flex-wrap gap-2 mb-4"></div>
-                                <p id="detalle-origen-texto" class="text-lg text-green-700 font-medium"></p>
-                                <p id="detalle-ico" class="text-xs font-mono text-gray-400 mt-2"></p>
-                                <div class="mt-4"><span id="detalle-puntaje-sca" class="text-3xl font-black text-green-800"></span><span class="text-[10px] ml-2 font-bold text-gray-400 uppercase tracking-widest">Puntaje SCA</span></div>
-                            </div>
+    function ft(family){
+      return FAMILY_THEMES[normalizeFamilyName(family)] || FAMILY_THEMES["Sin familia"];
+    }
 
-                            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 mb-10">
-                                <div class="flex justify-between items-center mb-6">
-                                    <span id="detalle-stock" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border"></span>
-                                    <span class="text-xs font-bold text-gray-400 uppercase" id="detalle-categoria"></span>
-                                </div>
-                                <div class="space-y-4">
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button onclick="setFormato('1kg')" id="btn-format-1kg" class="py-3 rounded-xl border-2 font-bold text-xs transition">1kg</button>
-                                        <button onclick="setFormato('Saco')" id="btn-format-saco" class="py-3 rounded-xl border-2 font-bold text-xs transition">Saco</button>
-                                    </div>
-                                    <div class="flex items-center justify-between border-y border-gray-100 py-4">
-                                        <span class="font-bold text-sm">Cantidad:</span>
-                                        <div class="flex items-center gap-4">
-                                            <button onclick="changeQty(-1)" class="w-8 h-8 rounded-full bg-gray-100 font-black">-</button>
-                                            <input type="number" id="input-qty" value="1" class="w-10 text-center font-black bg-transparent outline-none" readonly>
-                                            <button onclick="changeQty(1)" class="w-8 h-8 rounded-full bg-gray-100 font-black">+</button>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-between items-end py-2">
-                                        <span class="text-xs font-bold text-gray-400">Subtotal</span>
-                                        <span class="text-3xl font-black">$<span id="txt-subtotal-item">0</span></span>
-                                    </div>
-                                    <button id="btn-add-cart" onclick="agregarAlCarrito('Lote')" class="w-full bg-green-900 text-white py-4 rounded-2xl font-bold text-sm shadow-lg hover:bg-green-800 transition">Añadir al Carrito</button>
-                                    <button onclick="agregarAlCarrito('Muestra')" class="w-full text-blue-600 font-bold text-xs py-2 hover:underline">Añadir Muestra 250gr ($5.000)</button>
-                                </div>
-                            </div>
+    function cm(cat){
+      return CATEGORY_META[cat] || {icon:"category",color:"#7F56D9"};
+    }
 
-                            <div>
-                                <h4 class="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-6 border-b pb-2">Especificaciones Técnicas</h4>
-                                <div id="detalle-ficha" class="space-y-3"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    function scm(subcat,cat,name){
+      var label = String(subcat || "").trim();
+      var categoryMeta = cm(cat);
 
-    </main>
+      if(SUBCATEGORY_META[label]){
+        return {icon:SUBCATEGORY_META[label].icon,color:categoryMeta.color};
+      }
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzLrChkaUqiWMyDgYpzfHHjmwPcZJ2afiiXQEFbFZ_-2iE-6pV1m4CnVlIAUlKCVc1g/exec';
-        let productosGlobal = [], radarInstancia = null, pieInstancia = null;
-        let currentProduct = null, selectedFormat = 'Saco', currentQty = 1, currentSackWeight = 30; 
-        let carrito = JSON.parse(localStorage.getItem('st_carrito')) || [];
-        let sortDirection = {};
+      var raw = (label || String(name || "") || "").toLowerCase();
 
-        // --- SISTEMA DE VISTAS (ROUTER SPA) ---
-        function navigateTo(viewId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('view-active'));
-            document.getElementById('view-' + viewId).classList.add('view-active');
-            window.scrollTo(0, 0);
-            if(viewId === 'offerlist') renderTable(productosGlobal);
+      if(/funsmart/.test(raw)) return {icon:"deployed_code",color:categoryMeta.color};
+      if(/mtpack|impresa/.test(raw)) return {icon:"inventory_2",color:categoryMeta.color};
+      if(/kawas grandes|caja/.test(raw)) return {icon:"inventory",color:categoryMeta.color};
+      if(/botellas|botella/.test(raw)) return {icon:"water_bottle",color:categoryMeta.color};
+      if(/tapas|tapa/.test(raw)) return {icon:"radio_button_checked",color:categoryMeta.color};
+      if(/sello/.test(raw)) return {icon:"approval",color:categoryMeta.color};
+      if(/eureka|molino/.test(raw)) return {icon:"tune",color:categoryMeta.color};
+      if(/rocket|cafetera|espresso/.test(raw)) return {icon:"espresso",color:categoryMeta.color};
+      if(/guatemala|bolivia|regional|huehuetenango|lote/.test(raw)) return {icon:"public",color:categoryMeta.color};
+
+      return {icon:categoryMeta.icon,color:categoryMeta.color};
+    }
+
+    function familyCardStyle(family){
+      var t = ft(family);
+      return "border-color:"+t.softBorder+";background:linear-gradient(180deg,"+t.soft+",#ffffff);";
+    }
+
+    function familyChipStyle(family,active){
+      var t = ft(family);
+      return active
+        ? "border-color:"+t.accent+";background:"+t.soft+";color:"+t.text+";"
+        : "border-color:"+t.softBorder+";background:#ffffff;color:"+t.text+";";
+    }
+
+    function familyMetricStyle(family){
+      var t = ft(family);
+      return "border-color:"+t.softBorder+";background:"+t.soft+";";
+    }
+
+    function familyIconStyle(family){
+      var t = ft(family);
+      return "color:"+t.accent+";border-color:"+t.softBorder+";background:"+t.soft+";";
+    }
+
+    function familyTextStyle(family){
+      return "color:"+ft(family).text+";";
+    }
+
+    function familyBarColor(family){
+      return ft(family).accent;
+    }
+
+    function categoryIconStyle(cat){
+      var c = cm(cat);
+      return "color:"+c.color+";border-color:#EAECF0;background:#F9FAFB;";
+    }
+
+    function subcategoryIconStyle(subcat,cat,name){
+      var s = scm(subcat,cat,name);
+      return "color:"+s.color+";border-color:#EAECF0;background:#FFFFFF;";
+    }
+
+    function taxonomyPill(label,icon,style){
+      if(!label) return "";
+      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="'+style+'"><span class="material-symbols-rounded text-[14px]">'+icon+'</span>'+esc(label)+'</span>';
+    }
+
+    function statusTheme(s){
+      if(s === "ok") return {soft:"bg-success-50 text-success-700 border-green-200",bar:"#12B76A",text:"text-success-700"};
+      if(s === "low") return {soft:"bg-warning-50 text-warning-700 border-amber-200",bar:"#F79009",text:"text-warning-700"};
+      return {soft:"bg-error-50 text-error-700 border-red-200",bar:"#F04438",text:"text-error-700"};
+    }
+
+    function alerts(){
+      return items.filter(function(x){ return st(x) !== "ok"; }).sort(function(a,b){
+        return ({zero:0,crit:1,low:2,ok:3}[st(a)] - ({zero:0,crit:1,low:2,ok:3}[st(b)]));
+      });
+    }
+
+    function familyMap(){
+      var m = {};
+      items.forEach(function(x){
+        var f = normalizeFamilyName(x.family || "Sin familia");
+        if(!m[f]) m[f] = [];
+        m[f].push(x);
+      });
+      return m;
+    }
+
+    function stockListMap(familyName){
+      var m = {};
+      items
+        .filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName); })
+        .forEach(function(x){
+          var sl = x.stockList || "General";
+          if(!m[sl]) m[sl] = [];
+          m[sl].push(x);
+        });
+      return m;
+    }
+
+    function categoryMapForStockList(familyName,stockListName){
+      var m = {};
+      items
+        .filter(function(x){
+          return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName) && (x.stockList || "General") === stockListName;
+        })
+        .forEach(function(x){
+          var c = x.cat || "General";
+          if(!m[c]) m[c] = [];
+          m[c].push(x);
+        });
+      return m;
+    }
+
+    function enrichItem(x){
+      var name = String(x.name || x.nombre || "");
+      var cat = String(x.cat || x.categoria || "");
+      var familyRaw = x.family || x.familia || (
+        /castaño|castano/i.test(name) ? "Clientes Especiales" :
+        (cat === "Cold Brew" ? "Bebidas Frías" : "Producción")
+      );
+      var family = normalizeFamilyName(familyRaw);
+      var stockList = x.stockList || x.lista_stock || (
+        /castaño|castano/i.test(name) ? "Stock Castaño" :
+        (cat === "Cold Brew" ? "Sala Bebidas Frías" : "Stock General Kawas")
+      );
+
+      return {
+        id: String(x.id || ""),
+        family: family,
+        stockList: String(stockList || ""),
+        cat: cat,
+        subcat: String(x.subcat || x.subcategoria || ""),
+        name: String(x.name || x.nombre || ""),
+        stock: Number(x.stock) || 0,
+        min: Number(x.min || x.minimo) || 0,
+        unit: String(x.unit || x.unidad || "uds"),
+        alert: String(x.alert || x.alerta || "")
+      };
+    }
+
+    function saveAppState(){
+      try{ localStorage.setItem(STORAGE_KEYS.app, JSON.stringify({items:items,hist:hist})); }catch(e){}
+    }
+
+    function loadAppState(){
+      try{
+        var d = JSON.parse(localStorage.getItem(STORAGE_KEYS.app));
+        if(d && d.items && d.items.length > 0){
+          items = d.items.map(enrichItem);
+          hist = d.hist || [];
+        }else{
+          items = ITEMS.map(enrichItem);
+          hist = [];
         }
+      }catch(e){
+        items = ITEMS.map(enrichItem);
+        hist = [];
+      }
+    }
 
-        // Lightbox
-        function openLightbox(url) { if(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); } }
-        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
-
-        // --- FETCH DATA ---
-        async function cargarData() {
-            actualizarUI_Carrito();
-            try {
-                const res = await fetch(API_URL);
-                productosGlobal = await res.json();
-                document.getElementById('loading').classList.add('hidden');
-                
-                // Llenar Home Destacados (Primeros 3)
-                const gridHome = document.getElementById('home-featured-grid');
-                gridHome.innerHTML = productosGlobal.slice(0,3).map(p => buildCardHtml(p, productosGlobal.indexOf(p))).join('');
-                
-            } catch (e) { document.getElementById('loading').innerText = 'Error de conexión.'; }
+    function saveSession(){
+      try{
+        if(user){
+          localStorage.setItem(STORAGE_KEYS.session, JSON.stringify({
+            user:user,
+            pg:pg,
+            selFamily:selFamily,
+            selStockList:selStockList
+          }));
+        }else{
+          localStorage.removeItem(STORAGE_KEYS.session);
         }
+      }catch(e){}
+    }
 
-        function buildCardHtml(p, i) {
-            const nro = parseInt(p.Stock);
-            const isAgotado = isNaN(nro) ? (p.Stock && p.Stock.toLowerCase() === 'agotado') : (nro <= 0);
-            return `
-                <div onclick="verDetalle(${i})" class="bg-white cursor-pointer rounded-3xl shadow-lg border border-gray-100 overflow-hidden group flex flex-col h-full text-left transition-all hover:shadow-2xl">
-                    <div class="h-56 relative overflow-hidden bg-gray-100">
-                        <img src="${p.Imagen || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7'}" class="w-full h-full object-cover transition transform group-hover:scale-110">
-                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-green-900 shadow-sm">${p.Categoria || 'ORIGEN'}</div>
-                        ${p.Puntaje ? `<div class="absolute bottom-4 right-4 bg-green-900 text-white px-2 py-1 rounded-lg font-black text-xs shadow">SCA ${p.Puntaje}</div>` : ''}
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <h3 class="font-black text-gray-900 text-xl leading-tight mb-1 truncate">${p.Nombre}</h3>
-                        <p class="text-xs text-gray-500 font-medium mb-4 truncate">${p.Origen || '-'}</p>
-                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
-                            <span class="text-[10px] font-bold px-2 py-1 rounded-md ${isAgotado ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'} uppercase tracking-wider">${isAgotado ? 'Agotado' : nro + ' Sacos'}</span>
-                            <span class="font-black text-xl text-gray-900">$${Number(p.Precio).toLocaleString('es-CL')}</span>
-                        </div>
-                    </div>
-                </div>`;
+    function loadSession(){
+      try{
+        var raw = localStorage.getItem(STORAGE_KEYS.session);
+        if(!raw) return;
+        var data = JSON.parse(raw);
+        if(data && data.user){
+          user = data.user;
+          pg = data.pg || "home";
+          selFamily = data.selFamily || null;
+          selStockList = data.selStockList || null;
         }
+      }catch(e){}
+    }
 
-        // --- TABLA OFFER LIST ---
-        function renderTable(data) {
-            const tbody = document.getElementById('offerlist-tbody');
-            tbody.innerHTML = data.map(p => {
-                const nro = parseInt(p.Stock);
-                const stock = isNaN(nro) ? (p.Stock||'Agotado') : nro;
-                return `
-                <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="verDetalle(${productosGlobal.indexOf(p)})">
-                    <td class="p-4 font-bold text-gray-900">${p.Nombre}</td>
-                    <td class="p-4">${p.Origen || '-'}</td>
-                    <td class="p-4 text-xs">${p.Proceso || '-'}</td>
-                    <td class="p-4 text-center font-black text-green-700">${p.Puntaje || '-'}</td>
-                    <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${stock === 'Agotado' || stock <= 0 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}">${stock}</span></td>
-                    <td class="p-4 text-right font-black">$${Number(p.Precio).toLocaleString('es-CL')}</td>
-                    <td class="p-4 text-right"><span class="text-blue-600 text-xs font-bold hover:underline">Ver →</span></td>
-                </tr>`;
-            }).join('');
+    function clearSession(){
+      user = null;
+      pg = "login";
+      selFamily = null;
+      selStockList = null;
+      selItem = null;
+      adjMode = null;
+      adjVal = "";
+      adjNote = "";
+      searchQ = "";
+      stockListSearchQ = "";
+      loginPin = "";
+      try{ localStorage.removeItem(STORAGE_KEYS.session); }catch(e){}
+    }
+
+    function savePendingUpdates(){
+      try{ localStorage.setItem(STORAGE_KEYS.pending, JSON.stringify(pendingUpdates || [])); }catch(e){}
+    }
+
+    function loadPendingUpdates(){
+      try{
+        pendingUpdates = JSON.parse(localStorage.getItem(STORAGE_KEYS.pending) || "[]");
+        if(!Array.isArray(pendingUpdates)) pendingUpdates = [];
+      }catch(e){
+        pendingUpdates = [];
+      }
+    }
+
+    function clearLegacyCachesOnce(){
+      try{
+        if(localStorage.getItem(STORAGE_KEYS.cacheCleared) === "1"){
+          return Promise.resolve();
         }
+      }catch(e){}
 
-        function filterTable() {
-            const q = document.getElementById('table-search').value.toLowerCase();
-            const filtered = productosGlobal.filter(p => p.Nombre.toLowerCase().includes(q) || (p.Origen||'').toLowerCase().includes(q) || (p.Proceso||'').toLowerCase().includes(q));
-            renderTable(filtered);
-        }
+      var swPromise = ("serviceWorker" in navigator)
+        ? navigator.serviceWorker.getRegistrations().then(function(regs){
+            return Promise.all(regs.map(function(reg){ return reg.unregister(); }));
+          }).catch(function(){})
+        : Promise.resolve();
 
-        function sortTable(col) {
-            sortDirection[col] = !sortDirection[col];
-            const dir = sortDirection[col] ? 1 : -1;
-            const sorted = [...productosGlobal].sort((a, b) => {
-                let valA = a[col] || ''; let valB = b[col] || '';
-                if(col === 'Puntaje' || col === 'Precio') { valA = Number(valA); valB = Number(valB); }
-                if(valA < valB) return -1 * dir; if(valA > valB) return 1 * dir; return 0;
-            });
-            renderTable(sorted);
-        }
+      var cachePromise = ("caches" in window)
+        ? caches.keys().then(function(keys){
+            return Promise.all(keys.map(function(key){ return caches.delete(key); }));
+          }).catch(function(){})
+        : Promise.resolve();
 
-        // --- BUSCADOR PREDICTIVO HEADER ---
-        function toggleSearch() {
-            const modal = document.getElementById('search-modal');
-            if(modal.classList.contains('search-closed')) { modal.classList.remove('search-closed'); document.getElementById('global-search').focus(); } 
-            else { modal.classList.add('search-closed'); document.getElementById('global-search').value = ''; document.getElementById('search-results').classList.add('hidden'); }
-        }
+      return Promise.all([swPromise, cachePromise]).then(function(){
+        try{ localStorage.setItem(STORAGE_KEYS.cacheCleared, "1"); }catch(e){}
+      });
+    }
 
-        function predictiveSearch(q) {
-            const resContainer = document.getElementById('search-results');
-            if(q.length < 2) { resContainer.classList.add('hidden'); return; }
-            const lowQ = q.toLowerCase();
-            const results = productosGlobal.filter(p => p.Nombre.toLowerCase().includes(lowQ) || (p.Origen||'').toLowerCase().includes(lowQ) || (p['Notas de Cata']||'').toLowerCase().includes(lowQ));
-            
-            if(results.length > 0) {
-                resContainer.innerHTML = results.slice(0,5).map(p => `
-                    <div onclick="verDetalle(${productosGlobal.indexOf(p)}); toggleSearch()" class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 flex justify-between items-center">
-                        <div><p class="font-black text-lg text-gray-900">${p.Nombre}</p><p class="text-xs text-gray-500">${p.Origen} • ${p.Proceso}</p></div>
-                        <span class="font-bold text-green-700">Ver Lote</span>
-                    </div>
-                `).join('');
-                resContainer.classList.remove('hidden');
-            } else { resContainer.innerHTML = '<p class="p-4 text-gray-400">No encontramos coincidencias.</p>'; resContainer.classList.remove('hidden'); }
-        }
+    function hasConfiguredApi(){
+      return API_URL !== "" && API_URL !== "DEMO" && API_URL !== "TU_URL_AQUI";
+    }
 
-        // --- FICHA DE DETALLE ---
-        function verDetalle(index) {
-            currentProduct = productosGlobal[index];
-            currentQty = 1; selectedFormat = 'Saco';
-            
-            if(currentProduct['Peso Saco']) currentSackWeight = parseFloat(currentProduct['Peso Saco']);
-            else if (currentProduct.Empaque) { const m = currentProduct.Empaque.match(/\d+/); currentSackWeight = m ? parseInt(m[0]) : 30; }
-            else currentSackWeight = 30;
-            
-            document.getElementById('input-qty').value = 1;
-            document.getElementById('btn-format-saco').innerText = `Saco (${currentSackWeight}kg)`;
+    function markApiReachable(ok){
+      apiReachable = !!ok;
+      if(ok) browserOnlineHint = true;
+    }
 
-            navigateTo('detalle'); // IMPORTANTE: Usa el router en lugar de classList
+    function isOnline(){
+      return hasConfiguredApi() && apiReachable !== false;
+    }
 
-            document.getElementById('detalle-img').src = currentProduct.Imagen || '';
-            document.getElementById('detalle-nombre').innerText = currentProduct.Nombre;
-            document.getElementById('detalle-nombre-mobile').innerText = currentProduct.Nombre;
-            document.getElementById('detalle-origen-texto').innerText = currentProduct.Origen || '-';
-            document.getElementById('detalle-origen-texto-mobile').innerText = currentProduct.Origen || '-';
-            document.getElementById('detalle-puntaje-sca').innerText = currentProduct.Puntaje || '-';
-            
-            const resenaEl = document.getElementById('detalle-resena');
-            resenaEl.innerText = currentProduct.Reseña || currentProduct.Historia || "Lote seleccionado bajo los más estrictos estándares de especialidad. Este café refleja el arduo trabajo y la dedicación de la finca productora.";
+    function normalizeUsers(arr){
+      return (arr || [])
+        .map(function(u){
+          return {
+            n: String(u.nombre || u.n || "Usuario").trim(),
+            p: String(u.pin || u.p || "").trim()
+          };
+        })
+        .filter(function(u){ return u.n && u.p; });
+    }
 
-            const elIco = document.getElementById('detalle-ico');
-            if(currentProduct['Código ICO']) { elIco.innerText = `ICO: ${currentProduct['Código ICO']}`; elIco.classList.remove('hidden'); } else { elIco.classList.add('hidden'); }
-            
-            const elCerts = document.getElementById('detalle-certificaciones');
-            if(currentProduct.Certificaciones) {
-                elCerts.innerHTML = currentProduct.Certificaciones.split(',').map(c => `<span class="bg-green-100 text-green-800 text-[9px] px-2 py-1 rounded-full font-black uppercase tracking-widest border border-green-200">${c.trim()}</span>`).join('');
-                elCerts.classList.remove('hidden');
-            } else { elCerts.classList.add('hidden'); }
+    function loadCachedUsers(){
+      try{
+        var raw = localStorage.getItem(STORAGE_KEYS.authUsers);
+        if(!raw) return [];
+        var parsed = JSON.parse(raw);
+        var users = normalizeUsers(parsed);
+        if(users.length) AUTH_USERS = users;
+        return users;
+      }catch(e){
+        return [];
+      }
+    }
 
-            const cat = document.getElementById('detalle-categoria');
-            cat.innerText = currentProduct.Categoria || 'ORIGEN';
+    function saveCachedUsers(users){
+      try{ localStorage.setItem(STORAGE_KEYS.authUsers, JSON.stringify(users || [])); }catch(e){}
+    }
 
-            // Galería Extra
-            const fotosOrigen = [currentProduct['Imagen Origen 1'], currentProduct['Imagen Origen 2'], currentProduct['Imagen Origen 3']].filter(f => f);
-            const secGaleria = document.getElementById('seccion-galeria');
-            if(fotosOrigen.length > 0) {
-                secGaleria.classList.remove('hidden');
-                document.getElementById('galeria-grid').innerHTML = fotosOrigen.map(url => `
-                    <div onclick="openLightbox('${url}')" class="h-32 relative rounded-2xl overflow-hidden cursor-zoom-in watermark-overlay">
-                        <img src="${url}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition duration-500 img-protegida">
-                    </div>`).join('');
-            } else { secGaleria.classList.add('hidden'); }
+    function buildApiUrl(params){
+      var q = Object.keys(params || {})
+        .map(function(k){ return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); })
+        .join("&");
+      return API_URL + (API_URL.indexOf("?") > -1 ? "&" : "?") + q;
+    }
 
-            // SCA Desglose
-            const atributosSCA = ['Fragancia / Aroma', 'Sabor', 'Sabor Residual', 'Acidez', 'Cuerpo', 'Balance', 'Dulzor', 'Uniformidad', 'Taza Limpia', 'General'];
-            document.getElementById('tabla-sca-desglose').innerHTML = atributosSCA.map(a => currentProduct[a] ? `
-                <tr><td class="py-2 font-bold text-gray-800 border-b border-gray-100">${a}</td><td class="py-2 font-black text-green-700 text-center border-b border-gray-100">${currentProduct[a]}</td></tr>
-            ` : '').join('') || '<tr><td colspan="2" class="py-4 text-gray-400">Sin desglose sensorial.</td></tr>';
+    function fetchTextWithTimeout(url,opts,timeoutMs){
+      timeoutMs = timeoutMs || 12000;
+      return new Promise(function(resolve,reject){
+        var done = false;
+        var t = setTimeout(function(){
+          if(done) return;
+          done = true;
+          markApiReachable(false);
+          reject(new Error("Timeout " + timeoutMs + "ms"));
+        }, timeoutMs);
 
-            const notas = currentProduct['Notas de Cata'] || '';
-            document.getElementById('contenedor-pildoras-sabor').innerHTML = notas.split(',').filter(n=>n.trim()).map(n => `<span class="bg-white px-3 py-1.5 rounded-full text-[10px] uppercase font-bold border border-gray-200 shadow-sm">☕ ${n.trim()}</span>`).join('');
+        fetch(url, opts || {})
+          .then(function(r){
+            if(done) return;
+            clearTimeout(t);
+            done = true;
+            markApiReachable(true);
+            resolve(r);
+          })
+          .catch(function(err){
+            if(done) return;
+            clearTimeout(t);
+            done = true;
+            markApiReachable(false);
+            reject(err);
+          });
+      });
+    }
 
-            dibujarGraficoRadar(currentProduct);
-            dibujarGraficoMalla(currentProduct);
-            
-            // Ficha Técnica Curada
-            const camposCurados = ['Productor', 'Finca', 'Altitud', 'Variedad', 'Proceso', 'Cosecha', 'Grado', 'Malla', 'Humedad', 'WA', 'Color', 'Olor en Verde', 'Defectos', 'Empaque'];
-            document.getElementById('detalle-ficha').innerHTML = camposCurados.map(c => currentProduct[c] ? `<div class="flex justify-between items-baseline border-b border-gray-100 py-1.5"><span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">${c}</span><span class="text-xs font-semibold text-gray-900 text-right ml-4">${currentProduct[c]}</span></div>` : '').join('');
+    function fetchJsonWithTimeout(url,opts,timeoutMs){
+      return fetchTextWithTimeout(url,opts,timeoutMs)
+        .then(function(r){
+          return r.text().then(function(txt){
+            var body = String(txt || "").trim();
+            if(!r.ok){
+              throw new Error("HTTP " + r.status + (body ? " · " + body.slice(0,140) : ""));
+            }
+            try{
+              return JSON.parse(body);
+            }catch(e){
+              throw new Error("Respuesta no JSON" + (body ? " · " + body.slice(0,140) : ""));
+            }
+          });
+        });
+    }
 
-            // Bloquear Botones Stock
-            const nro = parseInt(currentProduct.Stock);
-            const isAgotado = isNaN(nro) ? (currentProduct.Stock && currentProduct.Stock.toLowerCase() === 'agotado') : (nro <= 0);
-            const btnCart = document.getElementById('btn-add-cart');
-            const tagStock = document.getElementById('detalle-stock');
-            if(isAgotado) {
-                btnCart.disabled = true; btnCart.classList.add('opacity-50', 'cursor-not-allowed'); btnCart.innerText = 'Agotado';
-                tagStock.innerText = 'Sin Stock'; tagStock.className = 'text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-red-200 text-red-600 bg-red-50';
+    function setSyncError(msg){ lastSyncError = String(msg || ""); }
+    function clearSyncError(){ lastSyncError = ""; }
+
+    function toast(m,t){
+      toastMsg = m;
+      toastT = t || "ok";
+      safeDraw();
+      clearTimeout(window.__toastTm);
+      window.__toastTm = setTimeout(function(){
+        toastMsg = null;
+        safeDraw();
+      }, 2600);
+    }
+
+    function setSyncState(state,tsLabel){
+      syncState = state;
+      if(tsLabel) lastSyncAt = tsLabel;
+      safeDraw();
+    }
+
+    function getSyncMeta(){
+      if(!hasConfiguredApi()) return {label:"Sin API",dot:"#F79009",text:"text-warning-700"};
+      if(syncState === "syncing") return {label:"Sincronizando",dot:"#175CD3",text:"text-blue-700"};
+      if(syncState === "success") return {label:lastSyncAt ? ("Sync " + lastSyncAt) : "Sincronizado",dot:"#12B76A",text:"text-success-700"};
+      if(apiReachable === false && browserOnlineHint === false) return {label:"Offline",dot:"#F79009",text:"text-warning-700"};
+      if(apiReachable === false) return {label:"Sin conexión",dot:"#F79009",text:"text-warning-700"};
+      if(syncState === "error") return {label:"Error sync",dot:"#F04438",text:"text-error-700"};
+      return {label:"Listo",dot:"#98A2B3",text:"text-gray-500"};
+    }
+
+    function loadUsers(force){
+      if(authLoading && authPromise) return authPromise;
+      if(authLoaded && !force && AUTH_USERS.length) return Promise.resolve(AUTH_USERS);
+
+      if(!hasConfiguredApi()){
+        authLoaded = true;
+        authError = true;
+        AUTH_USERS = AUTH_USERS.length ? AUTH_USERS : USERS.slice();
+        return Promise.resolve(AUTH_USERS);
+      }
+
+      authLoading = true;
+      authPromise = fetchJsonWithTimeout(buildApiUrl({action:"getUsers",_ts:Date.now()}), {cache:"no-store"}, 12000)
+        .then(function(d){
+          if(d && d.success && d.users && d.users.length){
+            AUTH_USERS = normalizeUsers(d.users);
+            saveCachedUsers(AUTH_USERS);
+            authError = false;
+          }else{
+            throw new Error("getUsers no devolvió usuarios");
+          }
+          authLoaded = true;
+          authLoading = false;
+          authPromise = null;
+          return AUTH_USERS;
+        })
+        .catch(function(err){
+          authLoaded = true;
+          authLoading = false;
+          authError = true;
+          authPromise = null;
+          AUTH_USERS = AUTH_USERS.length ? AUTH_USERS : USERS.slice();
+          setSyncError("Auth: " + (err && err.message ? err.message : String(err)));
+          return AUTH_USERS;
+        });
+
+      return authPromise;
+    }
+
+    function validatePinAttempt(pinAttempt){
+      var seen = {};
+      var pool = [];
+      (AUTH_USERS || []).concat(USERS || []).forEach(function(x){
+        if(!x || x.p == null) return;
+        var k = String(x.p);
+        if(seen[k]) return;
+        seen[k] = true;
+        pool.push(x);
+      });
+
+      var u = pool.find(function(x){ return String(x.p) === String(pinAttempt); });
+      return u ? {ok:true,user:u} : {ok:false};
+    }
+
+    function completeLogin(u){
+      loginBusy = false;
+      loginPin = "";
+      user = u;
+      loadAppState();
+      loadPendingUpdates();
+      pg = "home";
+      saveSession();
+      safeDraw();
+      sync(true);
+      toast("Hola, " + u.n);
+    }
+
+    function attemptLogin(pinAttempt){
+      if(loginBusy) return;
+      var attempt = String(pinAttempt || loginPin || "").replace(/\D/g,"").slice(0,4);
+      if(attempt.length !== 4) return;
+
+      loginBusy = true;
+      var firstTry = validatePinAttempt(attempt);
+      if(firstTry.ok){
+        completeLogin(firstTry.user);
+        return;
+      }
+
+      loadUsers(true)
+        .then(function(){
+          var secondTry = validatePinAttempt(attempt);
+          if(secondTry.ok){
+            completeLogin(secondTry.user);
+          }else{
+            loginBusy = false;
+            loginPin = "";
+            draw();
+            toast("PIN incorrecto","err");
+          }
+        })
+        .catch(function(){
+          loginBusy = false;
+          loginPin = "";
+          draw();
+          toast("No se pudo validar el PIN","err");
+        });
+    }
+
+    function queuePendingUpdate(payload){
+      pendingUpdates.push({
+        itemId: payload.itemId,
+        newStock: payload.newStock,
+        oldStock: payload.oldStock,
+        tipo: payload.tipo,
+        usuario: payload.usuario,
+        nota: payload.nota || "",
+        createdAt: new Date().toISOString()
+      });
+      savePendingUpdates();
+    }
+
+    function flushPendingUpdates(silent){
+      if(!hasConfiguredApi() || !pendingUpdates.length){
+        return Promise.resolve({flushed:0});
+      }
+
+      var queue = pendingUpdates.slice();
+      var flushed = 0;
+
+      return queue.reduce(function(p,entry){
+        return p.then(function(){
+          var body = JSON.stringify({
+            action:"updateStock",
+            itemId:entry.itemId,
+            newStock:entry.newStock,
+            oldStock:entry.oldStock,
+            tipo:entry.tipo,
+            usuario:entry.usuario,
+            nota:entry.nota || ""
+          });
+          return fetchJsonWithTimeout(API_URL, {
+            method:"POST",
+            body:body,
+            headers:{"Content-Type":"text/plain;charset=utf-8"}
+          }, 15000).then(function(d){
+            if(d && d.success){
+              flushed++;
+              pendingUpdates.shift();
+              savePendingUpdates();
+              clearSyncError();
             } else {
-                btnCart.disabled = false; btnCart.classList.remove('opacity-50', 'cursor-not-allowed'); btnCart.innerText = 'Añadir al Carrito';
-                tagStock.innerText = `${nro} Sacos Disp.`; tagStock.className = 'text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-green-200 text-green-700 bg-green-50';
+              throw new Error("updateStock respondió sin success");
+            }
+          }).catch(function(err){
+            setSyncError("Pendiente: " + (err && err.message ? err.message : String(err)));
+            return Promise.resolve();
+          });
+        });
+      }, Promise.resolve()).then(function(){
+        if(flushed && !silent) toast(flushed + " cambio(s) pendiente(s) sincronizado(s)");
+        return {flushed:flushed};
+      });
+    }
+
+    function sync(silent){
+      if(!hasConfiguredApi()){
+        saveAppState();
+        setSyncState("offline");
+        setSyncError("API no configurada");
+        return Promise.resolve(false);
+      }
+
+      setSyncState("syncing");
+      var syncId = ++syncCounter;
+
+      return flushPendingUpdates(true)
+        .then(function(){
+          var stockReq = fetchJsonWithTimeout(
+            buildApiUrl({action:"getAll",_ts:Date.now()}),
+            {cache:"no-store"},
+            15000
+          ).then(function(d){
+            if(!(d && d.success && d.items)) throw new Error("getAll inválido");
+            return d.items.map(enrichItem);
+          });
+
+          var histReq = fetchJsonWithTimeout(
+            buildApiUrl({action:"getHistory",limit:100,_ts:Date.now()}),
+            {cache:"no-store"},
+            15000
+          ).then(function(d){
+            if(!(d && d.success && d.entries)) throw new Error("getHistory inválido");
+            return d.entries.map(function(x){
+              return {
+                id:String(x.itemId || x.item_id || x.id || ""),
+                nm:String(x.itemNombre || x.item_nombre || x.nm || ""),
+                cat:String(x.categoria || x.cat || ""),
+                tp:String(x.tipo || x.tp || ""),
+                os:Number(x.stockAnterior != null ? x.stockAnterior : (x.stock_anterior != null ? x.stock_anterior : x.os)) || 0,
+                ns:Number(x.stockNuevo != null ? x.stockNuevo : (x.stock_nuevo != null ? x.stock_nuevo : x.ns)) || 0,
+                nt:String(x.nota || x.nt || ""),
+                u:String(x.usuario || x.u || "?"),
+                ts:x.timestamp ? String(x.timestamp).substring(0,16).replace("T"," ") : (x.ts || "")
+              };
+            });
+          });
+
+          return Promise.allSettled([stockReq,histReq]).then(function(results){
+            if(syncId !== syncCounter) return false;
+
+            var stockOk = results[0].status === "fulfilled";
+            var histOk = results[1].status === "fulfilled";
+
+            if(stockOk) items = results[0].value;
+            if(histOk) hist = results[1].value;
+
+            if(stockOk || histOk){
+              saveAppState();
+              saveSession();
+              clearSyncError();
+              setSyncState("success", new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false}));
+              safeDraw();
+              if(!silent) toast("Sincronización completada");
             }
 
-            setFormato('Saco');
+            if(!stockOk && !histOk){
+              var msg0 = results[0].reason && results[0].reason.message ? results[0].reason.message : "getAll error";
+              var msg1 = results[1].reason && results[1].reason.message ? results[1].reason.message : "getHistory error";
+              setSyncError("getAll: " + msg0 + " | getHistory: " + msg1);
+              setSyncState("error");
+              if(!silent) toast(apiReachable === false ? "Sin conexión" : "No se pudo sincronizar","err");
+            }else if(!stockOk || !histOk){
+              var partialErr = !stockOk
+                ? ("getAll: " + (results[0].reason && results[0].reason.message ? results[0].reason.message : "error"))
+                : ("getHistory: " + (results[1].reason && results[1].reason.message ? results[1].reason.message : "error"));
+              setSyncError(partialErr);
+              setSyncState("success", new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false}));
+              if(!silent) toast("Sincronización parcial","warn");
+            }
+
+            return stockOk || histOk;
+          });
+        })
+        .catch(function(err){
+          setSyncError(err && err.message ? err.message : String(err));
+          setSyncState("error");
+          if(!silent) toast(apiReachable === false ? "Sin conexión" : "No se pudo sincronizar","err");
+          return false;
+        });
+    }
+
+    function pushUpdate(item,oldStock,newStock,type,note){
+      var payload = {
+        itemId:item.id,
+        newStock:newStock,
+        oldStock:oldStock,
+        tipo:type,
+        usuario:user ? user.n : "?",
+        nota:note || ""
+      };
+
+      if(!hasConfiguredApi()){
+        queuePendingUpdate(payload);
+        saveAppState();
+        setSyncState("offline");
+        setSyncError("API no configurada");
+        toast("API no configurada: cambio guardado localmente","warn");
+        return Promise.resolve(false);
+      }
+
+      var body = JSON.stringify({
+        action:"updateStock",
+        itemId:item.id,
+        newStock:newStock,
+        oldStock:oldStock,
+        tipo:type,
+        usuario:user ? user.n : "?",
+        nota:note || ""
+      });
+
+      return fetchJsonWithTimeout(API_URL,{
+        method:"POST",
+        body:body,
+        headers:{"Content-Type":"text/plain;charset=utf-8"}
+      },15000)
+      .then(function(d){
+        if(d && d.success){
+          clearSyncError();
+          setSyncState("success", new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false}));
+          toast("Guardado en Sheets");
+          return true;
+        }
+        throw new Error("updateStock respondió sin success");
+      })
+      .catch(function(err){
+        queuePendingUpdate(payload);
+        setSyncError(err && err.message ? err.message : String(err));
+        setSyncState("error");
+        toast(apiReachable === false ? "Sin conexión: cambio en cola local" : "No se pudo enviar. Cambio en cola local","warn");
+        return false;
+      });
+    }
+
+    function badge(label,cls,icon){
+      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold '+cls+'">'+
+        (icon ? '<span class="material-symbols-rounded text-[14px]">'+icon+'</span>' : '')+
+        esc(label)+
+      '</span>';
+    }
+
+    function familyBadge(family){
+      var f = normalizeFamilyName(family || "Sin familia");
+      var t = ft(f);
+      return '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:'+t.softBorder+';background:'+t.soft+';color:'+t.text+'"><span class="material-symbols-rounded text-[14px]">'+t.icon+'</span>'+esc(f)+'</span>';
+    }
+
+    function statusBadge(item){
+      var s = st(item), th = statusTheme(s);
+      return badge(STC[s].l, th.soft, s === "ok" ? "check_circle" : s === "low" ? "warning" : "error");
+    }
+
+    function progressBar(item,barColor){
+      var pct = item.min > 0 ? Math.min(100,Math.round(item.stock / item.min * 100)) : 100;
+      var th = statusTheme(st(item));
+      return '<div class="mt-3"><div class="h-2 rounded-full bg-gray-100 overflow-hidden"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+(barColor || th.bar)+'"></div></div><div class="mt-2 flex items-center justify-between text-[11px] text-gray-500"><span>Mínimo '+item.min+' '+esc(item.unit)+'</span><span>'+pct+'%</span></div></div>';
+    }
+
+    function topIconButton(id,icon,primary,label){
+      return '<button id="'+id+'" class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border px-3.5 text-sm font-semibold transition shadow-soft '+(primary ? 'border-primary-600 bg-primary-600 text-white hover:bg-primary-700 hover:border-primary-700' : 'border-gray-200 bg-white/90 text-gray-700 hover:bg-gray-50')+'"><span class="material-symbols-rounded text-[20px]">'+icon+'</span>'+(label ? '<span class="hidden sm:inline">'+esc(label)+'</span>' : '')+'</button>';
+    }
+
+    function sectionHeader(eyebrow,title,subtitle,actions){
+      var rs = (actions && actions.right ? actions.right : "");
+      var hs = topIconButton("header-search","search",false,"Buscar");
+      var ss = topIconButton("header-sync","sync",true,"Sync");
+      var syncMeta = getSyncMeta();
+      var statusChips = '<span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/85 px-3 py-1.5 text-[11px] font-semibold text-gray-600 shadow-soft"><span class="sync-dot" style="background:'+syncMeta.dot+'"></span><span class="'+syncMeta.text+'">'+esc(syncMeta.label)+'</span></span>'+
+        (pendingUpdates.length ? '<span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-warning-50 px-3 py-1.5 text-[11px] font-semibold text-warning-700 shadow-soft"><span class="material-symbols-rounded text-[14px]">cloud_off</span><span>'+pendingUpdates.length+' pendiente(s)</span></span>' : '')+
+        (lastSyncError ? '<span class="inline-flex max-w-full items-center gap-1.5 rounded-full border border-red-200 bg-error-50 px-3 py-1.5 text-[11px] font-semibold text-error-700 shadow-soft"><span class="material-symbols-rounded text-[14px]">error</span><span class="truncate max-w-[280px]">'+esc(lastSyncError)+'</span></span>' : '');
+
+      return '<header class="sticky-blur safe-top px-4 pt-1"><div class="mx-auto w-full max-w-md xl:max-w-6xl">'+
+        '<div class="surface-card-strong panel-outline brand-glow overflow-hidden rounded-[30px] px-4 py-4 sm:px-5 xl:px-6 hero-mesh">'+
+          '<div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">'+
+            '<div class="min-w-0 flex-1">'+
+              '<div class="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary-700">'+esc(eyebrow || '')+'</div>'+
+              '<div class="mt-2 flex items-start gap-3">'+
+                (actions && actions.left ? actions.left : '')+
+                '<div class="min-w-0 flex-1">'+
+                  '<h1 class="text-[28px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900 sm:text-[32px]">'+esc(title || '')+'</h1>'+
+                  (subtitle ? '<p class="mt-2 max-w-3xl text-sm leading-6 text-gray-600">'+esc(subtitle)+'</p>' : '')+
+                '</div>'+
+              '</div>'+
+              '<div class="mt-4 flex flex-wrap items-center gap-2.5">'+statusChips+'</div>'+
+            '</div>'+
+            '<div class="flex items-center gap-2 xl:pl-4">'+hs+ss+rs+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div></header>';
+    }
+
+    function metricCard(label,value,meta,cls){
+      return '<div class="metric-tile rounded-[28px] p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">'+esc(label)+'</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] '+(cls || 'text-gray-900')+'">'+esc(String(value))+'</div>'+(meta ? '<div class="mt-1 text-xs text-gray-500">'+esc(meta)+'</div>' : '')+'</div>';
+    }
+
+    function compactStatPill(label,value,icon,toneClass){
+      return '<div class="compact-pill compact-pill-kpi"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-500"><span class="material-symbols-rounded text-[18px]">'+icon+'</span></div><div><div class="label">'+esc(label)+'</div><div class="value '+(toneClass || 'text-gray-900')+'">'+esc(String(value))+'</div></div></div>';
+    }
+
+    function emptyState(icon,title,text){
+      return '<div class="surface-card panel-outline rounded-[30px] px-6 py-10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] border border-gray-200 bg-gray-50 text-gray-500"><span class="material-symbols-rounded text-[28px]">'+icon+'</span></div><div class="mt-4 text-lg font-semibold text-gray-900">'+esc(title)+'</div><div class="mt-2 text-sm leading-6 text-gray-500">'+esc(text)+'</div></div>';
+    }
+
+    function navHtml(current,critCount){
+      var tabs = [
+        {id:"home",ic:"home",l:"Inicio"},
+        {id:"search",ic:"search",l:"Buscar"},
+        {id:"alerts",ic:"warning",l:"Alertas"},
+        {id:"history",ic:"schedule",l:"Historial"},
+        {id:"report",ic:"description",l:"Reporte"}
+      ];
+
+      return '<div class="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40"><div class="mx-auto max-w-md px-4 pb-safe-bottom"><div class="glass nav-blur bottom-shadow mb-3 rounded-[30px] px-2.5 py-2.5">'+
+        tabs.map(function(t){
+          var active = current === t.id;
+          return '<button data-tab="'+t.id+'" class="relative inline-flex w-[19.2%] flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-2.5 text-[10px] font-semibold transition '+(active ? 'bg-gray-900 text-white shadow-soft' : 'text-gray-500')+'"><span class="material-symbols-rounded text-[20px]">'+t.ic+'</span><span>'+t.l+'</span>'+(t.id === "alerts" && critCount > 0 ? '<span class="absolute right-3 top-2 h-2.5 w-2.5 rounded-full bg-error-700"></span>' : '')+'</button>';
+        }).join("")+
+      '</div></div></div>';
+    }
+
+    function roleLabel(u){
+      var name = String((u && (u.n || u.nombre)) || "").toLowerCase();
+      if(name.indexOf("admin") !== -1) return "Administrador";
+      if(name.indexOf("bodega") !== -1) return "Bodega";
+      if(name.indexOf("produ") !== -1) return "Producción";
+      return "Operador";
+    }
+
+    function currentDateLabel(){
+      var d = new Date();
+      return d.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"});
+    }
+
+    function currentTimeLabel(){
+      var d = new Date();
+      return d.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false});
+    }
+
+    function appShell(inner,bottom){
+      var alertItems = alerts();
+      var criticalAlerts = alertItems.filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length;
+      var rail = "";
+
+      if(user){
+        var syncMeta = getSyncMeta();
+        rail = '<aside class="app-shell-rail"><div class="rail-shell desktop-scroll flex h-full flex-col rounded-[36px] p-5">'+
+          '<div class="surface-muted panel-outline rounded-[28px] p-4">'+
+            '<div class="flex items-start gap-3">'+
+              '<div class="flex h-12 w-12 items-center justify-center rounded-[18px] border border-primary-200 bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[22px]">inventory_2</span></div>'+
+              '<div class="min-w-0 flex-1"><div class="text-base font-semibold tracking-[-0.02em] text-gray-900">'+APP_NAME+'</div><div class="mt-3 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-600"><span class="sync-dot" style="background:'+syncMeta.dot+'"></span><span>'+esc(syncMeta.label)+'</span></div></div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="mt-4 surface-card panel-outline rounded-[28px] p-4">'+
+            '<div class="flex items-center justify-between gap-3">'+
+              '<div><div class="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500">Sesión</div><div class="mt-1 text-sm font-semibold text-gray-900">'+esc(user.n)+'</div></div>'+
+              '<span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600">'+esc(roleLabel(user))+'</span>'+
+            '</div>'+
+            '<div class="mt-4 grid grid-cols-2 gap-2.5">'+
+              '<div class="metric-tile rounded-[20px] p-3"><div class="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500">Alertas</div><div class="mn mt-1 text-xl font-semibold text-gray-900">'+alertItems.length+'</div></div>'+
+              '<div class="metric-tile rounded-[20px] p-3"><div class="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-500">Pendientes</div><div class="mn mt-1 text-xl font-semibold '+(pendingUpdates.length ? 'text-warning-700' : 'text-gray-900')+'">'+pendingUpdates.length+'</div></div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="mt-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Navegación</div>'+
+          '<div class="mt-3 space-y-2">'+
+            ["home","search","alerts","history","report"].map(function(id){
+              var meta = {
+                home:["home","Inicio"],
+                search:["search","Buscar"],
+                alerts:["warning","Alertas"],
+                history:["schedule","Historial"],
+                report:["description","Reporte"]
+              }[id];
+              return '<button data-tab="'+id+'" class="rail-tab group flex w-full items-center justify-between rounded-[20px] border px-4 py-3 text-left transition '+(pg === id ? 'border-gray-900 bg-gray-900 text-white shadow-soft' : 'border-gray-200 bg-white/78 text-gray-700 hover:bg-gray-50')+'"><span class="flex min-w-0 items-center gap-3"><span class="material-symbols-rounded text-[20px]">'+meta[0]+'</span><span class="block text-sm font-semibold">'+meta[1]+'</span></span>'+(id === "alerts" && criticalAlerts ? '<span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full '+(pg === id ? 'bg-white/10 text-white' : 'bg-error-50 text-error-700')+' px-2 text-[11px] font-bold">'+criticalAlerts+'</span>' : '<span class="material-symbols-rounded text-[18px] '+(pg === id ? 'text-white/70' : 'text-gray-300 group-hover:text-gray-500')+'">chevron_right</span>')+'</button>';
+            }).join("")+
+          '</div>'+
+          '<div class="mt-auto space-y-2 pt-5">'+
+            '<button id="rail-sync" class="flex w-full items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-soft hover:bg-gray-50"><span class="material-symbols-rounded text-[18px]">sync</span><span>Sincronizar</span></button>'+
+            '<button id="rail-flush" class="flex w-full items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-white"><span class="material-symbols-rounded text-[18px]">cloud_upload</span><span>Enviar pendientes</span></button>'+
+            '<button id="rail-logout" class="flex w-full items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"><span class="material-symbols-rounded text-[18px]">logout</span><span>Salir</span></button>'+
+          '</div>'+
+        '</div></aside>';
+      }
+
+      return '<div class="app-shell-grid">'+rail+'<div class="app-shell-main">'+inner+(bottom || '')+'</div></div>';
+    }
+
+    function renderLogin(){
+      return '<div class="min-h-screen px-4 safe-top safe-bottom"><div class="mx-auto flex min-h-[calc(100vh-24px)] max-w-md items-center justify-center"><div class="w-full max-w-sm rounded-[32px] border border-gray-200 bg-white p-6 shadow-lgsoft"><div class="flex flex-col items-center text-center"><div class="flex h-16 w-16 items-center justify-center rounded-[22px] bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[30px]">inventory_2</span></div><div class="mt-4 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+APP_NAME+'</div><div class="mt-2 text-sm text-gray-500">Acceso por PIN</div></div><div class="mt-8"><label class="text-xs font-semibold uppercase tracking-[0.08em] text-gray-500">PIN</label><div class="mt-3 flex items-center gap-3 rounded-[20px] border border-gray-200 bg-gray-50 px-4 py-3"><span class="material-symbols-rounded text-gray-400">lock</span><input id="pin" class="w-full border-none bg-transparent text-[16px] font-medium tracking-[0.12em] text-gray-900 outline-none placeholder:tracking-normal placeholder:text-gray-400" type="password" inputmode="numeric" maxlength="4" placeholder="••••" value="'+esc(loginPin)+'"></div><div class="mt-3 text-center text-xs leading-5 text-gray-500">Ingresa los 4 dígitos y el acceso se intenta automáticamente.</div></div></div></div></div>';
+    }
+
+    function renderHome(){
+      var fm = familyMap();
+      var lowCount = items.filter(function(x){ return st(x) === "low"; }).length;
+      var criticalCount = items.filter(function(x){ return st(x) === "crit"; }).length;
+      var zeroCount = items.filter(function(x){ return st(x) === "zero"; }).length;
+      var okCount = items.filter(function(x){ return st(x) === "ok"; }).length;
+      var alertItems = alerts();
+      var families = Object.keys(fm);
+      var familiesCount = families.length;
+      var totalStock = 0;
+      items.forEach(function(x){ totalStock += Number(x.stock) || 0; });
+      var recentMovements = hist.slice(0,5);
+      var statusSummaryBadge = alertItems.length === 0
+        ? badge('Estable','bg-success-50 text-success-700 border-green-200','check_circle')
+        : (criticalCount + zeroCount > 0
+            ? badge('Crítico','bg-error-50 text-error-700 border-red-200','warning')
+            : badge('Atención','bg-warning-50 text-warning-700 border-amber-200','notifications_active'));
+      var inner = "";
+
+      inner += sectionHeader("Centro operativo","Hola, "+user.n,"");
+
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">';
+
+      inner += '<section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,.78fr)]">'+
+        '<div class="surface-card-strong panel-outline brand-glow hero-mesh rounded-[34px] p-4 sm:p-5">'+
+          '<div class="flex flex-wrap gap-2">'+
+            compactStatPill('Stock total', totalStock.toLocaleString(), 'inventory_2', 'text-gray-900')+
+            compactStatPill('Familias', familiesCount, 'dashboard', 'text-primary-700')+
+            compactStatPill('Alertas', alertItems.length, 'warning', alertItems.length ? 'text-warning-700' : 'text-success-700')+
+            compactStatPill('Pendientes', pendingUpdates.length, 'cloud_off', pendingUpdates.length ? 'text-warning-700' : 'text-gray-900')+
+          '</div>'+
+          '<div class="mt-4 flex flex-wrap gap-2">'+
+            '<button data-tab="search" class="action-pill"><span class="material-symbols-rounded text-[18px] text-primary-700">search</span><span>Buscar</span></button>'+
+            '<button data-tab="alerts" class="action-pill"><span class="material-symbols-rounded text-[18px] text-error-700">warning</span><span>Alertas</span>'+(criticalCount + zeroCount ? '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error-50 px-1.5 text-[10px] font-bold text-error-700">'+(criticalCount + zeroCount)+'</span>' : '')+'</button>'+
+            '<button data-tab="history" class="action-pill"><span class="material-symbols-rounded text-[18px] text-gray-500">schedule</span><span>Historial</span></button>'+
+            '<button data-tab="report" class="action-pill"><span class="material-symbols-rounded text-[18px] text-primary-700">description</span><span>Reporte</span></button>'+
+          '</div>'+
+          '<div class="mt-4 flex flex-wrap gap-2">'+
+            badge(alertItems.length ? alertItems.length+' alertas activas' : 'Sin alertas', alertItems.length ? 'bg-warning-50 text-warning-700 border-amber-200' : 'bg-success-50 text-success-700 border-green-200', alertItems.length ? 'notifications_active' : 'check_circle')+
+            badge(pendingUpdates.length ? pendingUpdates.length+' pendientes' : 'Sin pendientes', pendingUpdates.length ? 'bg-warning-50 text-warning-700 border-amber-200' : 'bg-primary-50 text-primary-700 border-primary-200', pendingUpdates.length ? 'cloud_off' : 'cloud_done')+
+            badge(hist.length+' movimientos', 'bg-white text-gray-700 border-gray-200', 'schedule')+
+          '</div>'+
+        '</div>'+
+        '<aside class="space-y-4">'+
+          '<section class="surface-card panel-outline rounded-[34px] p-4">'+
+            '<div class="flex items-start justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Estado</div><div class="mt-1 text-xl font-semibold tracking-[-0.04em] text-gray-900">'+(alertItems.length === 0 ? 'Todo estable' : (criticalCount + zeroCount > 0 ? 'Reposición prioritaria' : 'Atención'))+'</div></div>'+statusSummaryBadge+'</div>'+
+            '<div class="mt-4 flex flex-wrap gap-2">'+
+              badge('OK '+okCount,'bg-success-50 text-success-700 border-green-200','check_circle')+
+              badge('Bajo '+lowCount,'bg-warning-50 text-warning-700 border-amber-200','remove')+
+              badge('Críticos '+criticalCount,'bg-error-50 text-error-700 border-red-200','priority_high')+
+              badge('Agotados '+zeroCount,'bg-gray-100 text-gray-700 border-gray-200','block')+
+            '</div>'+
+          '</section>'+
+          '<section class="surface-card panel-outline rounded-[34px] p-4">'+
+            '<div class="flex items-center justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Sesión</div><div class="mt-1 text-lg font-semibold tracking-[-0.03em] text-gray-900">'+esc(user.n)+'</div></div><span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600">'+esc(roleLabel(user))+'</span></div>'+
+            '<div class="mt-4 flex flex-wrap gap-2">'+
+              badge(currentDateLabel(),'bg-white text-gray-700 border-gray-200','calendar_today')+
+              badge(currentTimeLabel(),'bg-white text-gray-700 border-gray-200','schedule')+
+              badge(getSyncMeta().label,'bg-white text-gray-700 border-gray-200','cloud_sync')+
+            '</div>'+
+          '</section>'+
+        '</aside>'+
+      '</section>';
+
+      inner += '<section class="mt-4 flex flex-wrap gap-2">'+
+        badge('Ítems '+items.length,'bg-white text-gray-700 border-gray-200','inventory')+
+        badge('Alertas '+alertItems.length,'bg-warning-50 text-warning-700 border-amber-200','warning')+
+        badge('Pendientes '+pendingUpdates.length,'bg-primary-50 text-primary-700 border-primary-200','cloud_off')+
+        badge('Movimientos '+hist.length,'bg-white text-gray-700 border-gray-200','history')+
+      '</section>';
+
+      inner += '<section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(300px,.88fr)]">';
+      inner += '<div><div class="mb-3 flex items-center justify-between gap-3"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">Familias</div></div>'+badge(familiesCount+" familias","bg-primary-50 text-primary-700 border-primary-200","dashboard")+'</div><div class="grid grid-cols-1 gap-3 sm:grid-cols-2">'+families.map(function(family,idx){
+        var itemsFamily = fm[family];
+        var familyAlerts = itemsFamily.filter(function(x){ return st(x) !== "ok"; }).length;
+        var listsCount = Object.keys(stockListMap(family)).length;
+        var familyStock = 0;
+        itemsFamily.forEach(function(x){ familyStock += Number(x.stock) || 0; });
+        var t = ft(family);
+        return '<button data-family="'+esc(family)+'" class="fade-up surface-card panel-outline w-full rounded-[28px] p-4 text-left transition active:scale-[0.99]" style="animation-delay:'+(idx * .03)+'s">'+
+          '<div class="flex items-start justify-between gap-3">'+
+            '<div class="flex h-11 w-11 items-center justify-center rounded-[18px] border" style="'+familyIconStyle(family)+'"><span class="material-symbols-rounded text-[20px]">'+t.icon+'</span></div>'+
+            (familyAlerts ? badge(familyAlerts+" alerta"+(familyAlerts > 1 ? "s" : ""),"bg-warning-50 text-warning-700 border-amber-200","warning") : badge("OK","bg-success-50 text-success-700 border-green-200","check_circle"))+
+          '</div>'+
+          '<div class="mt-3 text-[16px] font-semibold tracking-[-0.03em] text-gray-900">'+esc(family)+'</div>'+
+          '<div class="mt-1 text-sm text-gray-500">'+listsCount+' lista'+(listsCount > 1 ? 's' : '')+' · '+itemsFamily.length+' ítem'+(itemsFamily.length > 1 ? 's' : '')+'</div>'+
+          '<div class="mt-3 flex flex-wrap gap-2">'+
+            badge('Stock '+familyStock.toLocaleString(),'bg-white text-gray-700 border-gray-200','inventory_2')+
+            badge('Listas '+listsCount,'bg-white text-gray-700 border-gray-200','view_list')+
+            badge(familyAlerts ? 'Atención' : 'Estable', familyAlerts ? 'bg-warning-50 text-warning-700 border-amber-200' : 'bg-success-50 text-success-700 border-green-200', familyAlerts ? 'warning' : 'check_circle')+
+          '</div>'+
+        '</button>';
+      }).join('')+'</div></div>';
+
+      inner += '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="flex items-center justify-between gap-3"><div><div class="text-sm font-medium text-gray-500">Actividad reciente</div><div class="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-900">Últimos movimientos</div></div><button data-tab="history" class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-soft"><span>Ver todo</span><span class="material-symbols-rounded text-[16px]">arrow_outward</span></button></div>'+
+        (recentMovements.length ? '<div class="mt-4 space-y-3">'+recentMovements.map(function(r){
+          var delta = (Number(r.ns) || 0) - (Number(r.os) || 0);
+          var tone = delta > 0 ? 'text-success-700' : delta < 0 ? 'text-error-700' : 'text-primary-700';
+          return '<div class="metric-tile rounded-[20px] p-3"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(r.nm || 'Movimiento')+'</div><div class="mt-1 text-xs text-gray-500">'+esc(r.cat || 'Sin categoría')+' · '+esc(r.u || '?')+'</div></div><div class="mn text-sm font-semibold '+tone+'">'+(delta > 0 ? '+' : '')+delta+'</div></div><div class="mt-2 flex items-center justify-between gap-3 text-[11px] text-gray-500"><span>'+esc(r.tp || 'ajuste')+'</span><span>'+esc(r.ts || '')+'</span></div></div>';
+        }).join('')+'</div>' : '<div class="mt-4">'+emptyState('history','Sin movimientos','Aún no hay registros recientes.')+'</div>')+
+      '</section></aside></section>';
+
+      inner += '</div></main>';
+
+      return appShell(inner, navHtml("home", alertItems.filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function getSearchMatches(raw){
+      function norm(v){
+        return String(v || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g,"")
+          .trim();
+      }
+
+      var q = norm(raw);
+      var terms = q.split(/\s+/).filter(Boolean);
+      if(!q) return [];
+
+      function searchableText(i){
+        return norm([i.name,i.family,i.stockList,i.cat,i.subcat,i.unit,i.alert,i.id].join(" "));
+      }
+
+      function scoreItem(i){
+        var name = norm(i.name);
+        var family = norm(i.family);
+        var stockList = norm(i.stockList);
+        var cat = norm(i.cat);
+        var subcat = norm(i.subcat);
+        var alert = norm(i.alert);
+        var all = searchableText(i);
+        var score = 0;
+
+        if(name === q) score += 120;
+        if(stockList === q) score += 110;
+        if(cat === q) score += 100;
+        if(subcat === q) score += 100;
+        if(family === q) score += 95;
+        if(name.indexOf(q) === 0) score += 80;
+        if(stockList.indexOf(q) === 0) score += 70;
+        if(cat.indexOf(q) === 0) score += 65;
+        if(subcat.indexOf(q) === 0) score += 65;
+        if(family.indexOf(q) === 0) score += 60;
+        if(name.indexOf(q) !== -1) score += 50;
+        if(stockList.indexOf(q) !== -1) score += 45;
+        if(cat.indexOf(q) !== -1) score += 40;
+        if(subcat.indexOf(q) !== -1) score += 40;
+        if(family.indexOf(q) !== -1) score += 35;
+        if(alert.indexOf(q) !== -1) score += 20;
+        if(all.indexOf(q) !== -1) score += 10;
+
+        var matchedTerms = 0;
+        terms.forEach(function(t){
+          if(all.indexOf(t) !== -1){
+            matchedTerms++;
+            score += 8;
+          }
+          if(name.indexOf(t) !== -1) score += 4;
+          if(stockList.indexOf(t) !== -1) score += 3;
+          if(cat.indexOf(t) !== -1) score += 3;
+          if(subcat.indexOf(t) !== -1) score += 3;
+          if(family.indexOf(t) !== -1) score += 2;
+        });
+
+        return {score:score,matchedTerms:matchedTerms};
+      }
+
+      return items
+        .map(function(i){
+          var meta = scoreItem(i);
+          return {item:i,score:meta.score,matchedTerms:meta.matchedTerms};
+        })
+        .filter(function(x){ return x.score > 0 && x.matchedTerms === terms.length; })
+        .sort(function(a,b){
+          var order = {zero:0,crit:1,low:2,ok:3};
+          var sa = order[st(a.item)];
+          var sb = order[st(b.item)];
+          if(sa !== sb) return sa - sb;
+          if(b.score !== a.score) return b.score - a.score;
+          if(a.item.stock !== b.item.stock) return a.item.stock - b.item.stock;
+          return a.item.name > b.item.name ? 1 : -1;
+        })
+        .map(function(x){ return x.item; });
+    }
+
+    function getStockListMatches(familyName,stockListName,raw){
+      function norm(v){
+        return String(v || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g,"")
+          .trim();
+      }
+
+      var q = norm(raw || "");
+      var terms = q.split(/\s+/).filter(Boolean);
+      var base = items.filter(function(x){
+        return normalizeFamilyName(x.family || "Sin familia") === normalizeFamilyName(familyName) && (x.stockList || "General") === stockListName;
+      });
+
+      if(!q){
+        return base.slice().sort(function(a,b){
+          var order = {zero:0,crit:1,low:2,ok:3};
+          var sa = order[st(a)];
+          var sb = order[st(b)];
+          if(sa !== sb) return sa - sb;
+          if(a.stock !== b.stock) return a.stock - b.stock;
+          return (a.name || "").localeCompare(b.name || "");
+        });
+      }
+
+      function searchableText(i){
+        return norm([i.name,i.cat,i.subcat,i.unit,i.alert,i.id].join(" "));
+      }
+
+      function scoreItem(i){
+        var name = norm(i.name);
+        var cat = norm(i.cat);
+        var subcat = norm(i.subcat);
+        var alert = norm(i.alert);
+        var all = searchableText(i);
+        var score = 0;
+
+        if(name === q) score += 120;
+        if(cat === q) score += 105;
+        if(subcat === q) score += 100;
+        if(name.indexOf(q) === 0) score += 80;
+        if(cat.indexOf(q) === 0) score += 70;
+        if(subcat.indexOf(q) === 0) score += 70;
+        if(name.indexOf(q) !== -1) score += 50;
+        if(cat.indexOf(q) !== -1) score += 40;
+        if(subcat.indexOf(q) !== -1) score += 40;
+        if(alert.indexOf(q) !== -1) score += 20;
+        if(all.indexOf(q) !== -1) score += 10;
+
+        var matchedTerms = 0;
+        terms.forEach(function(t){
+          if(all.indexOf(t) !== -1){
+            matchedTerms++;
+            score += 8;
+          }
+          if(name.indexOf(t) !== -1) score += 4;
+          if(cat.indexOf(t) !== -1) score += 3;
+          if(subcat.indexOf(t) !== -1) score += 3;
+        });
+
+        return {score:score,matchedTerms:matchedTerms};
+      }
+
+      return base
+        .map(function(i){
+          var meta = scoreItem(i);
+          return {item:i,score:meta.score,matchedTerms:meta.matchedTerms};
+        })
+        .filter(function(x){ return x.score > 0 && x.matchedTerms === terms.length; })
+        .sort(function(a,b){
+          var order = {zero:0,crit:1,low:2,ok:3};
+          var sa = order[st(a.item)];
+          var sb = order[st(b.item)];
+          if(sa !== sb) return sa - sb;
+          if(b.score !== a.score) return b.score - a.score;
+          if(a.item.stock !== b.item.stock) return a.item.stock - b.item.stock;
+          return (a.item.name || "").localeCompare(b.item.name || "");
+        })
+        .map(function(x){ return x.item; });
+    }
+
+    function renderSearch(){
+      var quickMatches = (searchQ || "").trim() ? getSearchMatches(searchQ).slice(0,6) : [];
+      var families = Object.keys(familyMap());
+      var fm = familyMap();
+      var alertItems = alerts();
+      var stockListCount = Object.keys(items.reduce(function(acc,x){ acc[x.stockList || 'General']=1; return acc; },{})).length;
+
+      var familyPills = families.map(function(f){
+        var t = ft(f);
+        var count = fm[f].length;
+        var issues = fm[f].filter(function(x){ return st(x) !== "ok"; }).length;
+        return '<button data-family="'+esc(f)+'" class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold shadow-soft transition" style="'+familyChipStyle(f,false)+'"><span class="material-symbols-rounded text-[16px]">'+t.icon+'</span><span>'+esc(f)+'</span><span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold" style="background:'+t.soft+';color:'+t.text+'">'+(issues ? issues : count)+'</span></button>';
+      }).join("");
+
+      var inner = "";
+      inner += sectionHeader("Buscador","Buscar","");
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+
+        '<section class="mt-4 surface-card-strong panel-outline hero-mesh rounded-[34px] p-5 sm:p-6">'+
+          '<div class="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,.88fr)] xl:items-start">'+
+            '<div>'+
+              '<div class="flex flex-wrap items-center gap-2">'+badge(items.length+" ítems","bg-primary-50 text-primary-700 border-primary-200","inventory_2")+badge(Object.keys(fm).length+" familias","bg-bluebrand-50 text-bluebrand-700 border-blue-200","dashboard")+badge(alertItems.length+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div>'+
+              '<div class="mt-5 command-field rounded-[28px] p-3 sm:p-4">'+
+                '<div class="flex items-center gap-3 rounded-[22px] bg-white px-4 py-3 border border-gray-200 shadow-soft">'+
+                  '<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-50 text-primary-700"><span class="material-symbols-rounded text-[20px]">search</span></div>'+
+                  '<input id="search-in" class="w-full border-none bg-transparent text-[15px] font-medium outline-none placeholder:text-gray-400" placeholder="Buscar por producto, familia, lista o categoría" value="'+esc(searchQ)+'">'+
+                '</div>'+
+              '</div>'+
+              (quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft">'+esc(i.name)+'</button>'; }).join('')+'</div>' : '')+
+            '</div>'+
+            '<aside class="grid grid-cols-2 gap-3">'+
+              metricCard('Resultados', (searchQ || '').trim() ? getSearchMatches(searchQ).length : 0, '','text-gray-900')+
+              metricCard('Pendientes', pendingUpdates.length, '','text-primary-700')+
+              metricCard('Listas', stockListCount, '','text-gray-900')+
+              metricCard('Familias', Object.keys(fm).length, '','text-primary-700')+
+            '</aside>'+
+          '</div>'+
+          '<div class="mt-5 rounded-[28px] border border-gray-200 bg-white/80 p-3 sm:p-4">'+
+            '<div class="mb-2 flex items-center justify-between gap-3"><div><div class="text-sm font-semibold text-gray-900">Familias</div></div></div>'+
+            '<div class="pill-scroll">'+familyPills+'</div>'+
+          '</div>'+
+          '<div id="search-res" class="mt-5"></div>'+
+        '</section>'+
+      '</div></main>';
+
+      return appShell(inner, navHtml("search", alertItems.filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function renderSearchResults(){
+      var box = document.getElementById("search-res");
+      if(!box) return;
+
+      var raw = (searchQ || "").trim();
+      if(!raw){
+        box.innerHTML = '<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"><div class="surface-card panel-outline rounded-[30px] p-5"><div class="grid grid-cols-1 gap-3 sm:grid-cols-3">'+metricCard('Cobertura',items.length,'','text-gray-900')+metricCard('Alertas',alerts().length,'','text-warning-700')+metricCard('Historial',hist.length,'','text-gray-900')+'</div></div><div class="surface-card panel-outline rounded-[30px] p-5"><div class="flex flex-wrap gap-2">'+['Funsmart','Cold Brew','Cajas','Guatemala','Rocket'].map(function(s){ return '<button data-search-suggestion="'+s+'" class="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-soft">'+s+'</button>'; }).join('')+'</div></div></div>';
+        box.querySelectorAll('[data-search-suggestion]').forEach(function(btn){
+          btn.onclick = function(){
+            searchQ = btn.getAttribute('data-search-suggestion') || '';
+            var input = document.getElementById('search-in');
+            if(input) input.value = searchQ;
+            renderSearchResults();
+          };
+        });
+        return;
+      }
+
+      var res = getSearchMatches(raw);
+      var resultFamiliesCount = Object.keys(res.reduce(function(acc,i){ acc[normalizeFamilyName(i.family)] = 1; return acc; }, {})).length;
+      var resultListsCount = Object.keys(res.reduce(function(acc,i){ acc[i.stockList || 'General'] = 1; return acc; }, {})).length;
+
+      if(!res.length){
+        box.innerHTML = emptyState("inventory_2","Sin resultados","No encontramos coincidencias con tu búsqueda.");
+        return;
+      }
+
+      box.innerHTML = '<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">'+
+        '<div>'+
+          '<div class="mb-3 flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold tracking-[-0.03em] text-gray-900">'+res.length+' resultado'+(res.length > 1 ? 's' : '')+'</div></div>'+badge('Consulta','bg-primary-50 text-primary-700 border-primary-200','manage_search')+'</div>'+
+          '<div class="xl:hidden space-y-3">'+res.map(function(i,idx){ return itemCard(i,idx,familyBarColor(i.family || 'Sin familia')); }).join('')+'</div>'+
+          '<div class="hidden xl:block overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-mdsoft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.08em] text-gray-500"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Familia</th><th class="px-4 py-3 font-semibold">Lista</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+          res.map(function(i){
+            var meta = cm(i.cat);
+            var tone = statusTheme(st(i));
+            var submeta = scm(i.subcat,i.cat,i.name);
+            var fam = normalizeFamilyName(i.family);
+            return '<tr data-item="'+i.id+'" class="row-hover cursor-pointer border-t border-gray-200 align-top"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div><div class="mt-1 text-xs text-gray-500">'+esc(i.unit)+'</div></div></div></td><td class="px-4 py-3">'+familyBadge(fam)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.stockList || '—')+'</td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || '—')+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
+          }).join('')+
+          '</tbody></table></div></div>'+
+        '</div>'+
+        '<aside class="space-y-4"><section class="surface-card panel-outline rounded-[30px] p-5"><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard('Total',res.length,'','text-gray-900')+metricCard('Alertas',res.filter(function(i){ return st(i) !== 'ok'; }).length,'','text-warning-700')+metricCard('Familias',resultFamiliesCount,'','text-primary-700')+metricCard('Listas',resultListsCount,'','text-gray-900')+'</div></section></aside>'+
+      '</div>';
+
+      box.onclick = function(e){
+        var t = e.target;
+        while(t && t !== box){
+          if(t.hasAttribute && t.hasAttribute("data-item")){
+            selItem = items.find(function(x){ return x.id === t.getAttribute("data-item"); });
+            if(selItem) draw();
+            return;
+          }
+          t = t.parentElement;
+        }
+      };
+    }
+
+    function renderAlerts(){
+      var alertItems = alerts();
+      var critItems = alertItems.filter(function(a){ return st(a) === "zero" || st(a) === "crit"; });
+      var inner = "";
+
+      inner += sectionHeader("Alertas","Estado del inventario","");
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl">'+(!alertItems.length ? '<div class="mt-4">'+emptyState("check_circle","Todo en orden","No hay productos bajo mínimo ni agotados.")+'</div>' : '<div class="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2 2xl:grid-cols-3">'+alertItems.map(function(x,i){ return itemCard(x,i,familyBarColor(x.family || "Sin familia")); }).join("")+'</div>')+'</div></main>';
+
+      return appShell(inner, navHtml("alerts", critItems.length));
+    }
+
+    function renderHistory(){
+      var inner = "";
+      inner += sectionHeader("Historial","Movimientos","");
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_200px]"><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><div class="flex items-center gap-3"><span class="material-symbols-rounded text-gray-400">search</span><input id="hist-filter-q" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Filtrar por producto, categoría, usuario o nota" value="'+esc(histFilterQuery)+'"></div></div><div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"><select id="hist-filter-type" class="w-full border-none bg-transparent text-sm outline-none text-gray-700"><option value="all"'+(histFilterType === "all" ? " selected" : "")+'>Todos los tipos</option><option value="ingreso"'+(histFilterType === "ingreso" ? " selected" : "")+'>Ingresos</option><option value="salida"'+(histFilterType === "salida" ? " selected" : "")+'>Salidas</option><option value="ajuste"'+(histFilterType === "ajuste" ? " selected" : "")+'>Ajustes</option></select></div></div></div><div class="mt-4 overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-soft"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead class="bg-gray-50 text-[12px] uppercase tracking-[0.06em] text-gray-500"><tr><th class="px-4 py-3 font-semibold"><button data-hsort="nm" class="flex items-center gap-1">Producto<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="cat" class="flex items-center gap-1">Categoría<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="tp" class="flex items-center gap-1">Tipo<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold text-right"><button data-hsort="delta" class="ml-auto flex items-center gap-1">Cambio<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="u" class="flex items-center gap-1">Usuario<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold"><button data-hsort="ts" class="flex items-center gap-1">Fecha / hora<span class="material-symbols-rounded text-[16px]">unfold_more</span></button></th><th class="px-4 py-3 font-semibold">Nota</th></tr></thead><tbody id="history-table-body"></tbody></table></div></div></div></main>';
+      return appShell(inner, navHtml("history", alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function renderHistoryTable(){
+      var body = document.getElementById("history-table-body");
+      if(!body) return;
+
+      var rows = hist.slice();
+
+      if(histFilterType !== "all"){
+        rows = rows.filter(function(r){ return r.tp === histFilterType; });
+      }
+
+      var q = (histFilterQuery || "").trim().toLowerCase();
+      if(q){
+        rows = rows.filter(function(r){
+          return [r.nm,r.cat,r.tp,r.u,r.nt,r.ts].join(" ").toLowerCase().indexOf(q) !== -1;
+        });
+      }
+
+      rows = rows.map(function(r){
+        var delta = (Number(r.ns) || 0) - (Number(r.os) || 0);
+        return Object.assign({delta:delta}, r);
+      });
+
+      rows.sort(function(a,b){
+        var av, bv;
+        if(histSortKey === "delta"){
+          av = a.delta;
+          bv = b.delta;
+        }else if(histSortKey === "ts"){
+          av = parseDateLoose(a.ts);
+          bv = parseDateLoose(b.ts);
+        }else{
+          av = String(a[histSortKey] || "").toLowerCase();
+          bv = String(b[histSortKey] || "").toLowerCase();
+        }
+        if(av < bv) return histSortDir === "asc" ? -1 : 1;
+        if(av > bv) return histSortDir === "asc" ? 1 : -1;
+        return 0;
+      });
+
+      if(!rows.length){
+        body.innerHTML = '<tr><td colspan="7" class="px-4 py-10">'+emptyState("history","Sin resultados","No hay movimientos que coincidan con los filtros actuales.")+'</td></tr>';
+        return;
+      }
+
+      body.innerHTML = rows.slice(0,200).map(function(r){
+        var badgeCls = r.tp === "ingreso"
+          ? "bg-success-50 text-success-700 border-green-200"
+          : r.tp === "salida"
+            ? "bg-error-50 text-error-700 border-red-200"
+            : "bg-primary-50 text-primary-700 border-primary-200";
+        var tone = r.delta > 0 ? "text-success-700" : r.delta < 0 ? "text-error-700" : "text-primary-700";
+        return '<tr class="border-t border-gray-200 align-top"><td class="px-4 py-3"><div class="text-sm font-semibold text-gray-900">'+esc(r.nm)+'</div></td><td class="px-4 py-3 text-sm text-gray-600">'+esc(r.cat)+'</td><td class="px-4 py-3">'+badge(r.tp,badgeCls)+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone+'">'+(r.delta > 0 ? "+" : "")+r.delta+'</div><div class="text-[11px] text-gray-500">'+r.os+' → '+r.ns+'</div></td><td class="px-4 py-3 text-sm text-gray-600">'+esc(r.u)+'</td><td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">'+esc(r.ts)+'</td><td class="px-4 py-3 text-sm text-gray-500">'+esc(r.nt || "—")+'</td></tr>';
+      }).join("");
+    }
+
+    function renderReport(){
+      var totalS = 0;
+      items.forEach(function(x){ totalS += x.stock; });
+
+      var crit = items.filter(function(x){ return st(x) === "zero" || st(x) === "crit"; }).length;
+      var low = items.filter(function(x){ return st(x) === "low"; }).length;
+      var ok = items.filter(function(x){ return st(x) === "ok"; }).length;
+
+      var inner = "";
+      inner += sectionHeader("Reporte","PDF","");
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md"><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="text-lg font-semibold text-gray-900">Resumen</div></div><div class="mt-4 grid grid-cols-2 gap-3">'+metricCard("Productos",items.length,"","text-primary-700")+metricCard("Stock total",totalS.toLocaleString(),"","text-gray-900")+metricCard("Críticos",crit,"","text-error-700")+metricCard("OK",ok,"","text-success-700")+'</div><div class="mt-4 rounded-[32px] border border-gray-200 bg-white p-4 shadow-soft"><div class="flex flex-wrap gap-2">'+badge(low+" bajo mínimo","bg-warning-50 text-warning-700 border-amber-200","inventory_2")+badge(crit+" críticos","bg-error-50 text-error-700 border-red-200","warning")+badge("PDF","bg-bluebrand-50 text-bluebrand-700 border-blue-200","picture_as_pdf")+'</div><div class="mt-4 grid grid-cols-1 gap-3"><button id="open-db" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Abrir base de datos</button></div></div></div></main>';
+
+      return appShell(inner, navHtml("report", alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function renderFamily(){
+      var familyLabel = normalizeFamilyName(selFamily);
+      var lm = stockListMap(familyLabel);
+      var listKeys = Object.keys(lm);
+      var familyItems = familyMap()[familyLabel] || [];
+      var totalItems = familyItems.length;
+      var t = ft(familyLabel);
+
+      var totalStock = 0;
+      var totalAlerts = 0;
+      familyItems.forEach(function(x){
+        totalStock += Number(x.stock) || 0;
+        if(st(x) !== "ok") totalAlerts++;
+      });
+
+      var inner = "";
+      inner += sectionHeader("Familia", familyLabel || "Sin familia", totalItems+" ítems · "+listKeys.length+" listas", {left:topIconButton("back-family","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_320px]"><section><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" id="stocklist-scroll">'+listKeys.map(function(sl,idx){
+        var listItems = lm[sl];
+        var issueCount = listItems.filter(function(x){ return st(x) !== "ok"; }).length;
+        var totalSc = 0;
+        listItems.forEach(function(x){ totalSc += Number(x.stock) || 0; });
+        return '<button data-stocklist="'+esc(sl)+'" class="fade-up rounded-[28px] border p-4 text-left shadow-soft transition active:scale-[0.99]" style="animation-delay:'+(idx * .03)+'s;'+familyCardStyle(familyLabel)+'"><div class="flex items-start justify-between gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(familyLabel)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div>'+(issueCount ? badge(issueCount+" con alerta","bg-error-50 text-error-700 border-red-200") : badge("Todo OK","bg-success-50 text-success-700 border-green-200"))+'</div><div class="mt-4 text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(sl)+'</div><div class="mt-1 text-xs text-gray-600">'+listItems.length+' ítems</div><div class="mn mt-4 text-[24px] font-semibold tracking-[-0.04em] text-gray-900">'+totalSc.toLocaleString()+'</div><div class="text-xs text-gray-500">stock total</div></button>';
+      }).join("")+'</div></section><aside class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl border" style="'+familyIconStyle(familyLabel)+'"><span class="material-symbols-rounded text-[22px]">'+t.icon+'</span></div><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="text-xl font-semibold tracking-[-0.03em]" style="'+familyTextStyle(familyLabel)+'">'+esc(familyLabel)+'</div></div></div><div class="mt-5 grid grid-cols-2 gap-3"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Listas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+listKeys.length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalItems+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div></div></section></aside></div></div></main>';
+
+      return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function renderStockListView(){
+      var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
+      var theme = ft(familyLabel);
+      var matches = getStockListMatches(familyLabel,selStockList,stockListSearchQ);
+      var categories = categoryMapForStockList(familyLabel,selStockList);
+      var quickMatches = (stockListSearchQ || "").trim() ? matches.slice(0,6) : [];
+      var totalStock = 0;
+      var totalAlerts = 0;
+
+      items
+        .filter(function(x){
+          return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList;
+        })
+        .forEach(function(x){
+          totalStock += Number(x.stock) || 0;
+          if(st(x) !== "ok") totalAlerts++;
+        });
+
+      var categoryPills = Object.keys(categories).map(function(cat){
+        var itemsCat = categories[cat];
+        var catAlerts = itemsCat.filter(function(x){ return st(x) !== "ok"; }).length;
+        var meta = cm(cat);
+        return '<button data-master-cat="'+esc(cat)+'" class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'"><span class="material-symbols-rounded text-[16px]" style="color:'+meta.color+'">'+meta.icon+'</span><span>'+esc(cat)+'</span>'+(catAlerts ? '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error-50 px-1.5 text-[10px] font-bold text-error-700">'+catAlerts+'</span>' : '<span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold" style="background:'+theme.soft+';color:'+theme.text+'">'+itemsCat.length+'</span>')+'</button>';
+      }).join("");
+
+      var inner = "";
+      inner += sectionHeader("Lista de stock", selStockList, "", {left:topIconButton("back-stocklist","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+esc(selStockList)+'</div></div><div class="flex gap-2 flex-wrap">'+badge(matches.length+" resultados","bg-white text-gray-700 border-gray-200","table_rows")+badge(totalAlerts+" alertas","bg-warning-50 text-warning-700 border-amber-200","warning")+'</div></div><div class="mt-4 rounded-[28px] border p-3" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 border" style="border-color:'+theme.softBorder+'"><span class="material-symbols-rounded" style="color:'+theme.accent+'">search</span><input id="stocklist-search-in" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Buscar por producto, categoría o subcategoría" value="'+esc(stockListSearchQ)+'"></div></div>'+(quickMatches.length ? '<div class="mt-4 flex flex-wrap gap-2">'+quickMatches.map(function(i){ return '<button data-item="'+i.id+'" class="rounded-full border px-3 py-2 text-xs font-semibold shadow-soft" style="'+familyChipStyle(familyLabel,false)+'">'+esc(i.name)+'</button>'; }).join("")+'</div>' : '')+'<div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Ítems</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+items.filter(function(x){ return normalizeFamilyName(x.family || "Sin familia") === familyLabel && (x.stockList || "General") === selStockList; }).length+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Stock total</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+totalStock.toLocaleString()+'</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Categorías</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+Object.keys(categories).length+'</div></div><div class="rounded-[24px] border border-amber-200 bg-warning-50 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Alertas</div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+totalAlerts+'</div></div></div><div class="mt-4"><div class="mb-2 flex items-center justify-between gap-3"><div class="text-sm font-semibold" style="'+familyTextStyle(familyLabel)+'">Categorías</div></div><div class="pill-scroll">'+categoryPills+'</div></div><div id="stocklist-master-res" class="mt-4"></div></section></div></main>';
+
+      return appShell(pg === "home" ? inner : inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function renderStockListResults(){
+      var box = document.getElementById("stocklist-master-res");
+      if(!box) return;
+
+      var familyLabel = normalizeFamilyName(selFamily || "Sin familia");
+      var res = getStockListMatches(familyLabel,selStockList,stockListSearchQ);
+      var theme = ft(familyLabel);
+
+      if(!res.length){
+        box.innerHTML = emptyState("inventory_2","Sin resultados","No encontramos materiales que coincidan en esta lista de stock.");
+        return;
+      }
+
+      box.innerHTML = '<div class="mb-3 flex items-center justify-between gap-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+res.length+' material'+(res.length > 1 ? "es" : "")+'</div>'+badge("Tabla","bg-white text-gray-700 border-gray-200","dataset")+'</div><div class="overflow-hidden rounded-[28px] border shadow-soft" style="border-color:'+theme.softBorder+'"><div class="overflow-x-auto"><table class="min-w-full text-left"><thead style="background:'+theme.soft+';color:'+theme.text+'" class="text-[12px] uppercase tracking-[0.06em]"><tr><th class="px-4 py-3 font-semibold">Producto</th><th class="px-4 py-3 font-semibold">Categoría</th><th class="px-4 py-3 font-semibold">Subcategoría</th><th class="px-4 py-3 font-semibold text-right">Stock</th><th class="px-4 py-3 font-semibold">Unidad</th><th class="px-4 py-3 font-semibold">Estado</th></tr></thead><tbody>'+
+        res.map(function(i){
+          var meta = cm(i.cat);
+          var tone = statusTheme(st(i));
+          var submeta = scm(i.subcat,i.cat,i.name);
+          return '<tr data-item="'+i.id+'" class="cursor-pointer border-t border-gray-200 align-top hover:bg-gray-50"><td class="px-4 py-3"><div class="flex items-start gap-3"><div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="'+categoryIconStyle(i.cat)+'"><span class="material-symbols-rounded text-[18px]">'+meta.icon+'</span></div><div class="min-w-0"><div class="text-sm font-semibold text-gray-900">'+esc(i.name)+'</div>'+(i.alert ? '<div class="mt-1 text-xs text-gray-500">'+esc(i.alert)+'</div>' : '')+'</div></div></td><td class="px-4 py-3"><span class="inline-flex items-center gap-2 text-sm font-semibold" style="color:'+meta.color+'"><span class="material-symbols-rounded text-[16px]">'+meta.icon+'</span><span>'+esc(i.cat || "—")+'</span></span></td><td class="px-4 py-3">'+(i.subcat ? '<span class="inline-flex items-center gap-2 text-sm text-gray-600"><span class="material-symbols-rounded text-[16px]" style="color:'+submeta.color+'">'+submeta.icon+'</span><span>'+esc(i.subcat)+'</span></span>' : '<span class="text-sm text-gray-400">—</span>')+'</td><td class="px-4 py-3 text-right"><div class="mn text-sm font-semibold '+tone.text+'">'+i.stock.toLocaleString()+'</div></td><td class="px-4 py-3 text-sm text-gray-500">'+esc(i.unit)+'</td><td class="px-4 py-3">'+statusBadge(i)+'</td></tr>';
+        }).join("")+
+      '</tbody></table></div></div>';
+
+      box.onclick = function(e){
+        var t = e.target;
+        while(t && t !== box){
+          if(t.hasAttribute && t.hasAttribute("data-item")){
+            selItem = items.find(function(x){ return x.id === t.getAttribute("data-item"); });
+            if(selItem) draw();
+            return;
+          }
+          t = t.parentElement;
+        }
+      };
+    }
+
+    function renderDetail(){
+      var si = selItem;
+      var pct = si.min > 0 ? Math.min(100,Math.round(si.stock / si.min * 100)) : 100;
+      var familyLabel = normalizeFamilyName(si.family || "Sin familia");
+      var theme = ft(familyLabel);
+      var meta = cm(si.cat);
+      var submeta = scm(si.subcat,si.cat,si.name);
+
+      var inner = "";
+      inner += sectionHeader("Detalle de producto", si.name, (familyLabel ? familyLabel+" · " : "")+(si.stockList ? si.stockList+" · " : "")+(si.subcat ? si.subcat+" · " : "")+si.cat, {left:topIconButton("back-item","arrow_back",false)});
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]"><div class="space-y-4"><section class="rounded-[32px] border p-5 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="flex items-start justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">Estado actual</div></div>'+statusBadge(si)+'</div><div class="mt-3 flex items-center gap-2 flex-wrap">'+
+        familyBadge(familyLabel)+
+        '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:#EAECF0;background:#F9FAFB;color:'+meta.color+'"><span class="material-symbols-rounded text-[14px]">'+meta.icon+'</span>'+esc(si.cat)+'</span>'+
+        (si.subcat ? '<span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="border-color:#EAECF0;background:#FFFFFF;color:'+submeta.color+'"><span class="material-symbols-rounded text-[14px]">'+submeta.icon+'</span>'+esc(si.subcat)+'</span>' : '')+
+      '</div><div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Stock</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+si.stock.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Mínimo</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em] text-gray-900">'+si.min.toLocaleString()+'</div><div class="mt-1 text-xs text-gray-500">'+esc(si.unit)+'</div></div><div class="rounded-[24px] border p-4" style="'+familyMetricStyle(familyLabel)+'"><div class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="'+familyTextStyle(familyLabel)+'">Cobertura</div><div class="mn mt-2 text-[30px] font-semibold tracking-[-0.04em]" style="'+familyTextStyle(familyLabel)+'">'+pct+'%</div><div class="mt-1 text-xs text-gray-500">del mínimo</div></div><div class="rounded-[24px] border border-gray-200 bg-white/80 p-4"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Estado</div><div class="mt-2">'+statusBadge(si)+'</div></div></div><div class="mt-5 h-2 overflow-hidden rounded-full bg-gray-100"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+theme.accent+'"></div></div><div class="mt-2 flex items-center justify-between text-[11px] text-gray-500"><span>Stock mínimo: '+si.min+' '+esc(si.unit)+'</span><span>'+pct+'%</span></div></section></div><div class="space-y-4">'+
+        (!adjMode
+          ? '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="mb-3"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">Modifica Stock</div><div class="text-sm text-gray-600">Ingresos, salidas y ajustes.</div></div><div class="grid grid-cols-1 gap-3"><button data-adj="in" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">south_west</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">Ingreso</div><div class="text-sm text-gray-500">Suma unidades al stock actual</div></div></div></button><button data-adj="out" class="rounded-[28px] border border-red-200 bg-white p-4 text-left shadow-soft"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-error-50 text-error-700"><span class="material-symbols-rounded">north_east</span></div><div><div class="text-[15px] font-semibold text-gray-900">Salida</div><div class="text-sm text-gray-500">Descuenta unidades del inventario</div></div></div></button><button data-adj="set" class="rounded-[28px] border p-4 text-left shadow-soft" style="'+familyMetricStyle(familyLabel)+'"><div class="flex items-center gap-3"><div class="flex h-12 w-12 items-center justify-center rounded-2xl" style="background:'+theme.soft+';color:'+theme.accent+'"><span class="material-symbols-rounded">edit_square</span></div><div><div class="text-[15px] font-semibold" style="'+familyTextStyle(familyLabel)+'">Ajustar</div><div class="text-sm text-gray-500">Define un stock manual</div></div></div></button></div></section>'
+          : '<section class="rounded-[32px] border p-4 shadow-soft" style="'+familyCardStyle(familyLabel)+'"><div class="text-lg font-semibold" style="'+familyTextStyle(familyLabel)+'">'+(adjMode === "in" ? "Registrar ingreso" : adjMode === "out" ? "Registrar salida" : "Ajustar stock")+'</div><div class="mt-4 space-y-3"><div class="rounded-2xl border px-4 py-3" style="'+familyMetricStyle(familyLabel)+'"><input id="adj-v" type="number" inputmode="numeric" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="'+(adjMode === "set" ? "Nuevo stock" : "Cantidad")+'" value="'+esc(adjVal)+'"></div><div class="rounded-2xl border border-gray-200 bg-white px-4 py-3"><input id="adj-n" class="w-full border-none bg-transparent text-sm outline-none placeholder:text-gray-400" placeholder="Nota opcional" value="'+esc(adjNote)+'"></div><div class="grid grid-cols-2 gap-3"><button id="adj-cancel" class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700">Cancelar</button><button id="adj-ok" class="rounded-2xl px-4 py-3 text-sm font-semibold text-white" style="background:'+theme.accent+'">Confirmar</button></div></div></section>'
+        )+
+      '</div></div></div></main>';
+
+      return appShell(inner, navHtml(pg, alerts().filter(function(a){ return st(a) === "zero" || st(a) === "crit"; }).length));
+    }
+
+    function bindCommon(){
+      document.querySelectorAll("[data-tab], .rail-tab").forEach(function(btn){
+        btn.onclick = function(){
+          selFamily = null;
+          selStockList = null;
+          selItem = null;
+          adjMode = null;
+          adjVal = "";
+          adjNote = "";
+          pg = btn.getAttribute("data-tab");
+          searchQ = "";
+          stockListSearchQ = "";
+          saveSession();
+          draw();
+          if(pg === "search"){
+            setTimeout(function(){
+              var x = document.getElementById("search-in");
+              if(x) x.focus();
+            }, 40);
+          }
+        };
+      });
+
+      document.querySelectorAll("[data-family]").forEach(function(btn){
+        btn.onclick = function(){
+          selFamily = normalizeFamilyName(btn.getAttribute("data-family"));
+          stockListSearchQ = "";
+          saveSession();
+          draw();
+        };
+      });
+
+      document.querySelectorAll("[data-stocklist]").forEach(function(btn){
+        btn.onclick = function(){
+          selStockList = btn.getAttribute("data-stocklist");
+          stockListSearchQ = "";
+          saveSession();
+          draw();
+        };
+      });
+
+      document.querySelectorAll("[data-item]").forEach(function(btn){
+        btn.onclick = function(){
+          selItem = items.find(function(x){ return x.id === btn.getAttribute("data-item"); });
+          if(selItem) draw();
+        };
+      });
+
+      var hs = document.getElementById("header-search");
+      if(hs){
+        hs.onclick = function(){
+          selFamily = null;
+          selStockList = null;
+          selItem = null;
+          adjMode = null;
+          pg = "search";
+          stockListSearchQ = "";
+          saveSession();
+          draw();
+          setTimeout(function(){
+            var x = document.getElementById("search-in");
+            if(x) x.focus();
+          }, 40);
+        };
+      }
+
+      var hsync = document.getElementById("header-sync");
+      if(hsync){
+        hsync.onclick = function(){
+          toast("Sincronizando...");
+          sync();
+        };
+      }
+
+      var rsync = document.getElementById("rail-sync");
+      if(rsync){
+        rsync.onclick = function(){
+          toast("Sincronizando...");
+          sync();
+        };
+      }
+
+      var rflush = document.getElementById("rail-flush");
+      if(rflush){
+        rflush.onclick = function(){
+          if(!pendingUpdates.length){
+            toast("No hay cambios pendientes");
+            return;
+          }
+          toast("Enviando pendientes...");
+          flushPendingUpdates(false).then(function(){ sync(true); });
+        };
+      }
+
+      var rl = document.getElementById("rail-logout");
+      if(rl){
+        rl.onclick = function(){
+          clearSession();
+          draw();
+        };
+      }
+    }
+
+    function currentTopTabIndex(){
+      var i = TOP_LEVEL_TABS.indexOf(pg);
+      return i < 0 ? 0 : i;
+    }
+
+    function goPrevTopTab(){
+      var i = currentTopTabIndex();
+      if(i > 0){
+        pg = TOP_LEVEL_TABS[i-1];
+        searchQ = "";
+        stockListSearchQ = "";
+        saveSession();
+        draw();
+      }
+    }
+
+    function goNextTopTab(){
+      var i = currentTopTabIndex();
+      if(i < TOP_LEVEL_TABS.length - 1){
+        pg = TOP_LEVEL_TABS[i+1];
+        searchQ = "";
+        stockListSearchQ = "";
+        saveSession();
+        draw();
+      }
+    }
+
+    function goBackBySwipe(){
+      if(selItem){
+        selItem = null;
+        adjMode = null;
+        adjVal = "";
+        adjNote = "";
+        draw();
+        return;
+      }
+      if(selFamily && selStockList){
+        selStockList = null;
+        stockListSearchQ = "";
+        saveSession();
+        draw();
+        return;
+      }
+      if(selFamily){
+        selFamily = null;
+        saveSession();
+        draw();
+        return;
+      }
+      goPrevTopTab();
+    }
+
+    function goForwardBySwipe(){
+      if(selItem || selFamily || selStockList) return;
+      goNextTopTab();
+    }
+
+    function findScrollableX(el){
+      while(el && el !== document.body){
+        if(el.classList && el.classList.contains("pill-scroll")) return el;
+        var style = window.getComputedStyle(el);
+        if((style.overflowX === "auto" || style.overflowX === "scroll") && el.scrollWidth > el.clientWidth + 10){
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    function shouldIgnoreSwipeTarget(el){
+      while(el && el !== document.body){
+        var tag = (el.tagName || "").toUpperCase();
+        if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return true;
+        if(el.isContentEditable) return true;
+        el = el.parentElement;
+      }
+      return false;
+    }
+
+    function bindSwipeNavigation(){
+      var root = document.getElementById("app");
+      if(!root || root.__swipeBound) return;
+      root.__swipeBound = true;
+      root.classList.add("swipe-desktop");
+
+      function clearSwipeState(){
+        touchStartTarget = null;
+        touchStartScrollable = null;
+        mouseSwipeActive = false;
+        root.classList.remove("swiping");
+      }
+
+      function canUseSwipe(dx, dy, target, scrollable, minDistance){
+        var adx = Math.abs(dx);
+        var ady = Math.abs(dy);
+        if(adx < (minDistance || 70) || adx < ady * 1.35) return false;
+        if(shouldIgnoreSwipeTarget(target)) return false;
+        if(scrollable){
+          var canScrollLeft = scrollable.scrollLeft > 2;
+          var canScrollRight = scrollable.scrollLeft + scrollable.clientWidth < scrollable.scrollWidth - 2;
+          if((dx > 0 && canScrollLeft) || (dx < 0 && canScrollRight)) return false;
+        }
+        return true;
+      }
+
+      function triggerDirectionalSwipe(dx){
+        if(dx > 0) goBackBySwipe();
+        else goForwardBySwipe();
+      }
+
+      root.addEventListener("touchstart", function(e){
+        if(!e.touches || !e.touches.length) return;
+        var t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTarget = e.target;
+        touchStartScrollable = findScrollableX(e.target);
+      }, {passive:true});
+
+      root.addEventListener("touchend", function(e){
+        if(!touchStartTarget || !e.changedTouches || !e.changedTouches.length) return;
+        var t = e.changedTouches[0];
+        var dx = t.clientX - touchStartX;
+        var dy = t.clientY - touchStartY;
+        if(canUseSwipe(dx, dy, touchStartTarget, touchStartScrollable, 70)){
+          triggerDirectionalSwipe(dx);
+        }
+        clearSwipeState();
+      }, {passive:true});
+
+      root.addEventListener("pointerdown", function(e){
+        if(e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+        if(e.button !== 0) return;
+        mouseSwipeActive = true;
+        touchStartX = e.clientX;
+        touchStartY = e.clientY;
+        touchStartTarget = e.target;
+        touchStartScrollable = findScrollableX(e.target);
+        root.classList.add("swiping");
+      });
+
+      root.addEventListener("pointerup", function(e){
+        if(!mouseSwipeActive) return;
+        var dx = e.clientX - touchStartX;
+        var dy = e.clientY - touchStartY;
+        if(canUseSwipe(dx, dy, touchStartTarget, touchStartScrollable, 90)){
+          triggerDirectionalSwipe(dx);
+        }
+        clearSwipeState();
+      });
+
+      root.addEventListener("pointercancel", clearSwipeState);
+      root.addEventListener("mouseleave", function(){
+        if(mouseSwipeActive) clearSwipeState();
+      });
+
+      root.addEventListener("wheel", function(e){
+        var now = Date.now();
+        if(now < swipeWheelLockUntil) return;
+        var dx = e.deltaX || 0;
+        var dy = e.deltaY || 0;
+        if(Math.abs(dx) < 90 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        var target = e.target;
+        var scrollable = findScrollableX(target);
+        if(shouldIgnoreSwipeTarget(target)) return;
+        if(scrollable){
+          var canScrollLeft = scrollable.scrollLeft > 2;
+          var canScrollRight = scrollable.scrollLeft + scrollable.clientWidth < scrollable.scrollWidth - 2;
+          if((dx < 0 && canScrollLeft) || (dx > 0 && canScrollRight)) return;
+        }
+        swipeWheelLockUntil = now + 420;
+        if(dx < 0) goBackBySwipe();
+        else goForwardBySwipe();
+      }, {passive:true});
+    }
+
+    function safeDraw(){
+      try{
+        return draw();
+      }catch(e){
+        console.error("draw fatal", e);
+        var A = document.getElementById("app");
+        if(A){
+          A.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#f9fafb;font-family:Inter,system-ui,sans-serif"><div style="max-width:420px;width:100%;background:#fff;border:1px solid #eaecf0;border-radius:24px;padding:24px;box-shadow:0 12px 24px rgba(16,24,40,.08)"><div style="font-size:20px;font-weight:700;color:#101828">No se pudo abrir la app</div><div style="margin-top:8px;font-size:14px;line-height:1.6;color:#475467">Se detectó un error al renderizar la interfaz.</div><button id="retry-app" style="margin-top:16px;height:44px;padding:0 16px;border:none;border-radius:14px;background:#7f56d9;color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Reintentar</button><div style="margin-top:12px;font-size:12px;color:#98a2b3">'+esc(e && e.message ? e.message : String(e))+'</div></div></div>';
+          var r = document.getElementById("retry-app");
+          if(r) r.onclick = function(){ safeDraw(); };
+        }
+      }
+    }
+
+    function draw(){
+      var A = document.getElementById("app");
+      var html = "";
+
+      if(toastMsg){
+        html += '<div style="animation:toastin .24s ease" class="fixed left-1/2 top-5 z-[100] -translate-x-1/2 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-lgsoft '+(toastT === "err" ? "bg-error-700" : toastT === "warn" ? "bg-warning-700" : "bg-success-700")+'">'+esc(toastMsg)+'</div>';
+      }
+
+      if(!user){
+        A.innerHTML = html + renderLogin();
+        bindSwipeNavigation();
+
+        var pin = document.getElementById("pin");
+        if(pin){
+          setTimeout(function(){
+            try{
+              pin.focus();
+              pin.setSelectionRange(pin.value.length,pin.value.length);
+            }catch(e){}
+          },20);
+
+          pin.oninput = function(){
+            loginPin = String(pin.value || "").replace(/\D/g,"").slice(0,4);
+            pin.value = loginPin;
+            if(loginPin.length === 4) attemptLogin(loginPin);
+          };
+          pin.onkeydown = function(e){
+            if(e.key === "Enter") attemptLogin(loginPin);
+          };
+        }
+        return;
+      }
+
+      if(selItem){
+        A.innerHTML = html + renderDetail();
+        bindSwipeNavigation();
+        bindCommon();
+
+        document.getElementById("back-item").onclick = function(){
+          selItem = null;
+          adjMode = null;
+          adjVal = "";
+          adjNote = "";
+          draw();
+        };
+
+        document.querySelectorAll("[data-adj]").forEach(function(btn){
+          btn.onclick = function(){
+            adjMode = btn.getAttribute("data-adj");
+            draw();
+            setTimeout(function(){
+              var v = document.getElementById("adj-v");
+              if(v) v.focus();
+            },50);
+          };
+        });
+
+        var adjC = document.getElementById("adj-cancel");
+        if(adjC){
+          adjC.onclick = function(){
+            adjMode = null;
+            adjVal = "";
+            adjNote = "";
+            draw();
+          };
         }
 
-        // --- LOGICA DE COMPRAS ---
-        function setFormato(fmt) {
-            selectedFormat = fmt;
-            const act = "border-green-600 bg-green-50 text-green-900", inact = "bg-white border-gray-200 text-gray-600";
-            document.getElementById('btn-format-1kg').className = `py-3 rounded-xl border-2 font-bold text-xs transition ${fmt==='1kg' ? act : inact}`;
-            document.getElementById('btn-format-saco').className = `py-3 rounded-xl border-2 font-bold text-xs transition ${fmt==='Saco' ? act : inact}`;
-            calcularSubtotalItem();
-        }
-        function changeQty(v) { currentQty = Math.max(1, currentQty + v); document.getElementById('input-qty').value = currentQty; calcularSubtotalItem(); }
-        function calcularSubtotalItem() {
-            if(!currentProduct) return 0;
-            const p = Number(currentProduct.Precio), f = selectedFormat === 'Saco' ? currentSackWeight : 1, t = p * f * currentQty;
-            document.getElementById('txt-subtotal-item').innerText = t.toLocaleString('es-CL'); return t;
-        }
+        var adjV = document.getElementById("adj-v");
+        if(adjV) adjV.oninput = function(){ adjVal = adjV.value; };
 
-        function agregarAlCarrito(tipo) {
-            let i = { nombre: currentProduct.Nombre, img: currentProduct.Imagen, tipo: tipo, formato: tipo==='Muestra'?'250gr':selectedFormat, cantidad: tipo==='Muestra'?1:currentQty };
-            i.subtotal = tipo==='Muestra'?5000:calcularSubtotalItem();
-            i.detalleFormato = tipo==='Muestra' ? '250gr' : (selectedFormat === 'Saco' ? `${currentSackWeight}kg` : '1kg');
-            const idx = carrito.findIndex(x => x.nombre === i.nombre && x.formato === i.formato);
-            if(idx > -1) { carrito[idx].cantidad += i.cantidad; carrito[idx].subtotal += i.subtotal; } else { carrito.push(i); }
-            localStorage.setItem('st_carrito', JSON.stringify(carrito));
-            actualizarUI_Carrito();
-            if(document.getElementById('cart-panel').classList.contains('cart-closed')) toggleCarrito();
-        }
+        var adjN = document.getElementById("adj-n");
+        if(adjN) adjN.oninput = function(){ adjNote = adjN.value; };
 
-        function actualizarUI_Carrito() {
-            const b = document.getElementById('cart-badge'), c = document.getElementById('cart-items'), s = document.getElementById('cart-subtotal');
-            b.innerText = carrito.reduce((a, x) => a + x.cantidad, 0); b.classList.toggle('hidden', carrito.length === 0);
-            let t = 0;
-            c.innerHTML = carrito.length === 0 ? '<p class="text-center text-gray-400 text-xs mt-10">Tu carrito está vacío.</p>' : carrito.map((x, idx) => {
-                t += x.subtotal;
-                return `<div class="flex gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm"><img src="${x.img}" class="w-12 h-12 object-cover rounded-lg bg-gray-100"><div class="flex-grow flex flex-col justify-between"><div class="flex justify-between items-start font-bold text-xs"><span class="truncate w-32">${x.nombre}</span><button onclick="eliminarDelCarrito(${idx})" class="text-gray-300 hover:text-red-500 transition">×</button></div><div class="flex justify-between items-end mt-2"><span class="text-[10px] text-gray-500">${x.cantidad}x ${x.formato}</span><span class="font-black text-gray-900">$${x.subtotal.toLocaleString('es-CL')}</span></div></div></div>`;
-            }).join('');
-            s.innerText = t.toLocaleString('es-CL');
-        }
+        var adjO = document.getElementById("adj-ok");
+        if(adjO){
+          adjO.onclick = function(){
+            var v = parseInt(adjVal,10);
+            if(isNaN(v) || v < 0){
+              toast("Valor inválido","err");
+              return;
+            }
 
-        function eliminarDelCarrito(idx) { carrito.splice(idx,1); localStorage.setItem('st_carrito', JSON.stringify(carrito)); actualizarUI_Carrito(); }
-        function toggleCarrito() { const p = document.getElementById('cart-panel'), o = document.getElementById('cart-overlay'); p.classList.toggle('cart-closed'); p.classList.toggle('cart-open'); o.classList.toggle('hidden'); }
-        function toggleMenu() { const p = document.getElementById('side-menu'); if(p.classList.contains('-translate-x-full')) p.classList.remove('-translate-x-full'); else p.classList.add('-translate-x-full'); }
-        
-        function enviarPedido(m) {
-            if(carrito.length===0) return;
-            let tB = carrito.reduce((a,x) => a + x.subtotal, 0), tF = m === 'MercadoPago' ? Math.round(tB * 1.035) : tB;
-            let msg = `Hola *Super Tasters* ☕, pedido:\n\n` + carrito.map((x, i) => `${i+1}. *${x.nombre}* (${x.formato} x${x.cantidad}) - $${x.subtotal.toLocaleString('es-CL')}`).join('\n') + `\n\n*Pago:* ${m}\n*TOTAL:* $${tF.toLocaleString('es-CL')} (+IVA)`;
-            window.open(`https://wa.me/56975552708?text=${encodeURIComponent(msg)}`, '_blank');
-        }
+            var old = selItem.stock;
+            var ns;
 
-        // --- GRÁFICOS ---
-        function dibujarGraficoRadar(p) {
-            const ctx = document.getElementById('radarChart').getContext('2d'); if(radarInstancia) radarInstancia.destroy();
-            radarInstancia = new Chart(ctx, {
-                type: 'radar', data: { labels: ['Aroma', 'Sabor', 'Residual', 'Acidez', 'Cuerpo', 'Balance'], datasets: [{ data: [p['Fragancia / Aroma']||8, p.Sabor||8, p['Sabor Residual']||8, p.Acidez||8, p.Cuerpo||8, p.Balance||8], backgroundColor: 'rgba(20, 83, 45, 0.1)', borderColor: '#14532d', borderWidth: 2 }] },
-                options: { scales: { r: { min: 6, max: 10, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+            if(adjMode === "in") ns = old + v;
+            else if(adjMode === "out") ns = Math.max(0, old - v);
+            else ns = v;
+
+            items = items.map(function(x){
+              return x.id === selItem.id ? Object.assign({},x,{stock:ns}) : x;
             });
+
+            hist.unshift({
+              id:selItem.id,
+              nm:selItem.name,
+              cat:selItem.cat,
+              tp:adjMode === "in" ? "ingreso" : adjMode === "out" ? "salida" : "ajuste",
+              os:old,
+              ns:ns,
+              nt:adjNote,
+              u:user.n,
+              ts:ts()
+            });
+
+            saveAppState();
+            pushUpdate(selItem, old, ns, adjMode === "in" ? "ingreso" : adjMode === "out" ? "salida" : "ajuste", adjNote);
+            selItem = Object.assign({},selItem,{stock:ns});
+            adjMode = null;
+            adjVal = "";
+            adjNote = "";
+            saveSession();
+            toast(selItem.name + ": " + old + " → " + ns);
+            draw();
+          };
         }
-        function dibujarGraficoMalla(p) {
-            const container = document.getElementById('contenedor-pie-chart'), ctx = document.getElementById('pieChart').getContext('2d');
-            if(p['Malla 17'] || p['Malla 16'] || p['Malla 15']) {
-                container.classList.remove('hidden'); if(pieInstancia) pieInstancia.destroy();
-                pieInstancia = new Chart(ctx, {
-                    type: 'pie', data: { labels: ['M17', 'M16', 'M15', 'M14', 'Fuera'], datasets: [{ data: [parseFloat(p['Malla 17'])||0, parseFloat(p['Malla 16'])||0, parseFloat(p['Malla 15'])||0, parseFloat(p['Malla 14'])||0, parseFloat(p['Fuera Malla'])||0], backgroundColor: ['#14532d','#047857','#10b981','#34d399','#a7f3d0'], borderWidth: 0 }] },
-                    options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
-                });
-            } else { container.classList.add('hidden'); }
+        return;
+      }
+
+      if(selFamily && !selStockList){
+        A.innerHTML = html + renderFamily();
+        bindSwipeNavigation();
+        bindCommon();
+        document.getElementById("back-family").onclick = function(){
+          selFamily = null;
+          saveSession();
+          draw();
+        };
+        return;
+      }
+
+      if(selFamily && selStockList){
+        A.innerHTML = html + renderStockListView();
+        bindSwipeNavigation();
+        bindCommon();
+        document.getElementById("back-stocklist").onclick = function(){
+          selStockList = null;
+          stockListSearchQ = "";
+          saveSession();
+          draw();
+        };
+
+        var ssi = document.getElementById("stocklist-search-in");
+        if(ssi){
+          ssi.oninput = function(){
+            stockListSearchQ = ssi.value;
+            renderStockListResults();
+          };
+          setTimeout(renderStockListResults,0);
         }
 
-        // Utilidad
-        function volverCatalogo() { navigateTo('home'); }
+        document.querySelectorAll("[data-master-cat]").forEach(function(btn){
+          btn.onclick = function(){
+            var cat = btn.getAttribute("data-master-cat");
+            stockListSearchQ = cat;
+            var input = document.getElementById("stocklist-search-in");
+            if(input) input.value = cat;
+            renderStockListResults();
+          };
+        });
+        return;
+      }
 
-        // Inicializar
-        cargarData();
-    </script>
+      if(pg === "home") A.innerHTML = html + renderHome();
+      if(pg === "search") A.innerHTML = html + renderSearch();
+      if(pg === "alerts") A.innerHTML = html + renderAlerts();
+      if(pg === "history") A.innerHTML = html + renderHistory();
+      if(pg === "report") A.innerHTML = html + renderReport();
+
+      bindSwipeNavigation();
+      bindCommon();
+
+      var si = document.getElementById("search-in");
+      if(si){
+        si.oninput = function(){
+          searchQ = si.value;
+          renderSearchResults();
+        };
+        setTimeout(renderSearchResults,0);
+      }
+
+      var hfq = document.getElementById("hist-filter-q");
+      if(hfq) hfq.oninput = function(){ histFilterQuery = hfq.value; renderHistoryTable(); };
+
+      var hft = document.getElementById("hist-filter-type");
+      if(hft) hft.onchange = function(){ histFilterType = hft.value; renderHistoryTable(); };
+
+      document.querySelectorAll("[data-hsort]").forEach(function(btn){
+        btn.onclick = function(){
+          var k = btn.getAttribute("data-hsort");
+          if(histSortKey === k){
+            histSortDir = histSortDir === "asc" ? "desc" : "asc";
+          }else{
+            histSortKey = k;
+            histSortDir = (k === "delta" ? "desc" : "asc");
+          }
+          renderHistoryTable();
+        };
+      });
+
+      var db = document.getElementById("open-db");
+      if(db) db.onclick = function(){ window.open(SHEET_URL,"_blank"); };
+
+      if(pg === "history") setTimeout(renderHistoryTable,0);
+
+      saveSession();
+    }
+
+    function bootApp(){
+      loadCachedUsers();
+      loadAppState();
+      loadPendingUpdates();
+      loadSession();
+      safeDraw();
+
+      setTimeout(function(){
+        loadUsers(true).catch(function(){});
+        if(user) sync(true);
+      }, 0);
+    }
+
+    window.addEventListener("online", function(){
+      browserOnlineHint = true;
+      authError = false;
+      clearSyncError();
+      setSyncState("syncing");
+      loadUsers(true).catch(function(){});
+      if(user){
+        flushPendingUpdates(true).then(function(){ sync(true); });
+      }
+    });
+
+    window.addEventListener("offline", function(){
+      browserOnlineHint = false;
+      authError = true;
+      if(apiReachable === false){
+        setSyncState("offline");
+        setSyncError("Sin conexión");
+        safeDraw();
+        toast("Sin conexión: usando datos locales","warn");
+      }else{
+        safeDraw();
+      }
+    });
+
+    if(!window.__KW_APP_BOOTED){
+      window.__KW_APP_BOOTED = true;
+      clearLegacyCachesOnce().finally(bootApp);
+    }
+  </script>
 </body>
 </html>
