@@ -144,20 +144,62 @@
       border-radius:999px;
       display:inline-block
     }
+
+    .glass{backdrop-filter:none;-webkit-backdrop-filter:none}
+    .bottom-shadow{box-shadow:none;border-top:1px solid #EAECF0}
+    .gradient-shell{background:#F9FAFB}
+    .sticky-blur{
+      background:#F9FAFB;
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+      border-bottom:1px solid #EAECF0
+    }
+    .pill-scroll{gap:0;padding-bottom:0}
+    .app-shell-main{background:#F9FAFB}
+    .app-shell-main section,
+    .app-shell-main article,
+    .app-shell-main aside > section,
+    .app-shell-main .shadow-soft,
+    .app-shell-main .shadow-mdsoft,
+    .app-shell-main .shadow-lgsoft{
+      box-shadow:none !important
+    }
+    .app-shell-main [class*="rounded-"]:not(.rounded-full),
+    .mobile-bottom-nav [class*="rounded-"]:not(.rounded-full),
+    .app-shell-rail [class*="rounded-"]:not(.rounded-full){
+      border-radius:0 !important
+    }
+    .mobile-bottom-nav .glass{
+      background:#FFFFFF;
+      border-top:1px solid #EAECF0;
+      border-left:none;
+      border-right:none;
+      border-bottom:none;
+      margin-bottom:0;
+      box-shadow:none !important
+    }
+    .app-shell-rail > div{
+      box-shadow:none !important
+    }
+    .app-shell-main main > div > section + section,
+    .app-shell-main main > div > div > section + section{
+      margin-top:-1px !important
+    }
+
     @media (min-width:980px){
       body{padding-bottom:32px}
       .app-shell-grid{
-        grid-template-columns:300px minmax(0,1fr);
-        gap:24px;
-        max-width:1440px;
-        margin:0 auto;
-        padding:24px 24px 32px
+        grid-template-columns:280px minmax(0,1fr);
+        gap:0;
+        max-width:none;
+        margin:0;
+        padding:0
       }
       .app-shell-rail{
         display:block;
         position:sticky;
-        top:24px;
-        height:calc(100vh - 48px)
+        top:0;
+        height:100vh
       }
       .mobile-bottom-nav{display:none}
       .safe-top{padding-top:0}
@@ -169,7 +211,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-21 report-bi-export-suite";
+    var APP_VERSION = "2026-04-22 report-bi-minimal-square";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -313,6 +355,17 @@
       return p(d.getDate()) + "/" + p(d.getMonth()+1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
     }
 
+
+    function currentTimeLabelSafe(){
+      try{
+        if(typeof currentTimeLabel === "function"){
+          return currentTimeLabel();
+        }
+      }catch(e){}
+      var d = new Date();
+      return d.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false});
+    }
+
     function parseDateLoose(v){
       if(!v) return 0;
       if(v instanceof Date) return v.getTime();
@@ -391,43 +444,39 @@
     }
 
     function familyCardStyle(family){
-      var t = ft(family);
-      return "border-color:"+t.softBorder+";background:linear-gradient(180deg,"+t.soft+",#ffffff);";
+      return "border-color:#EAECF0;background:#FFFFFF;";
     }
 
     function familyChipStyle(family,active){
-      var t = ft(family);
       return active
-        ? "border-color:"+t.accent+";background:"+t.soft+";color:"+t.text+";"
-        : "border-color:"+t.softBorder+";background:#ffffff;color:"+t.text+";";
+        ? "border-color:#101828;background:#101828;color:#FFFFFF;"
+        : "border-color:#EAECF0;background:#FFFFFF;color:#475467;";
     }
 
     function familyMetricStyle(family){
-      var t = ft(family);
-      return "border-color:"+t.softBorder+";background:"+t.soft+";";
+      return "border-color:#EAECF0;background:#FFFFFF;";
     }
 
     function familyIconStyle(family){
-      var t = ft(family);
-      return "color:"+t.accent+";border-color:"+t.softBorder+";background:"+t.soft+";";
+      return "color:#344054;border-color:#EAECF0;background:#FFFFFF;";
     }
 
     function familyTextStyle(family){
-      return "color:"+ft(family).text+";";
+      return "color:#101828;";
     }
 
     function familyBarColor(family){
-      return ft(family).accent;
+      return "#101828";
     }
 
     function categoryIconStyle(cat){
       var c = cm(cat);
-      return "color:"+c.color+";border-color:#EAECF0;background:#F9FAFB;";
+      return "color:#344054;border-color:#EAECF0;background:#FFFFFF;";
     }
 
     function subcategoryIconStyle(subcat,cat,name){
       var s = scm(subcat,cat,name);
-      return "color:"+s.color+";border-color:#EAECF0;background:#FFFFFF;";
+      return "color:#667085;border-color:#EAECF0;background:#FFFFFF;";
     }
 
     function taxonomyPill(label,icon,style){
@@ -1441,7 +1490,7 @@
       }
 
       var workbook = XLSX.utils.book_new();
-      var nowLabel = currentDateLabel() + " " + currentTimeLabel();
+      var nowLabel = currentDateLabel() + " " + currentTimeLabelSafe();
 
       var summaryRows = [
         ["Reporte", "Kawas Stock BI"],
@@ -1579,7 +1628,7 @@
       doc.text("Kawas Stock · Reporte BI", 14, 16);
       doc.setFont("helvetica","normal");
       doc.setFontSize(10);
-      doc.text("Generado: " + currentDateLabel() + " " + currentTimeLabel() + " · Usuario: " + (user ? user.n : "Sistema"), 14, 23);
+      doc.text("Generado: " + currentDateLabel() + " " + currentTimeLabelSafe() + " · Usuario: " + (user ? user.n : "Sistema"), 14, 23);
       doc.text("Filtros: " + data.filterSummary.join(" | "), 14, 29);
 
       reportDrawPdfMetric(doc, 14, 38, 46, 22, "Ítems filtrados", String(data.filtered.length), [127,86,217]);
@@ -1723,7 +1772,7 @@
 
       inner += sectionHeader("Panel principal","Hola, "+user.n,"");
 
-      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabel())+'</strong></span>'+(pendingUpdates.length ? '<span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-warning-700">cloud_off</span><strong class="font-semibold text-warning-700">'+pendingUpdates.length+' pendiente(s)</strong></span>' : '')+'</div></section>';
+      inner += '<main class="px-4 pb-28"><div class="mx-auto max-w-md xl:max-w-6xl"><section class="mt-4 rounded-[24px] border border-gray-200 bg-white px-4 py-3 shadow-soft"><div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-gray-500"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">person</span><span>Usuario:</span><strong class="font-semibold text-gray-700">'+esc(user.n)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">badge</span><span>Rol:</span><strong class="font-semibold text-gray-700">'+roleLabel(user)+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">calendar_today</span><strong class="font-semibold text-gray-700">'+esc(currentDateLabel())+'</strong></span><span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-gray-400">schedule</span><strong class="font-semibold text-gray-700">'+esc(currentTimeLabelSafe())+'</strong></span>'+(pendingUpdates.length ? '<span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-[14px] text-warning-700">cloud_off</span><strong class="font-semibold text-warning-700">'+pendingUpdates.length+' pendiente(s)</strong></span>' : '')+'</div></section>';
 
       inner += '<section class="mt-4 rounded-[32px] border border-gray-200 bg-white p-5 shadow-soft"><div class="flex items-center justify-between gap-3 flex-wrap"><div><div class="text-sm font-medium text-gray-500">Resumen</div><div class="mt-1 text-2xl font-semibold tracking-[-0.04em] text-gray-900">Inventario</div></div><div class="flex gap-2 flex-wrap">'+badge(alertItems.length+" alertas","bg-warning-50 text-warning-700 border-amber-200","notifications_active")+'</div></div><div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4"><button data-tab="alerts" class="rounded-[24px] border border-primary-200 bg-primary-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-700">Salud general</div><span class="material-symbols-rounded text-[18px] text-primary-700">arrow_outward</span></div><div class="mt-2 text-[20px] font-semibold tracking-[-0.03em] text-primary-700">'+(alertItems.length === 0 ? "Óptima" : criticalCount > 0 || zeroCount > 0 ? "Crítica" : lowCount > 0 ? "Atención" : "Estable")+'</div><div class="mt-1 text-xs text-primary-700/80">'+(alertItems.length === 0 ? "Sin alertas activas" : (items.length - alertItems.length)+" de "+items.length+" ítems estables")+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-red-200 bg-error-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-error-700">Críticos</div><span class="material-symbols-rounded text-[18px] text-error-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-error-700">'+criticalCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-amber-200 bg-warning-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">Bajo mínimo</div><span class="material-symbols-rounded text-[18px] text-warning-700">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-warning-700">'+lowCount+'</div></button><button data-tab="alerts" class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 text-left transition active:scale-[0.99]"><div class="flex items-start justify-between gap-3"><div class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500">Agotados</div><span class="material-symbols-rounded text-[18px] text-gray-500">arrow_outward</span></div><div class="mn mt-2 text-[28px] font-semibold tracking-[-0.04em] text-gray-900">'+zeroCount+'</div></button></div></section>';
 
