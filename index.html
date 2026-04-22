@@ -295,7 +295,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-19 untitled-ui-shell-home-search-v1";
+    var APP_VERSION = "2026-04-21 untitled-ui-shell-home-search-v2-connectivity-fix";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -384,6 +384,8 @@
     var syncState = "idle";
     var lastSyncAt = "";
     var lastSyncError = "";
+    var browserOnlineHint = (typeof navigator !== "undefined" ? navigator.onLine !== false : true);
+    var apiReachable = null;
 
     var items = [];
     var hist = [];
@@ -728,8 +730,17 @@
       });
     }
 
+    function hasConfiguredApi(){
+      return API_URL !== "" && API_URL !== "DEMO" && API_URL !== "TU_URL_AQUI";
+    }
+
+    function markApiReachable(ok){
+      apiReachable = !!ok;
+      if(ok) browserOnlineHint = true;
+    }
+
     function isOnline(){
-      return navigator.onLine && API_URL !== "" && API_URL !== "DEMO" && API_URL !== "TU_URL_AQUI";
+      return hasConfiguredApi() && apiReachable !== false;
     }
 
     function normalizeUsers(arr){
@@ -774,6 +785,7 @@
         var t = setTimeout(function(){
           if(done) return;
           done = true;
+          markApiReachable(false);
           reject(new Error("Timeout " + timeoutMs + "ms"));
         }, timeoutMs);
 
@@ -782,12 +794,14 @@
             if(done) return;
             clearTimeout(t);
             done = true;
+            markApiReachable(true);
             resolve(r);
           })
           .catch(function(err){
             if(done) return;
             clearTimeout(t);
             done = true;
+            markApiReachable(false);
             reject(err);
           });
       });
@@ -831,10 +845,12 @@
     }
 
     function getSyncMeta(){
-      if(!isOnline()) return {label:"Offline",dot:"#F79009",text:"text-warning-700"};
+      if(!hasConfiguredApi()) return {label:"Sin API",dot:"#F79009",text:"text-warning-700"};
       if(syncState === "syncing") return {label:"Sincronizando",dot:"#175CD3",text:"text-blue-700"};
-      if(syncState === "error") return {label:"Error sync",dot:"#F04438",text:"text-error-700"};
       if(syncState === "success") return {label:lastSyncAt ? ("Sync " + lastSyncAt) : "Sincronizado",dot:"#12B76A",text:"text-success-700"};
+      if(apiReachable === false && browserOnlineHint === false) return {label:"Offline",dot:"#F79009",text:"text-warning-700"};
+      if(apiReachable === false) return {label:"Sin conexión",dot:"#F79009",text:"text-warning-700"};
+      if(syncState === "error") return {label:"Error sync",dot:"#F04438",text:"text-error-700"};
       return {label:"Listo",dot:"#98A2B3",text:"text-gray-500"};
     }
 
@@ -842,7 +858,7 @@
       if(authLoading && authPromise) return authPromise;
       if(authLoaded && !force && AUTH_USERS.length) return Promise.resolve(AUTH_USERS);
 
-      if(!isOnline()){
+      if(!hasConfiguredApi()){
         authLoaded = true;
         authError = true;
         AUTH_USERS = AUTH_USERS.length ? AUTH_USERS : USERS.slice();
@@ -951,7 +967,7 @@
     }
 
     function flushPendingUpdates(silent){
-      if(!isOnline() || !pendingUpdates.length){
+      if(!hasConfiguredApi() || !pendingUpdates.length){
         return Promise.resolve({flushed:0});
       }
 
@@ -994,10 +1010,10 @@
     }
 
     function sync(silent){
-      if(!isOnline()){
+      if(!hasConfiguredApi()){
         saveAppState();
         setSyncState("offline");
-        setSyncError("Sin conexión");
+        setSyncError("API no configurada");
         return Promise.resolve(false);
       }
 
@@ -1059,7 +1075,7 @@
               var msg1 = results[1].reason && results[1].reason.message ? results[1].reason.message : "getHistory error";
               setSyncError("getAll: " + msg0 + " | getHistory: " + msg1);
               setSyncState("error");
-              if(!silent) toast("No se pudo sincronizar","err");
+              if(!silent) toast(apiReachable === false ? "Sin conexión" : "No se pudo sincronizar","err");
             }else if(!stockOk || !histOk){
               var partialErr = !stockOk
                 ? ("getAll: " + (results[0].reason && results[0].reason.message ? results[0].reason.message : "error"))
@@ -1075,7 +1091,7 @@
         .catch(function(err){
           setSyncError(err && err.message ? err.message : String(err));
           setSyncState("error");
-          if(!silent) toast("No se pudo sincronizar","err");
+          if(!silent) toast(apiReachable === false ? "Sin conexión" : "No se pudo sincronizar","err");
           return false;
         });
     }
@@ -1090,12 +1106,12 @@
         nota:note || ""
       };
 
-      if(!isOnline()){
+      if(!hasConfiguredApi()){
         queuePendingUpdate(payload);
         saveAppState();
         setSyncState("offline");
-        setSyncError("Sin conexión");
-        toast("Sin conexión: cambio guardado localmente","warn");
+        setSyncError("API no configurada");
+        toast("API no configurada: cambio guardado localmente","warn");
         return Promise.resolve(false);
       }
 
@@ -1127,7 +1143,7 @@
         queuePendingUpdate(payload);
         setSyncError(err && err.message ? err.message : String(err));
         setSyncState("error");
-        toast("No se pudo enviar. Cambio en cola local","warn");
+        toast(apiReachable === false ? "Sin conexión: cambio en cola local" : "No se pudo enviar. Cambio en cola local","warn");
         return false;
       });
     }
@@ -2382,6 +2398,7 @@
     }
 
     window.addEventListener("online", function(){
+      browserOnlineHint = true;
       authError = false;
       clearSyncError();
       setSyncState("syncing");
@@ -2392,11 +2409,16 @@
     });
 
     window.addEventListener("offline", function(){
+      browserOnlineHint = false;
       authError = true;
-      setSyncState("offline");
-      setSyncError("Sin conexión");
-      safeDraw();
-      toast("Sin conexión: usando datos locales","warn");
+      if(apiReachable === false){
+        setSyncState("offline");
+        setSyncError("Sin conexión");
+        safeDraw();
+        toast("Sin conexión: usando datos locales","warn");
+      }else{
+        safeDraw();
+      }
     });
 
     if(!window.__KW_APP_BOOTED){
