@@ -211,7 +211,7 @@
 
   <script>
     var APP_NAME = "Kawas Stock";
-    var APP_VERSION = "2026-04-22 search-smart-filters";
+    var APP_VERSION = "2026-04-22 report-smart-filters-pdf-rich";
     var BUILD_CERTIFIED = APP_VERSION;
 
     var API_URL = "https://script.google.com/macros/s/AKfycbz5A3aHqNYssPewIyMBqIrfNUV3HijwI3MfCSuqv8Xv2YMkX1RKNwZFCP0tjgba-85oYw/exec";
@@ -1367,6 +1367,7 @@
     function getReportData(){
       var filtered = getFilteredReportItems();
       var stockTotal = 0;
+      var totalMin = 0;
       var statusCounts = {ok:0,low:0,crit:0,zero:0};
       var categoryAgg = {};
       var familyAgg = {};
@@ -1384,59 +1385,131 @@
         var coverage = reportCoverage(item);
 
         stockTotal += stock;
+        totalMin += min;
         statusCounts[status] = (statusCounts[status] || 0) + 1;
         coverageSum += coverage;
         if(min > 0 && stock < min) underMinCount++;
 
         if(!categoryAgg[category]){
-          categoryAgg[category] = {label:category, stock:0, items:0, alerts:0, lowOrCritical:0, zero:0};
+          categoryAgg[category] = {
+            label:category,
+            stock:0,
+            minTotal:0,
+            items:0,
+            alerts:0,
+            lowOrCritical:0,
+            zero:0,
+            coverageSum:0
+          };
         }
         categoryAgg[category].stock += stock;
+        categoryAgg[category].minTotal += min;
         categoryAgg[category].items += 1;
+        categoryAgg[category].coverageSum += coverage;
         if(status !== "ok") categoryAgg[category].alerts += 1;
         if(status === "low" || status === "crit") categoryAgg[category].lowOrCritical += 1;
         if(status === "zero") categoryAgg[category].zero += 1;
 
         if(!familyAgg[family]){
-          familyAgg[family] = {label:family, stock:0, items:0, alerts:0};
+          familyAgg[family] = {
+            label:family,
+            stock:0,
+            minTotal:0,
+            items:0,
+            alerts:0,
+            coverageSum:0
+          };
         }
         familyAgg[family].stock += stock;
+        familyAgg[family].minTotal += min;
         familyAgg[family].items += 1;
+        familyAgg[family].coverageSum += coverage;
         if(status !== "ok") familyAgg[family].alerts += 1;
 
         if(!stockListAgg[listName]){
-          stockListAgg[listName] = {label:listName, stock:0, items:0, alerts:0};
+          stockListAgg[listName] = {
+            label:listName,
+            stock:0,
+            minTotal:0,
+            items:0,
+            alerts:0,
+            coverageSum:0
+          };
         }
         stockListAgg[listName].stock += stock;
+        stockListAgg[listName].minTotal += min;
         stockListAgg[listName].items += 1;
+        stockListAgg[listName].coverageSum += coverage;
         if(status !== "ok") stockListAgg[listName].alerts += 1;
       });
 
-      var categorySummary = Object.keys(categoryAgg).map(function(key){ return categoryAgg[key]; }).sort(function(a,b){
-        if(b.stock !== a.stock) return b.stock - a.stock;
-        return a.label.localeCompare(b.label);
-      });
+      var movement30 = getReportMovementsForItems(filtered, 30);
+      var movement90 = getReportMovementsForItems(filtered, 90);
+      var movement180 = getReportMovementsForItems(filtered, 180);
+      var recentMovements = movement30.slice(0, 12);
 
-      var familySummary = Object.keys(familyAgg).map(function(key){ return familyAgg[key]; }).sort(function(a,b){
-        if(b.stock !== a.stock) return b.stock - a.stock;
-        return a.label.localeCompare(b.label);
-      });
-
-      var stockListSummary = Object.keys(stockListAgg).map(function(key){ return stockListAgg[key]; }).sort(function(a,b){
-        if(b.stock !== a.stock) return b.stock - a.stock;
-        return a.label.localeCompare(b.label);
-      });
-
-      var recentMovements = getReportMovementsForItems(filtered, 30, 12);
-      var movementWindow = getReportMovementsForItems(filtered, 30);
       var movementMetrics = {
-        ingreso: movementWindow.filter(function(x){ return x.tp === "ingreso"; }).length,
-        salida: movementWindow.filter(function(x){ return x.tp === "salida"; }).length,
-        ajuste: movementWindow.filter(function(x){ return x.tp === "ajuste"; }).length
+        ingreso: movement30.filter(function(x){ return x.tp === "ingreso"; }).length,
+        salida: movement30.filter(function(x){ return x.tp === "salida"; }).length,
+        ajuste: movement30.filter(function(x){ return x.tp === "ajuste"; }).length,
+        net30: movement30.reduce(function(acc,x){ return acc + (Number(x.delta) || 0); }, 0),
+        positive30: movement30.reduce(function(acc,x){ return acc + Math.max(0, Number(x.delta) || 0); }, 0),
+        negative30: movement30.reduce(function(acc,x){ return acc + Math.min(0, Number(x.delta) || 0); }, 0)
       };
 
+      var categoryMovementAgg = {};
+      movement90.forEach(function(entry){
+        var key = entry.cat || "General";
+        if(!categoryMovementAgg[key]){
+          categoryMovementAgg[key] = {count:0, netDelta:0};
+        }
+        categoryMovementAgg[key].count += 1;
+        categoryMovementAgg[key].netDelta += Number(entry.delta) || 0;
+      });
+
+      var categorySummary = Object.keys(categoryAgg).map(function(key){
+        var entry = categoryAgg[key];
+        var movement = categoryMovementAgg[key] || {count:0, netDelta:0};
+        entry.sharePct = stockTotal ? reportPercent(entry.stock, stockTotal) : 0;
+        entry.alertRate = entry.items ? reportPercent(entry.alerts, entry.items) : 0;
+        entry.avgCoverage = entry.items ? Math.round(entry.coverageSum / entry.items) : 0;
+        entry.weightedCoverage = entry.minTotal ? Math.round((entry.stock / entry.minTotal) * 100) : entry.avgCoverage;
+        entry.movement90 = movement.count;
+        entry.netDelta90 = movement.netDelta;
+        return entry;
+      }).sort(function(a,b){
+        if(b.stock !== a.stock) return b.stock - a.stock;
+        return a.label.localeCompare(b.label);
+      });
+
+      var familySummary = Object.keys(familyAgg).map(function(key){
+        var entry = familyAgg[key];
+        entry.sharePct = stockTotal ? reportPercent(entry.stock, stockTotal) : 0;
+        entry.alertRate = entry.items ? reportPercent(entry.alerts, entry.items) : 0;
+        entry.avgCoverage = entry.items ? Math.round(entry.coverageSum / entry.items) : 0;
+        entry.weightedCoverage = entry.minTotal ? Math.round((entry.stock / entry.minTotal) * 100) : entry.avgCoverage;
+        return entry;
+      }).sort(function(a,b){
+        if(b.stock !== a.stock) return b.stock - a.stock;
+        return a.label.localeCompare(b.label);
+      });
+
+      var stockListSummary = Object.keys(stockListAgg).map(function(key){
+        var entry = stockListAgg[key];
+        entry.sharePct = stockTotal ? reportPercent(entry.stock, stockTotal) : 0;
+        entry.alertRate = entry.items ? reportPercent(entry.alerts, entry.items) : 0;
+        entry.avgCoverage = entry.items ? Math.round(entry.coverageSum / entry.items) : 0;
+        entry.weightedCoverage = entry.minTotal ? Math.round((entry.stock / entry.minTotal) * 100) : entry.avgCoverage;
+        return entry;
+      }).sort(function(a,b){
+        if(b.stock !== a.stock) return b.stock - a.stock;
+        return a.label.localeCompare(b.label);
+      });
+
+      var trendSeries = buildReportTrendSeries(movement180, 6);
       var alertCount = statusCounts.low + statusCounts.crit + statusCounts.zero;
       var avgCoverage = filtered.length ? Math.round(coverageSum / filtered.length) : 0;
+      var weightedCoverage = totalMin ? Math.round((stockTotal / totalMin) * 100) : avgCoverage;
       var topCategory = categorySummary[0] || null;
       var topFamily = familySummary[0] || null;
       var topStockList = stockListSummary[0] || null;
@@ -1448,24 +1521,29 @@
         insights.push("No hay datos en el reporte con los filtros actuales.");
       }else{
         insights.push(alertCount ? (alertCount + " de " + filtered.length + " ítems filtrados requieren atención.") : "Todos los ítems filtrados están sobre el mínimo configurado.");
-        insights.push("Cobertura promedio del stock filtrado: " + avgCoverage + "% del mínimo configurado.");
+        insights.push("Cobertura promedio del stock filtrado: " + avgCoverage + "% y cobertura ponderada: " + weightedCoverage + "%.");
         if(topCategory){
-          insights.push("La categoría con mayor concentración es " + topCategory.label + " con " + topCategory.stock.toLocaleString() + " unidades.");
+          insights.push("La categoría con mayor concentración es " + topCategory.label + " con " + topCategory.stock.toLocaleString() + " unidades, " + topCategory.sharePct + "% del stock filtrado.");
+        }
+        if(topFamily){
+          insights.push("La familia dominante es " + topFamily.label + " con " + topFamily.stock.toLocaleString() + " unidades.");
         }
         if(stockTotal > 0 && categorySummary.length){
           insights.push("Las 3 categorías principales concentran " + reportPercent(topThreeCategoryShare, stockTotal) + "% del stock filtrado.");
         }
-        if(recentMovements.length){
-          insights.push("Se registraron " + movementWindow.length + " movimientos en 30 días para este subconjunto.");
+        if(movement30.length){
+          insights.push("En 30 días hubo " + movement30.length + " movimientos con delta neto de " + (movementMetrics.net30 > 0 ? "+" : "") + movementMetrics.net30 + ".");
         }
       }
 
       return {
         filtered: filtered,
         stockTotal: stockTotal,
+        totalMin: totalMin,
         statusCounts: statusCounts,
         alertCount: alertCount,
         avgCoverage: avgCoverage,
+        weightedCoverage: weightedCoverage,
         underMinCount: underMinCount,
         categorySummary: categorySummary,
         familySummary: familySummary,
@@ -1475,6 +1553,10 @@
         topStockList: topStockList,
         recentMovements: recentMovements,
         movementMetrics: movementMetrics,
+        movement30: movement30,
+        movement90: movement90,
+        movement180: movement180,
+        trendSeries: trendSeries,
         insights: insights,
         topShortages: filtered.slice().sort(function(a,b){
           var sa = reportStatusRank(st(a));
@@ -1482,7 +1564,7 @@
           if(sa !== sb) return sa - sb;
           if(reportCoverage(a) !== reportCoverage(b)) return reportCoverage(a) - reportCoverage(b);
           return (Number(a.stock) || 0) - (Number(b.stock) || 0);
-        }).filter(function(item){ return st(item) !== "ok"; }).slice(0, 8),
+        }).filter(function(item){ return st(item) !== "ok"; }).slice(0, 12),
         filterSummary: [
           reportFilterFamily !== "all" ? ("Familia: " + reportFilterFamily) : "Familia: Todas",
           reportFilterStockList !== "all" ? ("Lista: " + reportFilterStockList) : "Lista: Todas",
@@ -1633,6 +1715,120 @@
       return y;
     }
 
+
+    function reportFormatSigned(value){
+      value = Number(value) || 0;
+      return (value > 0 ? "+" : "") + value;
+    }
+
+    function buildReportTrendSeries(entries, monthsBack){
+      var monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+      var now = new Date();
+      var totalMonths = monthsBack || 6;
+      var buckets = [];
+      var map = {};
+
+      for(var i = totalMonths - 1; i >= 0; i--){
+        var bucketDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        var key = bucketDate.getFullYear() + "-" + ("0" + (bucketDate.getMonth() + 1)).slice(-2);
+        var bucket = {
+          key:key,
+          label:monthNames[bucketDate.getMonth()] + " " + String(bucketDate.getFullYear()).slice(-2),
+          count:0,
+          ingreso:0,
+          salida:0,
+          ajuste:0,
+          net:0
+        };
+        buckets.push(bucket);
+        map[key] = bucket;
+      }
+
+      (entries || []).forEach(function(entry){
+        var time = parseDateLoose(entry.ts);
+        if(!time) return;
+        var d = new Date(time);
+        var key = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2);
+        var bucket = map[key];
+        if(!bucket) return;
+        var delta = Number(entry.delta != null ? entry.delta : ((Number(entry.ns) || 0) - (Number(entry.os) || 0))) || 0;
+        bucket.count += 1;
+        if(entry.tp === "ingreso") bucket.ingreso += 1;
+        else if(entry.tp === "salida") bucket.salida += 1;
+        else bucket.ajuste += 1;
+        bucket.net += delta;
+      });
+
+      return buckets;
+    }
+
+    function reportPdfHeader(doc, title, subtitle){
+      var pageWidth = doc.internal.pageSize.getWidth();
+      doc.setFillColor(249,245,255);
+      doc.rect(0, 0, pageWidth, 24, "F");
+      doc.setFont("helvetica","bold");
+      doc.setTextColor(66,48,125);
+      doc.setFontSize(16);
+      doc.text(title, 14, 10);
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(9);
+      doc.setTextColor(71,84,103);
+      doc.text(subtitle, 14, 17);
+    }
+
+    function reportDrawPdfPanel(doc, x, y, w, h, title){
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(234,236,240);
+      doc.rect(x, y, w, h, "FD");
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(10);
+      doc.setTextColor(16,24,40);
+      doc.text(title, x + 4, y + 7);
+    }
+
+    function reportDrawPdfVerticalBars(doc, x, y, w, h, entries, valueKey, barColor, title){
+      reportDrawPdfPanel(doc, x, y, w, h, title);
+      var values = (entries || []).map(function(entry){ return Math.max(0, Number(entry[valueKey]) || 0); });
+      var maxValue = 0;
+      values.forEach(function(v){ if(v > maxValue) maxValue = v; });
+
+      if(!entries || !entries.length || maxValue <= 0){
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(9);
+        doc.setTextColor(152,162,179);
+        doc.text("Sin datos suficientes", x + 4, y + 18);
+        return;
+      }
+
+      var chartX = x + 6;
+      var chartY = y + 14;
+      var chartW = w - 12;
+      var chartH = h - 22;
+      var baseY = chartY + chartH - 8;
+      var slotW = chartW / entries.length;
+      var barW = Math.max(6, Math.min(slotW - 4, 18));
+
+      doc.setDrawColor(234,236,240);
+      doc.line(chartX, baseY, chartX + chartW, baseY);
+
+      entries.forEach(function(entry, idx){
+        var value = Math.max(0, Number(entry[valueKey]) || 0);
+        var height = maxValue ? Math.max(2, (value / maxValue) * (chartH - 18)) : 0;
+        var bx = chartX + (idx * slotW) + ((slotW - barW) / 2);
+        var by = baseY - height;
+
+        doc.setFillColor.apply(doc, barColor || [127,86,217]);
+        doc.rect(bx, by, barW, height, "F");
+
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(8);
+        doc.setTextColor(102,112,133);
+        doc.text(String(value), bx + (barW / 2), by - 1.5, {align:"center"});
+        doc.text(String(entry.label || ""), bx + (barW / 2), baseY + 5, {align:"center"});
+      });
+    }
+
+
     function reportToPdf(){
       var data = getReportData();
       if(!data.filtered.length){
@@ -1646,57 +1842,145 @@
 
       var jsPDF = window.jspdf.jsPDF;
       var doc = new jsPDF({orientation:"landscape", unit:"mm", format:"a4"});
-      var pageWidth = doc.internal.pageSize.getWidth();
+      var subtitle = "Generado: " + currentDateLabel() + " " + currentTimeLabelSafe() + " · Usuario: " + (user ? user.n : "Sistema") + " · " + data.filterSummary.join(" | ");
 
-      doc.setFillColor(249,245,255);
-      doc.rect(0, 0, pageWidth, 32, "F");
+      reportPdfHeader(doc, "Kawas Stock · Reporte BI ejecutivo", subtitle);
+
+      reportDrawPdfMetric(doc, 14, 30, 36, 20, "Ítems", String(data.filtered.length), [127,86,217]);
+      reportDrawPdfMetric(doc, 54, 30, 36, 20, "Stock total", String(data.stockTotal), [16,24,40]);
+      reportDrawPdfMetric(doc, 94, 30, 36, 20, "Mín. total", String(data.totalMin), [102,112,133]);
+      reportDrawPdfMetric(doc, 134, 30, 36, 20, "Alertas", String(data.alertCount), [180,35,24]);
+      reportDrawPdfMetric(doc, 174, 30, 36, 20, "Cob. prom.", String(data.avgCoverage) + "%", [23,92,211]);
+      reportDrawPdfMetric(doc, 214, 30, 36, 20, "Cob. pond.", String(data.weightedCoverage) + "%", [2,122,72]);
+      reportDrawPdfMetric(doc, 254, 30, 28, 20, "Mov 30d", String(data.movement30.length), [66,48,125]);
+
+      reportDrawPdfBars(doc, 14, 62, 78, data.categorySummary.slice(0,5).map(function(entry){
+        return {label:entry.label, value:entry.stock, rgb:[23,92,211]};
+      }), Math.max(1, data.stockTotal), [23,92,211]);
       doc.setFont("helvetica","bold");
-      doc.setTextColor(66,48,125);
-      doc.setFontSize(20);
-      doc.text("Kawas Stock · Reporte BI", 14, 16);
-      doc.setFont("helvetica","normal");
       doc.setFontSize(10);
-      doc.text("Generado: " + currentDateLabel() + " " + currentTimeLabelSafe() + " · Usuario: " + (user ? user.n : "Sistema"), 14, 23);
-      doc.text("Filtros: " + data.filterSummary.join(" | "), 14, 29);
-
-      reportDrawPdfMetric(doc, 14, 38, 46, 22, "Ítems filtrados", String(data.filtered.length), [127,86,217]);
-      reportDrawPdfMetric(doc, 64, 38, 46, 22, "Stock total", String(data.stockTotal), [16,24,40]);
-      reportDrawPdfMetric(doc, 114, 38, 46, 22, "Alertas", String(data.alertCount), [180,35,24]);
-      reportDrawPdfMetric(doc, 164, 38, 46, 22, "Cobertura prom.", String(data.avgCoverage) + "%", [23,92,211]);
-      reportDrawPdfMetric(doc, 214, 38, 33, 22, "OK", String(data.statusCounts.ok), [2,122,72]);
-      reportDrawPdfMetric(doc, 251, 38, 33, 22, "Crít.", String(data.statusCounts.crit + data.statusCounts.zero), [180,35,24]);
-
-      doc.setFont("helvetica","bold");
-      doc.setFontSize(11);
       doc.setTextColor(16,24,40);
-      doc.text("Distribución por estado", 14, 71);
+      doc.text("Top categorías por stock", 14, 58);
 
-      var statusEntries = [
+      reportDrawPdfBars(doc, 104, 62, 60, [
         {label:"OK", value:data.statusCounts.ok, rgb:[2,122,72]},
         {label:"Bajo", value:data.statusCounts.low, rgb:[181,71,8]},
         {label:"Crítico", value:data.statusCounts.crit, rgb:[180,35,24]},
         {label:"Agotado", value:data.statusCounts.zero, rgb:[127,86,217]}
-      ];
-      reportDrawPdfBars(doc, 14, 76, 70, statusEntries, Math.max(1, data.filtered.length), [127,86,217]);
+      ], Math.max(1, data.filtered.length), [127,86,217]);
+      doc.text("Distribución por estado", 104, 58);
 
-      doc.text("Top categorías por stock", 100, 71);
-      reportDrawPdfBars(doc, 100, 76, 84, data.categorySummary.map(function(entry){
-        return {label:entry.label, value:entry.stock, rgb:[23,92,211]};
-      }), Math.max(1, data.stockTotal), [23,92,211]);
+      reportDrawPdfVerticalBars(doc, 176, 54, 106, 52, data.trendSeries, "count", [127,86,217], "Tendencia de movimientos (6 meses)");
 
-      doc.text("Insights clave", 200, 71);
+      reportDrawPdfPanel(doc, 14, 116, 132, 74, "Insights y señales clave");
       doc.setFont("helvetica","normal");
       doc.setFontSize(9);
-      var insightY = 78;
-      data.insights.slice(0,5).forEach(function(line){
-        doc.text("• " + line, 200, insightY, {maxWidth:80});
+      doc.setTextColor(52,64,84);
+      var insightY = 126;
+      data.insights.slice(0,6).forEach(function(line){
+        doc.text("• " + line, 18, insightY, {maxWidth:124});
         insightY += 10;
       });
 
+      reportDrawPdfPanel(doc, 150, 116, 132, 74, "Tendencias mensuales");
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(9);
+      doc.setTextColor(16,24,40);
+      doc.text("Mes", 154, 126);
+      doc.text("Mov.", 184, 126, {align:"right"});
+      doc.text("Ing.", 205, 126, {align:"right"});
+      doc.text("Sal.", 225, 126, {align:"right"});
+      doc.text("Aju.", 245, 126, {align:"right"});
+      doc.text("Delta", 278, 126, {align:"right"});
+      doc.setFont("helvetica","normal");
+      data.trendSeries.forEach(function(entry, idx){
+        var y = 134 + (idx * 8);
+        doc.setTextColor(52,64,84);
+        doc.text(entry.label, 154, y);
+        doc.text(String(entry.count), 184, y, {align:"right"});
+        doc.text(String(entry.ingreso), 205, y, {align:"right"});
+        doc.text(String(entry.salida), 225, y, {align:"right"});
+        doc.text(String(entry.ajuste), 245, y, {align:"right"});
+        doc.text(reportFormatSigned(entry.net), 278, y, {align:"right"});
+      });
+
+      doc.addPage("a4","landscape");
+      reportPdfHeader(doc, "Kawas Stock · Categorías y agregados", subtitle);
+
       doc.autoTable({
-        startY: 114,
-        head: [["Producto","Familia","Lista","Categoría","Stock","Mínimo","Cobertura","Estado"]],
-        body: data.filtered.slice(0, 24).map(function(item){
+        startY: 30,
+        head: [["Categoría","Ítems","Stock","% stock","Alertas","% alertas","Cob. pond.","Mov. 90d","Delta 90d"]],
+        body: data.categorySummary.map(function(entry){
+          return [
+            entry.label,
+            String(entry.items),
+            String(entry.stock),
+            entry.sharePct + "%",
+            String(entry.alerts),
+            entry.alertRate + "%",
+            entry.weightedCoverage + "%",
+            String(entry.movement90),
+            reportFormatSigned(entry.netDelta90)
+          ];
+        }),
+        theme: "grid",
+        styles: {fontSize:8, cellPadding:2.3, textColor:[16,24,40]},
+        headStyles: {fillColor:[127,86,217], textColor:[255,255,255]},
+        alternateRowStyles: {fillColor:[249,250,251]},
+        margin: {left:14, right:14}
+      });
+
+      var yAfterCategories = doc.lastAutoTable.finalY + 8;
+
+      doc.autoTable({
+        startY: yAfterCategories,
+        head: [["Familia","Ítems","Stock","% stock","Alertas","Cob. pond."]],
+        body: data.familySummary.map(function(entry){
+          return [
+            entry.label,
+            String(entry.items),
+            String(entry.stock),
+            entry.sharePct + "%",
+            String(entry.alerts),
+            entry.weightedCoverage + "%"
+          ];
+        }),
+        theme: "grid",
+        styles: {fontSize:8, cellPadding:2.3, textColor:[16,24,40]},
+        headStyles: {fillColor:[23,92,211], textColor:[255,255,255]},
+        alternateRowStyles: {fillColor:[249,250,251]},
+        margin: {left:14, right:14}
+      });
+
+      doc.addPage("a4","landscape");
+      reportPdfHeader(doc, "Kawas Stock · Listas y riesgos", subtitle);
+
+      doc.autoTable({
+        startY: 30,
+        head: [["Lista de stock","Ítems","Stock","% stock","Alertas","Cob. pond."]],
+        body: data.stockListSummary.map(function(entry){
+          return [
+            entry.label,
+            String(entry.items),
+            String(entry.stock),
+            entry.sharePct + "%",
+            String(entry.alerts),
+            entry.weightedCoverage + "%"
+          ];
+        }),
+        theme: "grid",
+        styles: {fontSize:8, cellPadding:2.3, textColor:[16,24,40]},
+        headStyles: {fillColor:[2,122,72], textColor:[255,255,255]},
+        alternateRowStyles: {fillColor:[249,250,251]},
+        margin: {left:14, right:14}
+      });
+
+      var yAfterLists = doc.lastAutoTable.finalY + 8;
+
+      doc.autoTable({
+        startY: yAfterLists,
+        head: [["Producto","Familia","Lista","Categoría","Stock","Mín.","Cobertura","Estado"]],
+        body: data.topShortages.map(function(item){
           return [
             item.name,
             normalizeFamilyName(item.family || "Sin familia"),
@@ -1710,21 +1994,60 @@
         }),
         theme: "grid",
         styles: {fontSize:8, cellPadding:2.3, textColor:[16,24,40]},
-        headStyles: {fillColor:[127,86,217], textColor:[255,255,255]},
+        headStyles: {fillColor:[180,35,24], textColor:[255,255,255]},
         alternateRowStyles: {fillColor:[249,250,251]},
         margin: {left:14, right:14}
       });
 
-      var afterDetail = doc.lastAutoTable.finalY + 8;
+      doc.addPage("a4","landscape");
+      reportPdfHeader(doc, "Kawas Stock · Detalle filtrado", subtitle);
 
       doc.autoTable({
-        startY: afterDetail,
-        head: [["Fecha","Producto","Tipo","Δ","Usuario","Nota"]],
-        body: data.recentMovements.length ? data.recentMovements.map(function(entry){
-          return [entry.ts, entry.nm, entry.tp, String(entry.delta > 0 ? "+" + entry.delta : entry.delta), entry.u, entry.nt || "—"];
-        }) : [["—","Sin movimientos recientes","—","—","—","—"]],
+        startY: 30,
+        head: [["Producto","Familia","Lista","Categoría","Subcat.","Stock","Mín.","Cobertura","Unidad","Estado","Alerta"]],
+        body: data.filtered.map(function(item){
+          return [
+            item.name,
+            normalizeFamilyName(item.family || "Sin familia"),
+            item.stockList || "General",
+            item.cat || "",
+            item.subcat || "—",
+            String(item.stock),
+            String(item.min),
+            reportCoverage(item) + "%",
+            item.unit || "",
+            reportSeverityLabel(st(item)),
+            item.alert || "—"
+          ];
+        }),
         theme: "grid",
-        styles: {fontSize:8, cellPadding:2.3, textColor:[16,24,40]},
+        styles: {fontSize:7.5, cellPadding:2, textColor:[16,24,40]},
+        headStyles: {fillColor:[66,48,125], textColor:[255,255,255]},
+        alternateRowStyles: {fillColor:[249,250,251]},
+        margin: {left:14, right:14}
+      });
+
+      doc.addPage("a4","landscape");
+      reportPdfHeader(doc, "Kawas Stock · Historial y movimientos", subtitle);
+
+      doc.autoTable({
+        startY: 30,
+        head: [["Fecha","Producto","Categoría","Tipo","Stock ant.","Stock nuevo","Delta","Usuario","Nota"]],
+        body: data.movement90.length ? data.movement90.map(function(entry){
+          return [
+            entry.ts,
+            entry.nm,
+            entry.cat,
+            entry.tp,
+            String(entry.os),
+            String(entry.ns),
+            reportFormatSigned(entry.delta),
+            entry.u,
+            entry.nt || "—"
+          ];
+        }) : [["—","Sin movimientos","—","—","—","—","—","—","—"]],
+        theme: "grid",
+        styles: {fontSize:7.5, cellPadding:2, textColor:[16,24,40]},
         headStyles: {fillColor:[23,92,211], textColor:[255,255,255]},
         alternateRowStyles: {fillColor:[249,250,251]},
         margin: {left:14, right:14}
